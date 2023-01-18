@@ -1,0 +1,32 @@
+<!doctype html>
+<form *ngIf="frenteDeObra" [formGroup]="frenteDeObraForm" (ngSubmit)="onSubmit()">
+
+  <div class="form-row">
+    <div class="form-group col-md-3">
+      <label>Número:</label>
+      <input class="form-control" formControlName="numeroFrente" [ngClass]="{ 'is-invalid': showError('numeroFrente') }"
+        min="1" max="999" maxlength="3" (keypress)="numberOnly($event)">
+      <div *ngIf="showError('numeroFrente')" class="invalid-feedback">
+        <div *ngIf="field('numeroFrente').errors.required">O campo é de preenchimento obrigatório.</div>
+      </div>
+    </div>
+    <div class="form-group col-md-9">
+      <label>Nome:</label>
+      <input type="text" class="form-control" formControlName="nomeFrente"
+        [ngClass]="{ 'is-invalid': showError('nomeFrente') }" maxlength="100" max="100" minlength="0" min="100"
+        size="100">
+      <div *ngIf="showError('nomeFrente')" class="invalid-feedback">
+        <div *ngIf="field('nomeFrente').errors.required">O campo é de preenchimento obrigatório.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer-botoes">  
+    <button type="button" class="btn btn-secondary" style="margin-left: 20px; margin-right: 5px;" (click)="voltar()">Voltar</button>
+    <button type="submit" class="btn btn-primary" *ngIf="!visualizar">
+      Salvar
+    </button>
+  </footer>
+
+</form>
+

@@ -1,0 +1,49 @@
+excluirEventoFrenteObras(numeroProposta, anoProposta) ::= <% 
+    DELETE FROM vrpl_evento_frente_obra vefo2 
+    WHERE vefo2.evento_fk IN ( 
+        SELECT vefo.evento_fk 
+        FROM vrpl_evento_frente_obra vefo 
+        JOIN vrpl_frente_obra vfo ON (vefo.frente_obra_fk = vfo.id) 
+        JOIN vrpl_po vpo ON (vfo.po_fk = vpo.id) 
+        JOIN vrpl_submeta vs ON (vpo.submeta_fk = vs.id) 
+        JOIN vrpl_proposta proposta ON (vs.proposta_fk = proposta.id) 
+        WHERE proposta.numero_proposta = :numeroProposta 
+        AND proposta.ano_proposta = :anoProposta 
+    )
+%>
+
+excluirFrentesObra(numeroProposta, anoProposta) ::= <% 
+    DELETE from vrpl_frente_obra vfo2 
+    WHERE vfo2.id IN ( 
+        SELECT vfo.id 
+        from vrpl_frente_obra vfo 
+        JOIN vrpl_po vpo ON (vfo.po_fk = vpo.id) 
+        JOIN vrpl_submeta vs ON (vpo.submeta_fk = vs.id) 
+        JOIN vrpl_proposta proposta ON (vs.proposta_fk = proposta.id) 
+        WHERE proposta.numero_proposta = :numeroProposta 
+        AND proposta.ano_proposta = :anoProposta 
+    )
+%>
+
+excluirEventos(numeroProposta, anoProposta) ::= <%
+    DELETE from vrpl_evento ve2 
+    WHERE ve2.id IN ( 
+        SELECT ve.id FROM vrpl_evento ve 
+        JOIN vrpl_po vpo ON (ve.po_fk = vpo.id) 
+        JOIN vrpl_submeta vs ON (vpo.submeta_fk = vs.id) 
+        JOIN vrpl_proposta proposta ON (vs.proposta_fk = proposta.id) 
+        WHERE proposta.numero_proposta = :numeroProposta 
+        AND proposta.ano_proposta = :anoProposta 
+    ) 
+%>
+
+excluirPO(numeroProposta, anoProposta) ::= <%
+    DELETE from vrpl_po vp 
+    WHERE vp.id IN ( 
+        SELECT vpo.id FROM vrpl_po vpo 
+        JOIN vrpl_submeta vs ON (vpo.submeta_fk = vs.id) 
+        JOIN vrpl_proposta proposta ON (vs.proposta_fk = proposta.id) 
+        WHERE proposta.numero_proposta = :numeroProposta 
+        AND proposta.ano_proposta = :anoProposta 
+    )
+%>

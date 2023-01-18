@@ -1,0 +1,53 @@
+.header-centralizado {
+    text-align: center;
+}
+
+.header-a-direita {
+    text-align: right;
+}
+
+.header-cinza {
+    background-color: #C2C2C2;
+}
+
+.texto-destacado {
+    font-weight: bold;
+}
+
+.texto-vermelho {
+    color: red;
+}
+
+.icone-pequeno {
+    font-size: .65em;
+    vertical-align: middle;
+}
+
+.footer-totalizadores {
+    background: rgb(238, 239, 241) none repeat scroll 0pt 50%;
+    font-weight: bold;
+    text-align: center;
+}
+
+.footer-totalizadores .descricao-totalizadores {
+    text-align: right;
+    color: grey;
+}
+
+.footer-totalizadores .valor-totalizadores {
+    color: grey;
+}
+
+.texto-legenda-avisos {
+    color:red;
+    font-size: 70%;
+}
+
+.botao-voltar {
+    margin-left: 20px;
+    margin-right: 5px;
+}
+
+.bloco-na-mesma-linha {
+    display: block ruby;
+}

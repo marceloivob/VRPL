@@ -1,0 +1,184 @@
+<!doctype html>
+<form [formGroup]="form" *ngIf="form">
+
+    <div class="title">Planilha Orçamentária</div>
+
+    <siconv-sub-fieldset fieldsetTitle="Orçamento de Referência para Comparação">
+        <div class="form-row">
+            <div class="form-group has-feedback col-md-6">
+                <label>
+                    <input formControlName="referencia" (change)="radioReferenciaChange()" value="analise" type="radio">
+                    {{ getDescricaoReferencia('analise') }}
+                </label>
+            </div>
+            <div class="form-group has-feedback col-md-6">
+                <label>
+                    <input formControlName="referencia" (change)="radioReferenciaChange()" value="database" type="radio">
+                    Atualizado {{ getDescricaoReferencia('database') }}
+                </label>
+            </div>
+        </div>
+
+    </siconv-sub-fieldset>
+
+    <div class="form-row">
+
+        <siconv-table [data]="macrosservicosObservable | async" fileExportName="Planilha_Orcamentaria" [pagination]="true"
+            [export]="export" (listaPaginada)="getListaPaginada($event)">
+
+            <thead header>
+                <tr>
+                    <th rowspan="2" sortable-column="item" sortable-type="number" scope="col">Item</th>
+                    <th rowspan="2" sortable-column="nome" sortable-type="string" scope="col" class='header-centralizado'
+                        >Macrosserviço / Serviço</th>
+                    <th rowspan="2" scope="col" class='header-centralizado'>Fonte - Código</th>
+                    <th rowspan="2" scope="col" class='header-centralizado' title="Quantidade">Qtd.</th>
+                    <th rowspan="2" scope="col" class='header-centralizado' title="Unidade">Und.</th>
+                    <th colspan="2" scope="colgroup" class='header-centralizado'>Valores da Licitação</th>
+                    <th colspan="2" scope="colgroup" class='header-centralizado'>Valores de Referência</th>
+                    <th rowspan="2" scope="col" class='header-centralizado'>Ações</th>
+                </tr>
+
+                <tr>
+                    <th scope="col" class='header-centralizado'>Preço Unitário</th>
+                    <th sortable-column="precoTotal" sortable-type="number" scope="col" class='header-centralizado'
+                        >Preço Total</th>
+                    <th scope="col" class='header-centralizado header-cinza'
+                        >Preço Unitário {{ getDescricaoReferencia(referencia) }}</th>
+                    <th sortable-column="precoTotalReferencia" sortable-type="number" scope="col" class='header-centralizado header-cinza'
+                        >Preço Total {{ getDescricaoReferencia(referencia) }}</th>
+                </tr>
+            </thead>
+
+            <tbody *ngIf="macrosservicosObservable | async as macrosservicos">
+                <ng-container *ngIf="macrosservicos?.length; else nenhumRegistro">
+                    <ng-container *ngFor="let macrosservico of lista">
+                        <tr>
+                            <td class='texto-destacado'>{{macrosservico.item}} </td>
+                            <td class='texto-destacado'>{{macrosservico.nome}} </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class='header-a-direita texto-destacado'>
+                                {{macrosservico.precoTotalLicitado | currency:'BRL':'symbol'}}</td>
+
+                            <td class='header-cinza'></td>
+
+                            <td class='header-cinza header-a-direita texto-destacado'
+                                >
+                                {{ getMacrosservicoPrecoTotalReferencia(referencia, macrosservico) | currency:'BRL':'symbol'}}
+                            </td>
+                            <td></td>
+                        </tr>
+                        <ng-container *ngFor="let servico of macrosservico.servicos">
+                            <tr>
+                                <td class='header-a-direita'> {{macrosservico.item}}.{{servico.item}} </td>
+                                <td> {{servico.nome}} </td>
+                                <td> {{servico.fonte}} - {{servico.codigo}} </td>
+                                <td class='header-a-direita'> {{servico.quantidade | number:'1.2-2'}} </td>
+                                <td class='header-centralizado'> {{servico.unidade}} </td>
+
+                                <td class='header-a-direita'>
+                                    <span class="bloco-na-mesma-linha">
+                                    {{ servico.precoUnitarioLicitado | currency:'BRL':'symbol'}}
+
+                                    <ng-container *ngIf="servicoPrecoUnitarioLicitadoMaiorQueReferencia(referencia, servico)">
+                                        <span 
+                                            [title]="getDescricaoServicoPrecoUnitarioMaior(referencia, servico)"                                            
+                                            >&nbsp;<i class="fa fa-exclamation texto-vermelho" aria-hidden="true"></i>
+                                        </span>
+                                    </ng-container>                                    
+                                    </span>
+                                </td>
+
+                                <td class='header-a-direita'>
+                                    {{servico.precoTotalLicitado | currency:'BRL':'symbol'}}
+                                </td>
+
+                                <td class='header-a-direita header-cinza'
+                                    >
+                                   <span class="bloco-na-mesma-linha">
+                                   {{ getServicoPrecoUnitarioReferencia(referencia, servico) | currency:'BRL':'symbol'}}
+
+                                   <ng-container *ngIf="exibirAvisoUtilizandoValorAnalise(referencia, servico)">                                        
+                                        <span [title]="getDescricaoAvisoUtilizandoValorAnalise(servico)"
+                                            >&nbsp;<i class="fa fa-asterisk texto-vermelho icone-pequeno" aria-hidden="true"></i>
+                                        </span>
+                                    </ng-container>
+                                    </span>                                    
+                                </td>                                
+
+                                <td class='header-a-direita header-cinza'
+                                    >
+                                   <span class="bloco-na-mesma-linha">
+                                   {{ getServicoPrecoTotalReferencia(referencia, servico) | currency:'BRL':'symbol'}} 
+
+                                   <ng-container *ngIf="exibirAvisoUtilizandoValorAnalise(referencia, servico)">
+                                        <span [title]="getDescricaoAvisoUtilizandoValorAnalise(servico)"
+                                            >&nbsp;<i class="fa fa-asterisk texto-vermelho icone-pequeno" aria-hidden="true"></i>
+                                        </span>
+                                    </ng-container>
+                                    </span>
+                                </td>
+
+                                <td class='header-centralizado'>
+                                    <a [routerLink]="['../detalhar', servico.id]" title="Detalhar" alt="Detalhar">
+                                        <i class="fa fa-search-plus" aria-hidden="true"></i>
+                                    </a>
+                                    <a *ngIf="podeEditar" [routerLink]="['../editar', servico.id]" title="Editar" 
+                                        alt="Editar">
+                                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </ng-container>
+                    </ng-container>
+                </ng-container>
+                <ng-template #nenhumRegistro>
+                    <tr>
+                        <td colspan="10">
+                            Nenhum registro encontrado.
+                        </td>
+                    </tr>
+                </ng-template>
+            </tbody>
+
+            <tfoot class='footer-totalizadores'>
+                <tr>
+                    <td colspan="8" class='descricao-totalizadores'>Total Geral {{ getDescricaoReferencia(referencia) }}</td>
+                    <td class='valor-totalizadores'> {{ getTotalGeralReferencia(referencia) | currency:'BRL':'symbol'}} </td>
+                    <td></td>
+                </tr>
+            </tfoot> 
+
+            <tfoot class='footer-totalizadores'>
+                <tr>
+                    <td colspan="8" class='header-a-direita'>Total Geral Licitado </td>
+                    <td>{{totalGeralLicitado | currency:'BRL':'symbol'}} </td>
+                    <td></td>
+                </tr>
+            </tfoot>
+
+        </siconv-table>
+    </div>
+
+    <div *ngIf="exibirLegendaAvisoUtilizandoValorAnalise(referencia)" class="form-row">
+        <span class='texto-legenda-avisos'>
+            <i class="fa fa-asterisk texto-vermelho icone-pequeno" aria-hidden="true"></i> Para os Preços Unitários não contemplados no SINAPI foram 
+            adotados os Preços Unitários da Fase da Análise.
+        </span>
+    </div>
+
+    <div *ngIf="exibirLegendaAvisoValorLicitadoMaiorQueReferencia(referencia)" class="form-row" >
+        <span class='texto-legenda-avisos'>
+            <i class="fa fa-exclamation texto-vermelho" aria-hidden="true"></i> O Preço Unitário informado é maior que o
+             Preço Unitário de Referência.
+        </span>
+    </div>    
+</form>
+
+<footer class="footer-botoes">  
+    <button (click)="voltar()" type="button" class="btn btn-secondary botao-voltar">Voltar</button>
+    <button *ngIf="possuiValorDatabase && podeEditar && !travarReferencia" (click)="salvar()" type="button" class="btn btn-primary">Salvar</button>
+</footer>

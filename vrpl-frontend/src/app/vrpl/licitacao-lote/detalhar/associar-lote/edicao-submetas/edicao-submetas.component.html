@@ -1,0 +1,49 @@
+<siconv-fieldset fieldsetTitle="Edição de Lotes e Submetas" >
+  <siconv-table>
+    <thead header>
+      <tr>
+        <th>Lote</th>
+        <th>Meta</th>
+        <th>Submeta</th>
+        <th>Tipo da Atividade</th>
+        <th>Evento?</th>
+        <th>Regime de Execução</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let submeta of submetas">
+        <td>
+          <vrpl-lote-input
+            [numeroLote]="submeta.numeroLote"
+            [idSubmeta]="submeta.idSubmeta"
+            (loteChanged)="onLoteChange($event)"
+            [submetas]="submetas"
+            [statusLicitacoes]="statusLicitacoes" >
+          </vrpl-lote-input>
+        </td>
+        <td>{{submeta.nomeMeta}}</td>
+        <td>{{submeta.nomeSubmeta}}</td>
+        <td>{{submeta.social ? 'Social' : 'Engenharia' }}</td>
+        <td>{{submeta.evento ? 'Sim' : 'Não'}}</td>
+        <td>{{submeta.regimeExecucao}}</td>
+      </tr>
+    </tbody>
+  </siconv-table>
+  <br/>
+  <ng-template #modal>
+    <div class="modal-body text-center">
+      <p *ngIf="lotesExcluidos.length == 1; else mensagemVariosLotes">O lote n° {{lotesExcluidos[0]}} deixará de existir após as alterações. Deseja continuar?</p>
+      <ng-template #mensagemVariosLotes>
+        <p>Os lotes n° ({{lotesExcluidos.join(',')}}) deixarão de existir após as alterações. Deseja continuar?</p>
+      </ng-template>
+      <button type="button" class="btn btn-primary" (click)="confirmaSalvar()">Sim</button>
+      &nbsp;&nbsp;&nbsp;
+      <button type="button" class="btn btn-secondary" (click)="cancelarSalvar()">Não</button>
+    </div>
+  </ng-template>
+</siconv-fieldset>
+
+<footer class="footer-botoes" >  
+  <button type="button" class="btn btn-secondary" style="margin-left: 20px; margin-right: 5px;"  (click)="onVoltar()">Voltar</button>
+  <button type="button" (click)="exibeModalConfirmacao(modal)" class="btn btn-primary">Confirmar</button>
+</footer>

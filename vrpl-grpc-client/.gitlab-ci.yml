@@ -1,0 +1,67 @@
+variables:
+  TOKEN: $TOKEN
+  MAVEN_OPTS: "-Dmaven.repo.local=/.m2"
+  GIT_SSL_NO_VERIFY: "true"
+
+stages:
+    - Build:Compilação
+    #- Build:Testes Unitários
+    #- Build:Análise de Qualidade de Código
+    - Estaleiro:Construção da Imagem
+    - Estaleiro:Deploy
+    - Estaleiro:Publicação DESENV
+
+Build:Compilação:
+  before_script:
+    - export VERSION=1.0.0-b$CI_PIPELINE_ID-${CI_COMMIT_SHA:0:8}
+    - echo $CI_BUILD_ID
+    - echo $VERSION
+  image: hub.estaleiro.serpro/pipeline/maven:3-jdk-11-slim
+  stage: Build:Compilação
+  script:
+    - echo "Compilando..."
+    - pwd
+    - mvn clean package -B versions:set -DnewVersion=$VERSION
+    - ls
+    - cd target
+    - mv vrpl-grpc-client-1.0.0-b-sources.jar vrpl-grpc-client-$VERSION-sources.jar
+    - mv vrpl-grpc-client-1.0.0-b.jar vrpl-grpc-client-$VERSION.jar
+    - ls
+    - echo "Atualizando a versão do Projeto..."
+    - mvn -X deploy:deploy-file -Durl=http://nexus.aic.serpro/content/repositories/releases -Dfile=./vrpl-grpc-client-$VERSION.jar -Dpackaging=jar -Dsources=./vrpl-grpc-client-$VERSION-sources.jar -DgroupId=br.gov.serpro.siconv -DartifactId=vrpl-grpc-client -Dversion=$VERSION
+  cache:
+    paths:
+        - /.m2
+  when: manual
+
+# Build:Testes Unitários:
+#   before_script:
+#     - export VERSION=1.0.0-b$CI_PIPELINE_ID-${CI_COMMIT_SHA:0:8}
+#     - echo "before_script"
+#   image: siconv-node8:latest
+#   stage: Build:Testes Unitários
+#   script:
+#     - echo "Testes unitários..."
+#     - npm run test:ci
+
+#   tags:
+#     - siconv
+#     - cps
+#   variables:
+#     GIT_STRATEGY: none
+
+# Build:Análise de Qualidade de Código:
+#   image: siconv-node8-sonnar:latest
+#   stage: Build:Análise de Qualidade de Código
+#   script:
+#     - export JAVA_HOME=/jdk1.8.0_181/
+#     - export PATH=$PATH:/jdk1.8.0_181/bin/
+#     - sonar-scanner -Dsonar.login=387bdebd0cdb2054668cb57b271945a1d1da1d4f -Dsonar.testExecutionReportPaths=reports/headlesschrome.0.0.0.linux.0.0.0.xml -Dsonar.typescript.tslint.configPath=tslint.json -Dsonar.tests=src/app -Dsonar.test.inclusions=**/*.spec.ts -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts -Dsonar.sources=src/ -Dsonar.language=ts -Dsonar.host.url=http://sonar.aic.serpro:8080 -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info -Dsonar.projectKey=DERCE.DE414.SICONV-MANDATARIAS-CPS-FRONTEND -Dsonar.projectName=DERCE.DE414.SICONV-MANDATARIAS-CPS-FRONTEND -Dsonar.projectVersion=1.0.0 -Dsonar.sourceEncoding=UTF-8
+#   tags:
+#     - siconv
+#     - cps
+#   dependencies:
+#     - Build:Compilação
+#   variables:
+#     GIT_STRATEGY: none
+

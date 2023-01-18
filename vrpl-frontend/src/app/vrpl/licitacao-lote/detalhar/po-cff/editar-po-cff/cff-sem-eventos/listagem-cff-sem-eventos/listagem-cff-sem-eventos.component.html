@@ -1,0 +1,102 @@
+<!doctype html>
+<div class="title">Visão Parcelas por Macrosserviço</div>
+
+<siconv-table style="width:80%" [data]="visaoParcelasObservable | async" fileExportName="visaoParcelas" [pagination]="true" [export]="exportVisaoParcelas"
+  (listaPaginada)="getListaPaginadaVisaoParcelas($event)">
+  <thead header style="width:80%">
+    <tr>
+      <th style="width:5%" sortable-column="numeroMacroServico" sortable-type="number" scope="col">Nº</th>
+      <th style="width:10%" sortable-column="nomeMacroServico" sortable-type="string" scope="col">Macrosserviço</th>
+      <th style="width:15%" sortable-column="precoTotal" sortable-type="number" scope="col">Preço Total</th>
+      <th style="width:5%" scope="col">Nº da Parcela</th>
+      <th style="width:5%" scope="col">Parcela</th>
+      <th style="width:5%" scope="col">Percentual Parcela</th>
+      <th style="width:5%" scope="col">Percentual Acumulado</th>
+      <th style="width:15%" scope="col">Valor Acumulado</th>
+      <th style="text-align:center;width:15%" scope="col">Ações</th>
+    </tr>
+  </thead>
+  <tbody *ngIf="visaoParcelasObservable | async as visoes">
+    <ng-container *ngIf="visoes?.length; else nenhumRegistro">
+      <ng-container *ngFor="let visao of visoes">
+        <tr>
+          <td style="text-align: center; width:5%"><strong>{{visao.numeroMacroServico}}</strong></td>
+          <td style="text-align: left; width:10%" ><strong>{{visao.nomeMacroServico}}</strong></td>
+          <td style="text-align: right; width:15%"><strong>{{visao.precoTotal | currency: 'BRL'}}</strong></td>
+          <td style="width:5%"></td>
+          <td style="width:5%"></td>
+          <td style="width:5%"></td>
+          <td style="width:5%"></td>
+          <td style="width:15%"></td>
+          <td style="text-align: center; width:15%">
+            <a title="Detalhar" [routerLink]="['../detalhar', visao.idMacroServico]" alt="Detalhar">
+              <i class="fa fa-search-plus" aria-hidden="true"></i>
+            </a>
+            <a title="Editar" *ngIf="podeEditar" [routerLink]="['../editar', visao.idMacroServico]" alt="Editar">
+              <i class="fa fa-pencil" aria-hidden="true"></i>
+            </a>
+          </td>
+        </tr>
+        <ng-container *ngIf="visao.parcelas?.length">
+          <tr *ngFor="let parcela of visao.parcelas">
+            <td style="width:5%"></td>
+            <td style="width:10%"></td>
+            <td style="width:15%"></td>
+            <td style="text-align: center; width:5%">{{parcela.numero}}</td>
+            <td style="text-align: center; width:5%">{{parcela.mesAnoParcela}}</td>
+            <td style="text-align: right; width:5%">{{parcela.percentualParcela/100 | percent:'1.2-2' }}</td>
+            <td style="text-align: right; width:5%">{{parcela.percentualAcumulado/100 | percent:'1.2-2' }}</td>
+            <td style="text-align: right; width:15%">{{parcela.totalAcumulado/100 | currency: 'BRL'}}</td>
+            <td style="width:15%"></td>
+          </tr>
+        </ng-container>
+      </ng-container>
+    </ng-container>
+    <ng-template #nenhumRegistro>
+      <tr>
+        <td colspan="9">
+          Nenhum registro encontrado.
+        </td>
+      </tr>
+    </ng-template>
+  </tbody>
+</siconv-table>
+
+<div class="title" style="clear: left;">Cronograma Físico Financeiro</div>
+
+<siconv-table [data]="cffObservable | async" fileExportName="cff" [pagination]="true" [export]="exportCFF"
+  (listaPaginada)="getListaPaginadaCFF($event)">
+  <thead header>
+    <tr>
+      <th sortable-column="numeroParcela" sortable-type="number" scope="col" style="text-align: center;">Nº da Parcela</th>
+      <th sortable-column="mesAnoParcela" sortable-type="string" scope="col" style="text-align: center;">Parcela</th>
+      <th sortable-column="percentualParcela" sortable-type="number" scope="col" style="text-align: right;">Percentual Parcela</th>
+      <th sortable-column="percentualAcumulado" sortable-type="number" scope="col" style="text-align: right;">Percentual Acumulado</th>
+      <th sortable-column="totalAcumulado" sortable-type="number" scope="col" style="text-align: right;">Valor Acumulado</th>
+    </tr>
+  </thead>
+  <tbody *ngIf="cffObservable | async as parcelas">
+    <ng-container *ngIf="parcelas?.length; else nenhumRegistro">
+      <ng-container *ngFor="let parcela of listaCFF">
+        <tr>
+          <td style="text-align: center;">{{parcela.numeroParcela}}</td>
+          <td style="text-align: center;">{{parcela.mesAnoParcela}}</td>
+          <td style="text-align: right;">{{parcela.percentualParcela/100 | percent:'1.2-2'}}</td>
+          <td style="text-align: right;">{{parcela.percentualAcumulado/100 | percent:'1.2-2'}}</td>
+          <td style="text-align: right;">{{parcela.totalAcumulado/100 | currency: 'BRL'}}</td>
+        </tr>
+      </ng-container>
+    </ng-container>
+    <ng-template #nenhumRegistro>
+      <tr>
+        <td colspan="5">
+          Nenhum registro encontrado.
+        </td>
+      </tr>
+    </ng-template>
+  </tbody>
+</siconv-table>
+
+<footer class="footer-botoes">  
+  <button type="button" class="btn btn-secondary" style="margin-left: 20px; margin-right: 5px;" (click)="voltar()">Voltar</button>
+</footer>

@@ -1,0 +1,185 @@
+variables:
+  URI_ENDPOINT: https://console.estaleiro.serpro.gov.br
+  SYSTEM: ${PROJECT} # Sistema cadastrado no portal
+  MODULE: ${MODULE_FRONTEND} # Módulo criado no portal
+  PLATFORM: ${PLATAFORM} # Plataforma da aplicação
+  ENVIRONMENT_DESENV: d # Ambiente criado no portal
+  ENVIRONMENT_TESTE: t # Ambiente criado no portal
+  ENVIRONMENT_HOMOLOGACAO: h # Ambiente criado no portal
+  ENVIRONMENT_PRODUCAO: p # Ambiente criado no portal
+  ENVIRONMENT_Y: ${ENV_Y_ID} # Ambiente criado no portal
+  URI_ENV_DESENV: ${URI_ENV_DESENV} # URI para o ambiente configurada no portal
+  GIT_SSL_NO_VERIFY: "true"
+  GIT_STRATEGY: fetch
+
+
+stages:
+    - Build:Compilação
+    - Estaleiro:Construção da Imagem
+    - Estaleiro:Publicação desenv
+    - Build:Análise de Qualidade de Código
+    - Estaleiro:Publicação teste
+    - Estaleiro:Publicação homologacao
+    - Estaleiro:Publicação producao
+
+before_script:
+   - export VERSION=1.0.0-b$CI_PIPELINE_ID-${CI_COMMIT_SHA:0:8}
+
+Build:Compilação:
+  before_script:
+    - export VERSION=1.0.0-b$CI_PIPELINE_ID-${CI_COMMIT_SHA:0:8}
+    - echo $CI_BUILD_ID
+    - echo $VERSION
+    - echo "before_script"
+    - npm config set @serpro:registry https://nexus.aic.serpro.gov.br/repository/npm-private/
+  image: hub.estaleiro.serpro/pipeline/node:8-alpine
+  stage: Build:Compilação    
+  script:
+    - echo $VERSION
+    - pwd
+    - ls -lha
+    - echo "Compilando..."    
+    - node -v
+    - npm -v
+    - npm install
+    - npm run build_des
+  allow_failure: false
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - ./node_modules
+  artifacts:
+    paths:
+      - dist/
+      - estaleiro/conf/nginx.conf
+      - src/
+      - src/app/
+      - tslint.json
+      - sonar-project.properties
+      - e2e/
+      - ./*.json
+      - ./*.js
+      - ./*.ts
+    expire_in: 1 day
+
+
+Build:Análise de Qualidade de Código:
+ before_script:
+   - export VERSION=1.0.0-b$CI_PIPELINE_ID-${CI_COMMIT_SHA:0:8}
+   - echo "before_script"
+   - npm config set @serpro:registry https://nexus.aic.serpro.gov.br/repository/npm-private/
+ image: hub.estaleiro.serpro/pipeline/sonar-scanner:latest
+ stage: Build:Análise de Qualidade de Código
+ script:
+   - echo "Análise de qualidade de código..."
+   - npm --loglevel info install --verbose typescript
+   - npm install --save-dev karma-sonarqube-unit-reporter karma-junit-reporter gulp sonarqube-scanner
+   - sonar-scanner -Dsonar.projectVersion=$VERSION -Dsonar.links.scm=$CI_PROJECT_URL
+ dependencies:
+   - Build:Compilação
+ variables:
+   GIT_STRATEGY: none
+
+Estaleiro:Construção da Imagem:
+  stage: Estaleiro:Construção da Imagem
+  image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+  before_script:
+    - export VERSION=1.0.0-b$CI_PIPELINE_ID-${CI_COMMIT_SHA:0:8}
+    - echo "Deploy no ambiente de desenv..."
+    - estaleiro config token --literal $TOKEN
+    - estaleiro config endpoint $URI_ENDPOINT
+    - estaleiro config system siconv
+  script:
+    - echo $VERSION
+    - echo "Construindo e publicando a imagem para o Estaleiro..."
+    - echo $MODULE 
+    - echo $VERSION
+    - ls -lha
+    - mv -f estaleiro/conf/ ./dist/
+    - cd dist
+    - ls -lha
+    - estaleiro app build --module $MODULE --platform $PLATAFORM --version $VERSION
+  dependencies:
+    - Build:Compilação
+  variables:
+    GIT_STRATEGY: none
+
+Estaleiro:Publicação desenv:
+  stage: Estaleiro:Publicação desenv
+  image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+  script:
+    - echo $VERSION
+    - echo "Deploy no ambiente de desenv..."
+    - estaleiro config token --literal $TOKEN
+    - estaleiro config endpoint $URI_ENDPOINT
+    - estaleiro config system siconv
+    # Promote
+    - estaleiro app promote mod $ENVIRONMENT_DESENV --module $MODULE --version $VERSION
+  environment:
+    name: desenv
+    url: https://des-siconv.estaleiro.serpro.gov.br/siconv-vrpl-frontend
+  when: manual
+  dependencies:
+    - Build:Compilação
+  variables:
+    GIT_STRATEGY: none
+
+Estaleiro:Publicação teste:
+  stage: Estaleiro:Publicação teste
+  image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+  script:
+    - echo $VERSION
+    - echo "Deploy no ambiente de teste"
+    - estaleiro config token --literal $TOKEN
+    - estaleiro config endpoint $URI_ENDPOINT
+    - estaleiro config system siconv
+    # Promote
+    - estaleiro app promote mod $ENVIRONMENT_TESTE --module $MODULE --version $VERSION
+  environment:
+    name: teste
+    url: https://tes-siconv.estaleiro.serpro.gov.br/siconv-vrpl-frontend
+  when: manual
+  dependencies:
+    - Build:Compilação
+  variables:
+    GIT_STRATEGY: none
+
+Estaleiro:Publicação homologacao:
+  stage: Estaleiro:Publicação homologacao
+  image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+  script:
+    - echo $VERSION
+    - echo "Deploy no ambiente de Homologação"
+    - estaleiro config token --literal $TOKEN
+    - estaleiro config endpoint $URI_ENDPOINT
+    - estaleiro config system siconv
+    # Promote
+    - estaleiro app promote mod $ENVIRONMENT_HOMOLOGACAO --module $MODULE --version $VERSION
+  environment:
+    name: homologacao
+    url: https://hom-siconv.estaleiro.serpro.gov.br/siconv-vrpl-frontend
+  when: manual
+  dependencies:
+    - Build:Compilação
+  variables:
+    GIT_STRATEGY: none
+
+Estaleiro:Publicação producao:
+  stage: Estaleiro:Publicação producao
+  image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+  script:
+    - echo $VERSION
+    - echo "Deploy no ambiente de teste"
+    - estaleiro config token --literal $TOKEN
+    - estaleiro config endpoint $URI_ENDPOINT
+    - estaleiro config system siconv
+    # Promote
+    - estaleiro app promote mod $ENVIRONMENT_PRODUCAO --module $MODULE --version $VERSION
+  environment:
+    name: producao
+    url: https://pro-siconv.estaleiro.serpro.gov.br/siconv-vrpl-frontend
+  when: manual
+  dependencies:
+    - Build:Compilação
+  variables:
+    GIT_STRATEGY: none

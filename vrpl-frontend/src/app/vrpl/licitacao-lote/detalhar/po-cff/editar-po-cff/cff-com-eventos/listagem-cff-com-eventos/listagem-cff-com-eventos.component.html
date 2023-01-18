@@ -1,0 +1,105 @@
+<!doctype html>
+<div class="title">Visão Frentes de Obra por Evento</div>
+
+<siconv-table [data]="eventosObservable | async" fileExportName="visaoPorEventos" [pagination]="true"
+    [export]="exportVisaoPorEventos" (listaPaginada)="getListaPaginadaVisaoPorEventos($event)">
+    <thead header>
+        <tr>
+            <th title="Número do Evento" sortable-column="numeroEvento" sortable-type="number" scope="col">Nº do Evento
+            </th>
+            <th title="Título do Evento" sortable-column="tituloEvento" sortable-type="string" scope="col">Título do
+                Evento</th>
+            <th title="Número da Frente de Obra">Nº da Frente de Obra</th>
+            <th title="Frente de Obra">Frente de Obra</th>
+            <th title="Número do Período de Conclusão do Evento">Nº do Período de Conclusão do Evento</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody *ngIf="eventosObservable | async as eventos">
+        <ng-container *ngIf="eventos?.length; else nenhumRegistro">
+            <ng-container *ngFor="let evento of listaVisaoPorEventos">
+                <tr>
+                    <td style="text-align: center; font-weight: bold;">{{evento.numeroEvento}}</td>
+                    <td style="text-align: left; font-weight: bold;">{{evento.tituloEvento}}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td style="text-align: center;">
+                        <a title="Detalhar" [routerLink]="['../detalhar', evento.idEvento]" alt="Detalhar">
+                            <i class="fa fa-search-plus" aria-hidden="true"></i>
+                        </a>
+                        <a title="Editar" *ngIf="podeEditar" [routerLink]="['../editar', evento.idEvento]" alt="Editar">
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                        </a>
+                    </td>
+
+                </tr>
+                <ng-container *ngIf="evento.listaFrenteObras?.length">
+                    <tr *ngFor="let frenteObra of evento.listaFrenteObras">
+                        <td></td>
+                        <td></td>
+                        <td style="text-align: center;">{{frenteObra.numeroFrenteObra}}</td>
+                        <td style="text-align: left;">{{frenteObra.nomeFrenteObra}}</td>
+                        <td style="text-align: center;">
+                            {{frenteObra.mesConclusao === 0? 'Não Definido' : frenteObra.mesConclusao}}</td>
+                        <td></td>
+
+                    </tr>
+                </ng-container>
+            </ng-container>
+        </ng-container>
+        <ng-template #nenhumRegistro>
+            <tr>
+                <td colspan="6">
+                    Nenhum registro encontrado.
+                </td>
+            </tr>
+        </ng-template>
+    </tbody>
+</siconv-table>
+
+<div class="title" style="clear: left;">Cronograma Físico Financeiro</div>
+<ng-container *ngIf="listaValoresMensais">
+    <siconv-table [data]="listaValoresMensais" fileExportName="cff" [pagination]="true" [export]="exportVisaoPorCFF"
+        (listaPaginada)="getListaPaginadaVisaoPorCFF($event)">
+        <thead header>
+            <tr>
+                <th title="Número do Período de Conclusão do Evento" sortable-column="mes" sortable-type="number"
+                    scope="col" style="text-align: center;">Nº do Período de Conclusão do Evento</th>
+                <th title="Percentual da Parcela" sortable-column="percentualParcela" sortable-type="number" scope="col"
+                    style="text-align: center;">Percentual da Parcela</th>
+                <th title="Valor da Parcela" sortable-column="valorParcela" sortable-type="number" scope="col"
+                    style="text-align: center;">Valor da Parcela</th>
+                <th title="Percentual Acumulado" sortable-column="percentualAcumulado" sortable-type="number"
+                    scope="col" style="text-align: center;">Percentual Acumulado</th>
+                <th title="Valor Acumulado" sortable-column="valorAculumado" sortable-type="number" scope="col"
+                    style="text-align: center;">Valor Acumulado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <ng-container *ngIf="listaValoresMensais?.length; else nenhumRegistro">
+                <ng-container *ngFor="let valores of listaVisaoPorCFF">
+                    <tr>
+                        <td style="text-align: center;">{{valores.mes}}</td>
+                        <td style="text-align: right; ">{{valores.percentualParcela| percent:'1.2-2'}}</td>
+                        <td style="text-align: right;">{{valores.valorParcela | currency: 'BRL'}}</td>
+                        <td style="text-align: right;">{{valores.percentualAcumulado| percent:'1.2-2'}}</td>
+                        <td style="text-align: right;">{{valores.valorAculumado | currency: 'BRL'}}</td>
+                    </tr>
+                </ng-container>
+            </ng-container>
+            <ng-template #nenhumRegistro>
+                <tr>
+                    <td colspan="5">
+                        Nenhum registro encontrado.
+                    </td>
+                </tr>
+            </ng-template>
+        </tbody>
+    </siconv-table>
+</ng-container>
+
+
+<footer class="footer-botoes">  
+    <button type="button" class="btn btn-secondary" style="margin-left: 20px; margin-right: 5px;" (click)="voltar()">Voltar</button>
+</footer>

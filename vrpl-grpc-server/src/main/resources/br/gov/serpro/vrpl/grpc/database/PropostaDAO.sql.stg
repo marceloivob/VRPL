@@ -1,0 +1,20 @@
+existePropostaVrplAceita(idProposta) ::= <%
+    select distinct true as existeVrpl,											<\n>
+	(select exists ( 															<\n>
+		select 1 																<\n>
+		from siconv.vrpl_proposta												<\n> 							
+		join siconv.vrpl_licitacao 												<\n> 							
+		on (siconv.vrpl_proposta.id = siconv.vrpl_licitacao.proposta_fk)		<\n>
+		where siconv.vrpl_proposta.id_siconv		= :idProposta				<\n>
+			and siconv.vrpl_licitacao.in_situacao 	= 'ACT' 	 				<\n>
+		    and siconv.vrpl_proposta.versao_in_atual))  as existeVrplAceita		<\n>
+    from siconv.vrpl_proposta where id_siconv = :idProposta		 				<\n>
+%>
+
+excluirProposta(numeroProposta, anoProposta) ::= <% 
+	DELETE FROM vrpl_proposta vp 
+	WHERE vp.numero_proposta = :numeroProposta 
+	AND vp.ano_proposta = :anoProposta 
+%>
+
+

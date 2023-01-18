@@ -1,0 +1,101 @@
+<!doctype html>
+<siconv-fieldset fieldsetTitle="Quadro de Composição de Investimento">
+
+  <ng-container *ngIf="qciObservable | async as qci">
+    <siconv-table [data]="qci.metas" fileExportName="qci" [pagination]="true" [export]="export"
+      (listaPaginada)="getListaPaginada($event)" *ngIf="qci.metas">
+
+      <thead header>
+        <tr>
+          <th sortable-column="numero" sortable-type="number" scope="col" style="text-align: center;">Nº Meta / Submeta</th>
+          <th sortable-column="itemInvestimento" sortable-type="object" scope="col" style="text-align: center;">Item Investimento</th>
+          <th sortable-column="descricao" sortable-type="string" scope="col" style="text-align: center;">Descrição Meta / Submeta</th>
+          <th style="text-align: center;">Situação</th>
+          <th sortable-column="quantidade" sortable-type="number" scope="col" style="text-align: center;">Quantidade</th>
+          <th sortable-column="unidade" sortable-type="object" scope="col" style="text-align: center;">Unidade</th>
+          <th style="text-align: center;" >Lote de Licitação</th>
+          <th sortable-column="repasseLicitado" sortable-type="number" scope="col" style="text-align: right;">Repasse</th>
+          <th sortable-column="contrapartidaLicitada" sortable-type="number" scope="col" style="text-align: right;">Contrapartida</th>
+          <th sortable-column="totalLicitado" sortable-type="number" scope="col" style="text-align: right;">Total</th>
+        </tr>
+      </thead>
+      <ng-container *ngIf="qciObservable | async as qci; else loading">
+        <tbody>
+          <ng-container *ngIf="qci?.metas?.length; else nenhumRegistro">
+            <ng-container *ngFor="let meta of lista">
+              <tr>
+                <td><strong>{{meta.numero}}</strong></td>
+                <td><strong>{{meta.itemInvestimento}}</strong></td>
+                <td><strong>{{meta.descricao}}</strong></td>
+                <td></td>
+                <td style="text-align: center;"><strong>{{meta.quantidade| number:'1.2-2':'pt-BR'}}</strong></td>
+                <td style="text-align: center;"><strong>{{meta.unidade}}</strong></td>
+                <td></td>
+                <td style="text-align: right;"><strong>{{meta.vlRepasse | currency:'BRL':'symbol':'1.2-2'}}</strong></td>
+                <td style="text-align: right;"><strong>{{meta.vlContrapartida | currency:'BRL':'symbol':'1.2-2'}}</strong></td>
+                <td style="text-align: right;"><strong>{{meta.vlTotal | currency:'BRL':'symbol':'1.2-2'}}</strong></td>
+              </tr>
+              <ng-container *ngFor="let submeta of meta.submetas">
+                <tr>
+                  <td>{{meta.numero}}.{{submeta.numero}}</td>
+                  <td>{{submeta.itemInvestimento}}</td>
+                  <td>{{submeta.descricao}}</td>
+                  <td>{{submeta.situacao.descricao}}</td>
+                  <td></td>
+                  <td></td>
+                  <td style="text-align: center;">{{submeta.lote}}</td>
+                  <td style="text-align: right;">{{submeta.valorRepasseLicitado | currency:'BRL':'symbol':'1.2-2'}}</td>
+                  <td style="text-align: right;">{{submeta.valorContrapartidaLicitado | currency:'BRL':'symbol':'1.2-2'}}</td>
+                  <td style="text-align: right;">{{submeta.valorTotalLicitado | currency:'BRL':'symbol':'1.2-2'}}</td>
+                </tr>
+              </ng-container>
+            </ng-container>
+          </ng-container>
+          <ng-template #nenhumRegistro>
+            <tr>
+              <td colspan="11">
+                Nenhum registro encontrado.
+              </td>
+            </tr>
+          </ng-template>
+        </tbody>
+        <tfoot style="background: none repeat scroll 0 0 #EEEFF1; font-weight: bold; text-align: center;">
+          <tr>
+            <td colspan="7" style="text-align: right;"> Total Geral </td>
+            <td>{{qci.vlRepasse | currency:'BRL':'symbol':'1.2-2'}}</td>
+            <td>{{qci.vlContrapartida | currency:'BRL':'symbol':'1.2-2'}}</td>
+            <td>{{qci.vlTotal | currency:'BRL':'symbol':'1.2-2'}}</td>
+          </tr>
+          <tr *ngIf="qci.possuiSubmetaSocial">
+            <td colspan="7" style="text-align: right;"> Saldo do Trabalho Social </td>
+            <td>{{qci.diferencaVlRepasseParaSubmetasSociais | currency:'BRL':'symbol':'1.2-2'}}</td>
+            <td>{{qci.diferencaVlContrapartidaParaSubmetasSociais | currency:'BRL':'symbol':'1.2-2'}}</td>
+            <td>{{qci.diferencaVlTotalLicitadoParaSubmetasSociais | currency:'BRL':'symbol':'1.2-2'}}</td>
+          </tr>
+          <tr *ngIf="qci.possuiSubmetaSocial">
+            <td colspan="7" style="text-align: right;"> Saldo das Demais Metas </td>
+            <td>{{qci.diferencaVlRepasseParaDemaisMetas | currency:'BRL':'symbol':'1.2-2'}}</td>
+            <td>{{qci.diferencaVlContrapartidaParaDemaisMetas | currency:'BRL':'symbol':'1.2-2'}}</td>
+            <td>{{qci.diferencaVlTotalLicitadoParaDemaisMetas | currency:'BRL':'symbol':'1.2-2'}}</td>
+          </tr>
+          <tr>
+            <td colspan="7" style="text-align: right;"> Saldo Geral do {{qci.modalidade}}</td>
+            <td>{{qci.difValorOrcadoRepasseLicitado | currency:'BRL':'symbol':'1.2-2'}}</td>
+            <td>{{qci.difValorOrcadoContrapartidaLicitada | currency:'BRL':'symbol':'1.2-2'}}</td>
+            <td>{{qci.difValorOrcadoTotalLicitado | currency:'BRL':'symbol':'1.2-2'}}</td>
+          </tr>
+        </tfoot>
+      </ng-container>
+      <ng-template #loading>
+        <tbody>
+          <tr>
+            <td colspan="11">
+              Carregando...
+            </td>
+          </tr>
+        </tbody>
+      </ng-template>
+    </siconv-table>
+
+  </ng-container>
+</siconv-fieldset>

@@ -1,0 +1,236 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="form">
+
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <div class="title">Planilha Orçamentária</div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <div class="form-group has-feedback">
+                <label for="macrosservicoAssociado">Macrosserviço Associado</label>
+                <p class="informacao" id="macrosservicoAssociado">{{macrosservico.item}} - {{macrosservico.nome}}</p>
+            </div>
+        </div>
+        <div class="form-group col-md-4">
+            <div class="form-group has-feedback">
+                <label for="numeroServico">Número do Serviço</label>
+                <p class="informacao" id="numeroServico">{{servico.item}}</p>
+            </div>
+        </div>
+        <div class="form-group col-md-4">
+            <div class="form-group has-feedback">
+                <label for="fonte">Fonte</label>
+                <p class="informacao" id="fonte">{{servico.fonte}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <div class="form-group has-feedback">
+                <label for="codigo">Código</label>
+                <p class="informacao" id="codigo">{{servico.codigo}}</p>
+            </div>
+        </div>
+        <div class="form-group col-md-4">
+            <div class="form-group has-feedback">
+                <label for="descricao">Descrição</label>
+                <p class="informacao" id="descricao">{{servico.nome}}</p>
+            </div>
+        </div>
+        <div class="form-group col-md-4">
+            <div class="form-group has-feedback">
+                <label for="unidade">Unidade</label>
+                <p class="informacao" id="unidade">{{servico.unidade}}</p>
+            </div>
+        </div>
+    </div>
+    <!-- linha com os custos analisados -->
+    <div class="form-row">
+        
+        <div class="form-group col-md-4">
+            <div class="form-group has-feedback">
+                <label for="precoUnitarioReferencia">Preço Unitário {{ getDescricaoReferencia() }}</label>
+
+                <ng-container *ngIf="exibirAvisoUtilizandoValorAnalise()">
+                    <span [title]="getDescricaoAvisoUtilizandoPrecoAnalise()"
+                        >&nbsp;<i class="fa fa-asterisk texto-vermelho icone-pequeno" aria-hidden="true"></i>
+                    </span>
+                </ng-container>
+
+                <p class="informacao" id="precoUnitarioReferencia">{{ getServicoPrecoUnitarioReferencia() | currency:'BRL':'symbol'}}</p>
+            </div>
+        </div>
+
+        <div class="form-group col-md-4">
+            <div class="form-group has-feedback">
+                <label for="BDIAceitoNaAnalise">BDI Aceito na Análise</label>
+                <p class="informacao" id="BDIAceitoNaAnalise">{{ servico.bdi | number:'1.2-2' }} %</p>
+            </div>
+        </div>
+
+        <div *ngIf="!podeEditarCustoUnitario()" class="form-group col-md-4">
+            <div class="form-group has-feedback">
+                <label for="custoUnitarioReferencia">Custo Unitário {{ getDescricaoReferencia() }}</label>
+
+                <ng-container *ngIf="exibirAvisoUtilizandoValorAnalise()">
+                    <span [title]="getDescricaoAvisoUtilizandoCustoAnalise()"
+                        >&nbsp;<i class="fa fa-asterisk texto-vermelho icone-pequeno" aria-hidden="true"></i>
+                    </span>
+                </ng-container>
+
+                <p class="informacao" id="custoUnitarioReferencia">{{ getServicoCustoUnitarioReferencia() | currency:'BRL':'symbol'}}</p>
+            </div>
+        </div>
+
+        <div *ngIf="podeEditarCustoUnitario()" class="form-group col-md-4">
+            <div class="form-group has-feedback">
+                <label for="formBasicText">Custo Unitário na Data Base da Licitação (R$)&nbsp;</label>
+                <div>
+                    <input vrplCurrencyFormatter type="text" class="form-control" formControlName="custoUnitario" (keypress)="numberOnly($event)">
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="exibirLegendaAvisoUtilizandoValorAnalise()" class="form-group col-md-12">
+            <span class='texto-legenda-avisos'>
+                <i class="fa fa-asterisk texto-vermelho icone-pequeno" aria-hidden="true"></i> Para os Preços Unitários não contemplados no SINAPI foram 
+                adotados os Preços Unitários da Fase da Análise.
+            </span>
+        </div>
+    </div>
+
+    <!-- linha com os custos licitados -->
+    <div class="form-row">
+        <div class="form-group col-md-3">
+            <div class="form-group has-feedback">
+                <label for="formBasicText">Preço Unitário Licitado (R$)&nbsp;</label>
+                <ng-container *ngIf="precoUnitarioLicitadoEhInvalido(); else avisoPrecoUnitarioValido">
+                    <i class="fa fa-exclamation texto-vermelho" [title]="getDescricaoServicoPrecoUnitarioMaior()" aria-hidden="true"></i>
+                </ng-container>
+
+                <ng-template #avisoPrecoUnitarioValido>
+                    <i class="fa fa-check texto-verde" aria-hidden="true"></i>
+                </ng-template>
+
+                <div>
+                    <input vrplCurrencyFormatter type="text" class="form-control" formControlName="precoUnitarioLicitado" (keypress)="numberOnly($event)">
+                    
+                    <h5 *ngIf="precoUnitarioLicitadoEhInvalido()" class="texto-aviso">
+                        {{ getDescricaoServicoPrecoUnitarioMaior() }}
+                    </h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="acompanhaEventos">
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                <div class="form-group has-feedback has-error">
+                    <label for="formBasicText">Evento</label>
+
+                    <select formControlName="evento" (change)="changeEvento()" class="form-control">
+                        <option *ngFor="let evento of eventos" value="{{evento.id}}">{{evento.numeroEvento}} - {{evento.tituloEvento}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <!-- TABELA LICITADO-->
+            <siconv-table [data]="frentes" fileExportName="frenteObra" [pagination]="true"
+                (listaPaginada)="getListaPaginada($event)" [export]="export">
+                <thead header>
+                    <tr>
+                        <th rowspan="2" scope="col" sortable-column="frenteDeObra" sortable-type="object"
+                         class="header-centralizado">Frente de Obra</th>
+                        <th colspan="2" scope="colgroup" class="header-centralizado">Licitado</th>
+                       
+                    </tr>
+                    <tr>
+                        <th scope="col" sortable-column="quantidade" sortable-type="number" class="header-centralizado">Quantidade</th>
+                        <th scope="colgroup" class="header-centralizado">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let frente of lista">
+                        <td>{{frente.frenteDeObra.nomeFrente}}</td>
+                        <td class="header-a-direita">
+                            <input *ngIf="!visualizar" type="number" step="0.01" min="0" max="999999999999999.99" class="header-a-direita"
+                                [value]="frente.quantidade" (input)="frente.quantidade = +$event.target.value" (change)="validarQuantidade(frente)"/>
+
+                            <input disabled *ngIf="visualizar" type="number" step="0.01" min="0"
+                            class="header-a-direita" [value]="frente.quantidade" />
+                        </td>
+                        <td class="header-a-direita">
+                            {{(frente.quantidade *  currencyHelper.rawValue(form.get('precoUnitarioLicitado').value)) | currency:'BRL':'symbol'}}
+                        </td>                       
+                    </tr>
+                </tbody>
+
+                <tfoot class="siconv-table-header table footer-totalizadores">
+                    <td colspan="1">Total</td>
+                    <td class="header-a-direita">{{getSomaQuantidade() | number:'1.2-2'}}</td>
+                    <td class="header-a-direita">{{somaValorLicitado | currency:'BRL':'symbol'}}</td>
+                </tfoot>
+            </siconv-table>
+        </div>
+    </div>
+    <!-- FINAL TABELA -->
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <!-- TABELA ANALISE-->
+            <siconv-table [data]="servicosFrenteObraAnalise" fileExportName="servicoFrenteObraAnalise" [pagination]="true"
+                (listaPaginada)="getListaPaginada2($event)" [export]="export2">
+                <thead header>
+                    <tr>
+                        <th rowspan="2" scope="col" sortable-column="frenteDeObra" sortable-type="object"
+                        class="header-centralizado">Frente de Obra</th>
+                        <th colspan="2" scope="colgroup" class="header-centralizado">Análise</th>
+                       
+                    </tr>
+                    <tr>
+                        <th scope="col" sortable-column="quantidade" sortable-type="number" class="header-centralizado">Quantidade</th>
+                        <th scope="colgroup" class="header-centralizado">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let servicoFrenteObraAnalise of lista2">
+                        <td>{{servicoFrenteObraAnalise.nomeFrente}}</td>
+                        <td class="header-a-direita">
+                            <input disabled type="number" step="0.01" min="0" max="999999999999999.99"
+                            class="header-a-direita" [value]="servicoFrenteObraAnalise.qtItens" />
+                        </td>                        
+                        <td class="header-a-direita">
+                            {{(servicoFrenteObraAnalise.qtItens * servico.precoUnitarioAnalise) | currency:'BRL':'symbol'}}</td>                    
+                    </tr>
+                </tbody>
+
+                <tfoot class="siconv-table-header table footer-totalizadores">
+                    <td colspan="1">Total</td>
+                    <td class="header-a-direita">{{getSomaQuantidadeAnalise() | number:'1.2-2'}}</td>
+                    <td class="header-a-direita">{{somaValorAnalise | currency:'BRL':'symbol'}}</td>
+                </tfoot>
+            </siconv-table>
+        </div>
+    </div>
+    <!-- FINAL TABELA ANALISE-->
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <div class="form-group has-feedback">
+                <label for="inputObservacao">Observação:</label>
+                <textarea formControlName="observacao" id="inputObservacao" class="form-control" type="text" maxlength="500"
+                    value="{{servico.observacao}}"></textarea>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<footer class="footer-botoes">  
+    <button (click)="voltar()" type="button" class="btn btn-secondary botao-voltar">Voltar</button>
+    <button *ngIf="!visualizar" (click)="salvar()" type="button" class="btn btn-primary">Salvar</button>
+</footer>

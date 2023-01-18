@@ -1,0 +1,66 @@
+<!doctype html>
+<siconv-fieldset fieldsetTitle="Planilhas Orçamentárias" [collapsible]="false">
+
+  <siconv-table [data]="poCffsObservable | async" fileExportName="planilhas_orcamentarias" [pagination]="true" [export]="export"
+    (listaPaginada)="getListaPaginada($event)">
+
+    <thead header>
+      <tr>
+        <th sortable-column="numeroMeta" sortable-type="number" scope="col">Meta</th>
+        <th style="text-align: left;">Submeta</th>
+        <th style="text-align: center;">Data Base</th>
+        <th style="text-align: center;">Localidade</th>
+        <th style="text-align: center;">Previsão Definida de Início da Obra</th>
+        <th style="text-align: center;">Duração Definida da Obra (meses)</th>
+        <th scope="col" style="text-align: center;">Obra Acompanhada por Evento?</th>
+        <th style="color: rgb(170, 170, 170);text-align: center;">Preço Total Aceito na Análise</th>
+        <th style="text-align: center;">Preço Total Licitado</th>
+        <th style="text-align: center;" scope="col">Ações</th>
+      </tr>
+    </thead>
+    <tbody *ngIf="poCffsObservable | async as poCffs">
+      <ng-container *ngIf="poCffs?.length; else nenhumRegistro">
+        <tr *ngFor="let poCff of lista">
+          <td style="text-align: left;vertical-align: middle" *ngIf="poCff.exibe" [attr.rowspan]="poCff.rowspan">
+            {{poCff.numeroMeta}} - {{poCff.descricaoMeta}}</td>
+          <td style="text-align: left;">{{poCff.numeroMeta}}.{{poCff.numeroSubmeta}} - {{poCff.descricao}}</td>
+          <td style="text-align: center;">{{poCff.dataBaseVrpl | date:'MM/yyyy'}}</td>
+          <td style="text-align: center;">{{poCff.localidade}}</td>
+          <td style="text-align: center;">{{poCff.previsaoInicioVRPL | date:'MM/yyyy'}}</td>
+          <td style="text-align: center;">{{poCff.duracao}}</td>
+          <td style="text-align: center;">
+            <span *ngIf="poCff.acompanhamentoEvento">
+              <i class="fa fa-check" title="Sim"></i>
+            </span>
+            <span *ngIf="!poCff.acompanhamentoEvento">
+              <i class="fa fa-times" title="Não"></i>
+            </span>
+          </td>
+          <td style="text-align: right;color: rgb(170, 170, 170);">{{poCff.precoTotalAnalise | currency:'BRL':'symbol'}}
+          </td>
+          <td style="text-align: right;">{{poCff.precoTotalLicitacao | currency:'BRL':'symbol'}}</td>
+          <td style="text-align: center;">
+            <a title="Detalhar" [routerLink]="['../detalhar', poCff.id]" alt="Detalhar">
+              <i class="fa fa-search-plus" aria-hidden="true"></i>
+            </a>
+            <a *ngIf="podeEditar" title="Editar" [routerLink]="['../editar-po-cff', poCff.id]" alt="Editar">
+              <i class="fa fa-pencil"></i>
+            </a>
+          </td>
+        </tr>
+      </ng-container>
+      <ng-template #nenhumRegistro>
+        <tr>
+          <td colspan="10">
+            Nenhum registro encontrado.
+          </td>
+        </tr>
+      </ng-template>
+    </tbody>
+  </siconv-table>
+
+</siconv-fieldset>
+
+<footer class="footer-botoes">  
+  <button type="button" class="btn btn-secondary" style="margin-left: 20px; margin-right: 5px;" (click)="voltar()" >Voltar</button>
+</footer>

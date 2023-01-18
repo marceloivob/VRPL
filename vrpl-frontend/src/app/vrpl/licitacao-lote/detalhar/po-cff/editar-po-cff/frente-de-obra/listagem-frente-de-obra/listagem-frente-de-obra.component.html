@@ -1,0 +1,58 @@
+<!doctype html>
+<div class="title">Frente de Obra</div>
+
+<siconv-table [data]="frenteDeObraObservable | async" fileExportName="frenteObra" [pagination]="true" [export]="export"
+  (listaPaginada)="getListaPaginada($event)">
+  <thead header>
+    <tr>
+      <th sortable-column="numeroFrente" sortable-type="number" scope="col">Número da Frente de Obra</th>
+      <th sortable-column="nomeFrente" sortable-type="string" scope="col">Frente de Obra</th>
+      <th style="text-align: center;" scope="col">Ações</th>
+    </tr>
+  </thead>
+  <tbody *ngIf="frenteDeObraObservable | async as frentes">
+    <ng-container *ngIf="frentes?.length; else nenhumRegistro">
+      <tr *ngFor="let frente of lista">
+        <td style="text-align: center;">{{ frente.numeroFrente }}</td>
+        <td>{{ frente.nomeFrente }}</td>
+        <td style="text-align: center;">
+          <a title="Detalhar" [routerLink]="['../detalhar', frente.id]" alt="Detalhar">
+            <i class="fa fa-search-plus" aria-hidden="true"></i>
+          </a>
+          <a *ngIf="podeEditar" title="Editar" [routerLink]="['../editar', frente.id]" alt="Editar">
+            <i class="fa fa-pencil"></i>
+          </a>
+          <a *ngIf="podeEditar" title="Excluir" (click)="deleteFrente(frente, template)" alt="Excluir">
+            <i class="fa fa-trash"></i>
+          </a>
+        </td>
+      </tr>
+    </ng-container>
+    <ng-template #nenhumRegistro>
+      <tr>
+        <td colspan="3">
+          Nenhum registro encontrado.
+        </td>
+      </tr>
+    </ng-template>
+  </tbody>
+</siconv-table>
+
+<ng-template #template>
+  <div class="modal-body text-center">
+    <p *ngIf="frenteASerExcluida">A exclusão da Frente de obra selecionada resulta na desassociação de todos os seus
+      relacionamentos na PO.</p>
+    <p>Tem certeza que deseja excluir a Frente de obra '{{frenteASerExcluida.nomeFrente}}'?</p>
+    <button type="button" class="btn btn-primary" (click)="confirmaExclusao()">Sim</button>
+    &nbsp;&nbsp;&nbsp;
+    <button type="button" class="btn btn-secondary" (click)="cancelaExclusao()">Não</button>
+  </div>
+</ng-template>
+
+
+<footer class="footer-botoes">  
+  <button type="button" class="btn btn-secondary" style="margin-left: 20px; margin-right: 5px;" (click)="voltar()">Voltar</button>
+  <button *ngIf="podeEditar" type="button" class="btn btn-primary" [routerLink]="['../salvar']">
+    Adicionar
+  </button>
+</footer>

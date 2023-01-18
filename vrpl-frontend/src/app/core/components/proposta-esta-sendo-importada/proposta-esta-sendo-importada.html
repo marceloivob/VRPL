@@ -1,0 +1,28 @@
+<div class="header" *ngIf="menu && menuLoaded">
+  <vrpl-siconv-menu
+    [totalTime]=2
+    [warningTime]=2
+    (logout)="logoutFeedback($event)"
+    (sessionTime)="sessionTimeFeedback($event)">
+  </vrpl-siconv-menu>
+</div>
+
+<div class="siconv-container">
+  <div class="convenio-bar">
+
+    <div style="text-align: center">
+      <h4 class="titulo-tela">ALERTA</h4>
+    </div>
+    <div>
+      <p style="text-align: center">Não é possível acessar as informações e funcionalidades deste módulo VRPL 
+        (Verificação do Resultado Processo Licitatório), pois ainda estão sendo importados os dados da proposta, 
+        por favor tente novamente mais tarde.
+      </p>
+      <ul style="text-align: center">
+        <li>
+          <a [href]=link>Clique aqui para voltar para a Página Principal</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

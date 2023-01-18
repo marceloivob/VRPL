@@ -1,0 +1,118 @@
+.nav {
+    padding-left: 0px;
+}
+
+.tab-pane:not(.active) {
+    display: none;
+}
+  
+.disabled {
+    cursor: not-allowed;
+}
+  
+.nav-tabs > li > a {
+    border-radius: 0;
+}
+  
+.container-tab-vertical > .nav-tabs {
+    margin-left: 0px;
+}
+  
+.container-tab-vertical {
+  
+  .tab-vert-e {
+    width: 20%;
+    padding: 20px 0px;
+    float: left;    
+    font-size: 15px;
+    letter-spacing: tracking( 25px );
+  }
+  
+  .tab-vert-d {
+    width: 80%;
+    float: left;
+    min-height: 300px;
+    background: #FFFFFF;
+    border-left: 2px solid #d1d4d1;
+    border-top: 2px solid #d1d4d1;
+    border-right: 1px solid #d1d4d1;
+    border-bottom: 1px solid #d1d4d1;
+    padding-left: 40px;
+    border-radius: 5px;
+    margin-bottom: 50px;
+  }
+    
+  .tab-vertical-direita {    
+    width: 100%;
+    background: #FFFFFF !important;
+  }  
+  
+  .tab-vertical-esquerda {
+    margin-left: 0px;
+    width: 100%;    
+  }
+  
+  .tab-vertical-esquerda > li {
+    width: 100%;
+    background: #FFFFFF;
+  }
+  
+  .tab-vertical-esquerda > li > a {
+    border-top: 1px solid #CFCFCF;
+    background: #EDEDED;
+    border-bottom: 1px solid #cccccc;
+    color: #5C5C5C;
+    margin-right: 0px;
+    padding-left: 40px;
+    padding-top: 17px;
+    padding-bottom: 10px;
+  }
+  
+  .tab-vertical-esquerda > li > a:hover {
+    border-top: 1px solid #CFCFCF;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E5E5E5;
+    margin-right: 0px;
+  }
+  
+  .tab-vertical-esquerda > li > a.active {
+    background: #0A6AA6;
+    color: #FFFFFF;
+  }
+  
+  .tab-vertical-esquerda > li > a.active:hover {
+    background: #0A6AA6;
+    color: #FFFFFF;
+  }
+  
+  .tab-content {
+    padding: 40px 20px 40px 0px;  
+  }
+  
+  .tabs-left > li > a {
+    display:block;
+  }
+  
+  .tabs-right > li > a {    
+    margin-right: 0;
+  }
+  
+  .sideways {
+    margin-top:50px;
+    border: none;
+    position: relative;
+  }
+  
+  .sideways > li {
+    height: 20px;
+    width: 120px;
+    margin-bottom: 100px;
+  }  
+  
+  .nav-tabs > li.active > a, 
+  .nav-tabs > li.active > a:focus, 
+  .nav-tabs > li.active > a:hover {
+    border-right: none;
+  }
+  
+}

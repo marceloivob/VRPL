@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "br.gov.serpro.vrpl.grpc";
+option java_outer_classname = "SiconvProto";
+
+package vrpl;
+
+message PermissoesDasLicitacoesResponse {
+  
+  repeated Licitacao licitacao 			= 1;
+  
+  message Licitacao {
+  	int64 idDaLicitacao					= 1;
+
+  		enum SituacaoLicitacaoVRPLEnum {
+			EM_ELABORACAO 							= 0;
+			ENVIADA_PARA_ANALISE 					= 1;
+			EM_ANALISE 								= 2;
+			SOLICITADA_COMPLEMENTACAO 				= 3;
+			EM_COMPLEMENTACAO 						= 4;
+			DOCUMENTACAO_ACEITA 					= 5;
+			ACEITAR_A_LICITAR 						= 6;
+			EM_EXECUCAO 							= 7;
+			EXECUTADA 								= 8;
+			REJEITADA 								= 9;
+			EM_HOMOLOGACAO 							= 10;
+			SOLICITADA_COMPLEMENTACAO_CONCEDENTE 	= 11;
+			EM_COMPLEMENTACAO_MANDATARIA 			= 12;
+			HOMOLOGADA 								= 13;
+			HOMOLOGADA_NO_PROJETO_BASICO 			= 14;
+		}
+
+
+	SituacaoLicitacaoVRPLEnum estado 		= 2;
+  	
+  	bool alterar				= 3;
+  	bool excluir				= 4;
+  		
+	}
+}
+
+message PropostaRequest {
+	int64 idProposta = 1;
+}
+
+message VrplAceitaResponse {
+	bool vrplAceita = 1;
+}
+
+service Proposta {
+	rpc consultarPermissoesDasLicitacoesDaProposta (PropostaRequest) returns (PermissoesDasLicitacoesResponse); 
+	rpc existeVrplAceita (PropostaRequest) returns (VrplAceitaResponse);
+}

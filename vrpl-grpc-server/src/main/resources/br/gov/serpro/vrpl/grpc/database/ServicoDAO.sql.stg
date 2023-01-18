@@ -1,0 +1,73 @@
+excluirServicoFrenteObra(numeroProposta, anoProposta) ::= <%
+
+DELETE FROM vrpl_servico_frente_obra vsfo 
+WHERE vsfo.servico_fk IN (
+    select sfo.servico_fk 
+    FROM vrpl_servico_frente_obra  sfo 
+    JOIN vrpl_servico vs ON (sfo.servico_fk = vs.id) 
+    JOIN vrpl_macro_servico vms ON (vs.macro_servico_fk = vms.id) 
+    JOIN vrpl_po po ON (vms.po_fk = po.id) 
+    JOIN vrpl_submeta submeta ON (po.submeta_fk = submeta.id) 
+    JOIN vrpl_proposta proposta ON (submeta.proposta_fk = proposta.id) 
+    WHERE proposta.numero_proposta = :numeroProposta 
+    AND proposta.ano_proposta = :anoProposta 
+    ) 
+
+%>
+
+excluirServicoFrenteObraAnalise(numeroProposta, anoProposta) ::= <% 
+DELETE FROM vrpl_servico_frente_obra_analise vsfoa 
+WHERE vsfoa.id IN ( 
+    SELECT vsfoa.id 
+    FROM vrpl_servico_frente_obra_analise vsfoa 
+    JOIN vrpl_servico vs ON (vsfoa.servico_fk = vs.id) 
+    JOIN vrpl_macro_servico vms ON (vs.macro_servico_fk = vms.id) 
+    JOIN vrpl_po po ON (vms.po_fk = po.id) 
+    JOIN vrpl_submeta submeta ON (po.submeta_fk = submeta.id) 
+    JOIN vrpl_proposta proposta ON (submeta.proposta_fk = proposta.id) 
+    WHERE proposta.numero_proposta = :numeroProposta 
+    AND proposta.ano_proposta = :anoProposta 
+    ) 
+%>
+
+
+excluirServicos(numeroProposta, anoProposta) ::= <% 
+DELETE FROM vrpl_servico servico 
+WHERE servico.id IN ( 
+    SELECT vs.id 
+    FROM vrpl_servico vs 
+    JOIN vrpl_macro_servico vms ON (vs.macro_servico_fk = vms.id) 
+    JOIN vrpl_po po ON (vms.po_fk = po.id) 
+    JOIN vrpl_submeta submeta ON (po.submeta_fk = submeta.id) 
+    JOIN vrpl_proposta proposta ON (submeta.proposta_fk = proposta.id) 
+    WHERE proposta.numero_proposta = :numeroProposta 
+    AND proposta.ano_proposta = :anoProposta 
+    ) 
+%>
+
+excluirMacroServicoParcela(numeroProposta, anoProposta) ::= <%
+DELETE FROM vrpl_macro_servico_parcela parcela 
+WHERE parcela.id IN ( 
+    SELECT vmsp.id 
+    FROM VRPL_MACRO_SERVICO_PARCELA vmsp 
+    JOIN vrpl_macro_servico vms ON (vmsp.macro_servico_fk = vms.id) 
+    JOIN vrpl_po po ON (vms.po_fk = po.id) 
+    JOIN vrpl_submeta submeta ON (po.submeta_fk = submeta.id) 
+    JOIN vrpl_proposta proposta ON (submeta.proposta_fk = proposta.id) 
+    WHERE proposta.numero_proposta = :numeroProposta 
+    AND proposta.ano_proposta = :anoProposta 
+    ) 
+%>
+
+excluirMacroServicos(numeroProposta, anoProposta) ::= <%
+DELETE FROM vrpl_macro_servico vms2 
+WHERE vms2.id IN ( 
+    SELECT vms.id 
+    FROM VRPL_MACRO_SERVICO vms 
+    JOIN vrpl_po po ON (vms.po_fk = po.id) 
+    JOIN vrpl_submeta submeta ON (po.submeta_fk = submeta.id) 
+    JOIN vrpl_proposta proposta ON (submeta.proposta_fk = proposta.id) 
+    WHERE proposta.numero_proposta = :numeroProposta 
+    AND proposta.ano_proposta = :anoProposta 
+    )
+%>

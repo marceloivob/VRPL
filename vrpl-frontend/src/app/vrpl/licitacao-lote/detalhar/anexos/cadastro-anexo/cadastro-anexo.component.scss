@@ -1,0 +1,32 @@
+/*
+ CSS obtido do componente FileComponent do projeto de componentes visuais do SICONV
+*/
+
+.input-file{     
+
+    /* Esconde o input */
+    input[type='file'] {
+        display: none
+    }
+
+    .file-text {
+        border-radius: 0px 5px 5px 0px !important;
+    }
+
+    .file-icon {
+        margin: 0px !important;
+        border-radius: 5px 0px 0px 5px !important;   
+    }    
+
+    /* Aparência que terá o seletor de arquivo */
+    button {
+        background-color: #0a6aa6;
+        color: #fff;
+        cursor: pointer;
+        margin: 0 !important;
+        border-radius: 5px 0 0 5px !important;
+        border: 0px;
+        padding: 6px 20px;
+        height: 34px !important;
+    }
+}

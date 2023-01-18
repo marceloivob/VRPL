@@ -1,0 +1,114 @@
+<!doctype html>
+<div class="form-group col-md">
+  <button *ngIf="podeEditar" type="button" class="btn btn-primary float-right" (click)="cadastrar()">
+    Adicionar
+  </button>
+</div>
+<br>
+<siconv-table [data]="pendencias | async" fileExportName="pendencias" [pagination]="true" [export]="export"
+  (listaPaginada)="getListaPaginada($event)" *ngIf="pendencias | async">
+  <thead header>
+    <tr>
+      <th sortable-column="descricao" sortable-type="string" scope="col">Pendências</th>
+      <th sortable-column="submetaDescricao" sortable-type="string" scope="col">Submetas</th>
+      <th sortable-column="prazoDescricao" sortable-type="string" scope="col">Prazos</th>
+      <th style="text-align: center;" scope="col">Ações</th>
+    </tr>
+  </thead>
+  <tbody *ngIf="pendencias | async as async_pendencias">
+    <ng-container *ngIf="async_pendencias?.length; else nenhumRegistro">
+      <tr *ngFor="let pendencia of lista">
+        <td>{{pendencia.descricao}}</td>
+        <td>{{pendencia.submetaDescricao}}</td>
+        <td>{{pendencia.prazoDescricao}}</td>
+
+        <td style="text-align: center;">
+          <a *ngIf="podeEditar" title="Editar" (click)="editar(pendencia)" alt="Editar">
+            <i class="fa fa-pencil"></i>
+          </a>
+          <a *ngIf="podeEditar" title="Excluir" (click)="deletePendencia(pendencia, template)" alt="Excluir">
+            <i class="fa fa-trash"></i>
+          </a>
+        </td>
+      </tr>
+    </ng-container>
+    <ng-template #nenhumRegistro>
+      <tr>
+        <td colspan="4">
+          Nenhum registro encontrado.
+        </td>
+      </tr>
+    </ng-template>
+  </tbody>
+</siconv-table>
+<br />
+
+<form *ngIf="showCadastro" [formGroup]="pendenciaForm" (ngSubmit)="onSubmit()">
+  <div class="form-row">
+    <div class="form-group col-md-8">
+      <label>Descrição da Pendência</label>
+      <input type="text" class="form-control" (input)="descricao = $event.target.value" [value]="descricao"
+        required="true" formControlName="descricao" [ngClass]="{ 'is-invalid': showError('descricao') }">
+      <div *ngIf="showErrorDescricao()" class="invalid-feedback">
+        <div *ngIf="showErrorDescricaoNula()">O campo é de preenchimento obrigatório.</div>
+      </div>
+      <div *ngIf="showErrorDescricao()" class="invalid-feedback">
+        <div *ngIf="showErrorTamanhoDescricaoMaiorQueOPermitido()">Tamanho máximo do campo é de 1500 caracteres!</div>
+      </div>
+    </div>
+    <div class="form-group col-md-8">
+      <label>Submeta do Item de Investimento</label>
+      <ng-select 
+        style="border-radius: 4px"
+        [ngStyle]="{ 'border': '1px solid #ccc' }"
+        [items]="submetas"
+        bindLabel="descricao"
+        notFoundText="Nenhum elemento encontrado"
+        formControlName="submetaSelecionada" 
+        [(ngModel)]="submetaSelecionada"
+        required="true"
+        [ngClass]="{ 'is-invalid': showError('submetaSelecionada') }">
+      </ng-select>
+      <div [ngStyle]="{ display: showError('submetaSelecionada') ? 'block' : 'none' }" class="invalid-feedback">
+        <div>O campo é de preenchimento obrigatório.</div>
+      </div>
+    </div>
+    <div class="form-group col-md-8">
+      <label>Prazo para Solução</label>
+      <ng-select 
+        style="border-radius: 4px"
+        [ngStyle]="{ 'border': '1px solid #ccc' }"
+        bindLabel="descricao"
+        [items]="prazos"
+        notFoundText="Nenhum elemento encontrado"
+        formControlName="prazoSelecionado" 
+        [(ngModel)]="prazoSelecionado"
+        required="true"
+        [ngClass]="{ 'is-invalid': showError('prazoSelecionado') }">
+      </ng-select>
+      <div [ngStyle]="{ display: showError('prazoSelecionado') ? 'block' : 'none' }" class="invalid-feedback">
+        <div>O campo é de preenchimento obrigatório.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="col-md-12">
+      <button type="button" class="btn btn-secondary" style="margin-right:10px" (click)="cancelar()">
+        Cancelar
+      </button>
+      <button type="submit" class="btn btn-primary">
+        Salvar
+      </button>
+    </div>
+  </div>
+</form>
+
+<ng-template #template>
+  <div class="modal-body text-center">
+    <p>Tem certeza que deseja excluir a Pendência '{{pendenciaASerExcluida.descricao}}'?</p>
+    <button type="button" class="btn btn-primary" (click)="confirmaExclusao()">Sim</button>
+    &nbsp;&nbsp;&nbsp;
+    <button type="button" class="btn btn-secondary" (click)="cancelaExclusao()">Não</button>
+  </div>
+</ng-template>

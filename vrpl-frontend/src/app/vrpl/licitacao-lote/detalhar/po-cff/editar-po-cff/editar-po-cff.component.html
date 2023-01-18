@@ -1,0 +1,53 @@
+<!doctype html>
+<div *ngIf="poDetalhada" style="overflow: auto;">
+
+  <p class="informacao">{{po.numeroMeta}} {{po.descricaoMeta}} - {{po.numeroMeta}}.{{po.numeroSubmeta}} {{po.descricao}}</p>
+  <div class="tab-container container-tab-vertical">
+    <div class="tab-content">
+      <div class="tab-vert-e">
+        <ul class="nav nav-tabs tabs-left tab-vertical-esquerda">
+          <li class="nav-item">
+            <a class="nav-link" (click)="loadPoDetalhada()" routerLinkActive="active" [routerLink]="['./dados-gerais']">
+              Dados Gerais
+            </a>
+          </li>
+          <li *ngIf="acompanhamentoEventos" class="nav-item">
+            <a class="nav-link" routerLinkActive="active" [routerLink]="['./eventos']">
+              Eventos
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLinkActive="active" [routerLink]="['./frente-de-obra']">
+              Frente de Obra
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLinkActive="active" [routerLink]="['./po']" title="Planilha Orçamentária">
+              Planilha Orçamentária
+            </a>
+          </li>
+          <li *ngIf="!acompanhamentoEventos" class="nav-item">
+            <a class="nav-link" routerLinkActive="active" [routerLink]="['./cff-sem-eventos']" title="Cronograma Físico Financeiro">
+              CFF
+            </a>
+          </li>
+          <li *ngIf="acompanhamentoEventos" class="nav-item">
+            <a class="nav-link" routerLinkActive="active" [routerLink]="['./cff-com-eventos']" title="Cronograma Físico Financeiro">
+              CFF
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLinkActive="active" [routerLink]="['./plq']" title="Planilha de Levantamento Quantitativo">
+              PLQ
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="tab-vert-d">
+        <div class="tab-content tab-vertical-direita">
+          <router-outlet></router-outlet>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

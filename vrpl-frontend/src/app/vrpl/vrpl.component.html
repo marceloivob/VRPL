@@ -1,0 +1,58 @@
+<div class="header" *ngIf="menu && exibeMenu">
+  <vrpl-siconv-menu
+    [totalTime]=tempoTotalSessao
+    [warningTime]=warningTime
+    (logout)="logoutFeedback($event)"
+    (sessionTime)="sessionTimeFeedback($event)">
+  </vrpl-siconv-menu>
+</div>
+
+
+<ng-container *ngIf="propostaObservable | async as proposta">
+  <siconv-title module="Verificação do Resultado do Processo Licitatório" title="Documentos Orçamentários" subtitle="{{proposta.identificadorDoProponente | cnpj}} - {{proposta.nomeProponente}}">
+  </siconv-title>
+</ng-container>
+
+<div class="versao">
+  <div style="margin-bottom: auto; margin-top: auto;"><label>Versão:&nbsp;</label></div>
+  <div>
+    <siconv-select
+      [labels]="versoes"
+      (selectChange)="versaoSelecionadaChanged($event)"
+      [values]="versoes"
+      [(ngModel)]="versaoSelecionada">
+  </siconv-select>
+  </div>
+</div>
+
+<ul class="nav nav-tabs">
+  <li class="nav-item">
+    <a class="nav-link" routerLinkActive="active" [routerLink]="['licitacao-lote']">
+      Licitações / Lotes
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" routerLinkActive="active" [routerLink]="['qci']" title="Quadro de Composição de Investimento">
+      QCI
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" routerLinkActive="active" [routerLink]="['dados-basicos']">
+      Dados Básicos
+    </a>
+  </li>
+
+</ul>
+  <div class="tab-content" *ngIf="loaded">
+    <siconv-alert-messages></siconv-alert-messages>
+    <router-outlet></router-outlet>
+  </div>
+
+  <ng-template #templateSessao>
+    <div class="modal-body text-center">
+      <p>Deseja reiniciar sessão?</p>
+      <button type="button" class="btn btn-primary" (click)="confirmaReinicio()">Sim</button>
+      &nbsp;&nbsp;&nbsp;
+      <button type="button" class="btn btn-secondary" (click)="cancelaReinicio()">Não</button>
+    </div>
+  </ng-template>

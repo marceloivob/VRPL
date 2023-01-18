@@ -1,0 +1,33 @@
+<div class="header" *ngIf="menu && menuLoaded">
+  <vrpl-siconv-menu
+    [totalTime]="2"
+    [warningTime]="2"
+    (logout)="logoutFeedback($event)"
+    (sessionTime)="sessionTimeFeedback($event)"
+  >
+  </vrpl-siconv-menu>
+</div>
+
+<div class="siconv-container">
+  <div class="convenio-bar">
+    <div class="texto-centralizado">
+      <h4 class="titulo-tela">ALERTA</h4>
+    </div>
+    <div>
+      <p *ngIf="message" class="center mensagem-alerta">
+        {{ message }}
+      </p>
+
+      <p *ngIf="ticket" class="texto-centralizado">
+        O número do <strong>Ticket</strong> gerado é
+        <strong>{{ ticket }}</strong
+        >.
+      </p>
+      <ul class="texto-centralizado">
+        <li>
+          <a [href]="link">Clique aqui para voltar para a Página Principal</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

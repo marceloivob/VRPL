@@ -1,0 +1,34 @@
+excluirRespostaLaudo(numeroProposta, anoProposta) ::= <% 
+    DELETE FROM vrpl_resposta vr 
+    WHERE vr.id in 
+    ( SELECT vr.id 
+    FROM vrpl_resposta vr 
+    JOIN vrpl_laudo vl ON (vr.laudo_fk = vl.id) 
+    JOIN vrpl_licitacao vl2 ON (vl.licitacao_fk = vl2.id) 
+    JOIN vrpl_proposta vp ON (vl2.proposta_fk = vp.id) 
+    WHERE vp.numero_proposta = :numeroProposta 
+    AND vp.ano_proposta = :anoProposta )
+%>
+
+excluirPendenciasLaudo(numeroProposta, anoProposta) ::= <% 
+DELETE FROM vrpl_pendencia p 
+WHERE p.id in 
+    ( SELECT vpend.id 
+	FROM vrpl_pendencia vpend 
+	JOIN vrpl_laudo vl ON (vpend.laudo_fk = vl.id) 
+	JOIN vrpl_licitacao vl2 ON (vl.licitacao_fk = vl2.id) 
+	JOIN vrpl_proposta vp ON (vl2.proposta_fk = vp.id) 
+	WHERE vp.numero_proposta = :numeroProposta 
+	AND vp.ano_proposta = :anoProposta ) 
+%> 
+
+excluirLaudos(numeroProposta, anoProposta) ::= <% 
+DELETE FROM vrpl_laudo laudo 
+WHERE laudo.id in 
+    ( SELECT vlaudo.id 
+    FROM   VRPL_LAUDO  vlaudo 
+    JOIN vrpl_licitacao vl ON (vlaudo.licitacao_fk = vl.id) 
+    JOIN vrpl_proposta vp ON (vl.proposta_fk = vp.id) 
+    WHERE vp.numero_proposta = :numeroProposta 
+    AND vp.ano_proposta = :anoProposta )
+%>

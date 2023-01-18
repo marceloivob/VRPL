@@ -1,0 +1,82 @@
+<!doctype html>
+<siconv-fieldset fieldsetTitle="" [collapsible]="false">
+
+  <form *ngIf="submeta" [formGroup]="qciForm" (ngSubmit)="onSubmit()">
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label>Meta Associada</label>
+        <p class="informacao">{{meta.numero}} - {{meta.descricao}}</p>
+      </div>
+      <div class="form-group col-md-3">
+        <label>Quantidade</label>
+        <p class="informacao">{{meta.quantidade | number:'1.2-2':'pt-BR'}}</p>
+      </div>
+      <div class="form-group col-md-3">
+        <label>Unidade</label>
+        <p class="informacao">{{meta.subItemInvestimento?.codigoUnidade}}</p>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-md-12">
+        <label>Submeta</label>
+        <p class="informacao">{{meta.numero}}.{{submeta.numero}} - {{submeta.descricao}}</p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-3">
+        <label>Repasse</label>
+        <input vrplCurrencyFormatter type="text" class="form-control" formControlName="valorRepasse" (keypress)="numberOnly($event)"
+          [ngClass]="{ 'is-invalid': showError('valorRepasse') }" (change)=validarValorRepasse()>
+        <div *ngIf="showError('valorRepasse')" class="invalid-feedback">
+          <div *ngIf="field('valorRepasse').errors.required">
+            O campo é de preenchimento obrigatório.</div>
+        </div>
+      </div>
+      <div class="form-group col-md-3">
+        <label>Contrapartida</label>
+        <p class="informacao">{{contrapartida | currency:'BRL':'symbol':'1.2-2'}}</p>
+      </div>
+      <div class="form-group col-md-3">
+        <label>Outros</label>
+        <input vrplCurrencyFormatter type="text" class="form-control" formControlName="valorOutrosLicitado" (keypress)="numberOnly($event)"
+          [ngClass]="{ 'is-invalid': showError('valorOutrosLicitado') }" (change)="validarValorOutros()">
+        <div *ngIf="showError('valorOutrosLicitado')" class="invalid-feedback">
+          <div *ngIf="field('valorOutrosLicitado').errors.required">
+            O campo é de preenchimento obrigatório.</div>
+        </div>
+      </div>
+      <div class="form-group col-md-3">
+        <label>Total</label>
+        <p class="informacao">{{submeta.vlTotal | currency:'BRL':'symbol':'1.2-2'}}</p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label>Item do PAD</label>
+        <p class="informacao">{{submeta.descricaoItemPad}}</p>
+      </div>
+      <div class="form-group col-md-6">
+        <label>Regime de Execução da Obra</label>
+        <p class="informacao">{{submeta.descricaoRegimeExecucao}}</p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-2">
+        <label>Lote de Licitação</label>
+        <p class="informacao">{{submeta.lote}}</p>
+      </div>
+      <div class="form-group col-md-7">
+        <label>Situação</label>
+        <p class="informacao">{{submeta.descricaoSituacaoVerificacaoLicitacao}}</p>
+      </div>
+    </div>
+
+    <footer class="footer-botoes">  
+      <button type="button" class="btn btn-secondary" style="margin-left: 20px; margin-right: 5px;" (click)="voltar()" >Voltar</button>
+      <button *ngIf="!visualizar" type="submit" class="btn btn-primary ">Salvar</button>
+    </footer>
+  </form>
+</siconv-fieldset>

@@ -1,0 +1,481 @@
+<siconv-fieldset fieldsetTitle="Parecer Técnico de Engenharia">
+  <ng-container *ngIf="templateObservable | async as template">
+
+    <!-- Grupo 0 - Dados Gerais da Licitação -->
+    <siconv-fieldset fieldsetTitle="1 - Dados Gerais da {{licitacaoDetalhada.descricaoProcessoExecucao}}"
+      [collapsible]="true">
+      <div *ngIf="licitacaoDetalhada.descricaoProcessoExecucao == 'Licitação'">
+        <div class="form-row">
+          <div class="col-md-12">
+            <label>Número da Licitação</label>
+            <p class="informacao">{{licitacaoDetalhada.numeroAno}}</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="col-md-12">
+            <label>Objeto da Licitação</label>
+            <p class="informacao">{{licitacaoDetalhada.objeto}}</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="col-md-4">
+            <label>Modalidade</label>
+            <p class="informacao">{{licitacaoDetalhada.modalidade}}</p>
+          </div>
+          <div class="col-md-8">
+            <label>Regime de Contratação</label>
+            <p class="informacao">{{licitacaoDetalhada.regimeContratacao}}</p>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-md-4">
+            <label>Valor Total do Edital</label>
+            <p class="informacao">{{licitacaoDetalhada.valorTotalEdital | currency:'BRL':'symbol'}}</p>
+          </div>
+          <div class="col-md-4">
+            <label>Data de Publicação do Edital</label>
+            <p class="informacao">{{licitacaoDetalhada.dataPublicacaoEdital | date:'dd/MM/yyyy'}}</p>
+          </div>
+          <div class="col-md-4">
+            <label>Data da Homologação</label>
+            <p class="informacao">{{licitacaoDetalhada.dataHomologacao | date:'dd/MM/yyyy'}}</p>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="licitacaoDetalhada.descricaoProcessoExecucao == 'Dispensa de Licitação'">
+        <div class="form-row">
+          <div class="col-md-12">
+            <label>Número da Dispensa</label>
+            <p class="informacao">{{licitacaoDetalhada.numeroAno}}</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="col-md-12">
+            <label>Objeto</label>
+            <p class="informacao">{{licitacaoDetalhada.objeto}}</p>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-md-4">
+            <label>Valor</label>
+            <p class="informacao">{{licitacaoDetalhada.valorTotalEdital | currency:'BRL':'symbol'}}</p>
+          </div>
+          <div class="col-md-8">
+            <label>Data da Homologação</label>
+            <p class="informacao">{{licitacaoDetalhada.dataHomologacao | date:'dd/MM/yyyy'}}</p>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="licitacaoDetalhada.descricaoProcessoExecucao == 'Inexigibilidade'">
+        <div class="form-row">
+          <div class="col-md-12">
+            <label>Número da Inexigibilidade</label>
+            <p class="informacao">{{licitacaoDetalhada.numeroAno}}</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="col-md-12">
+            <label>Objeto</label>
+            <p class="informacao">{{licitacaoDetalhada.objeto}}</p>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-md-4">
+            <label>Valor</label>
+            <p class="informacao">{{licitacaoDetalhada.valorTotalEdital | currency:'BRL':'symbol'}}</p>
+          </div>
+          <div class="col-md-8">
+            <label>Data da Homologação</label>
+            <p class="informacao">{{licitacaoDetalhada.dataHomologacao | date:'dd/MM/yyyy'}}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grupo 1 - Quadro Resumo de Metas da Licitação -->
+      <siconv-sub-fieldset fieldsetTitle="{{template.grupos[1].titulo}}" [collapsible]="true">
+        <siconv-table [data]="licitacaoDetalhada.lotes" fileExportName="quadroResumo" [export]="exportQuadroResumo"
+          (listaPaginada)="getListaPaginada($event)" [pagination]="true">
+          <thead header>
+            <tr>
+              <th style="text-align: center;">Lote de Licitação</th>
+              <th style="text-align: center;">Meta</th>
+              <th style="text-align: center;">Submeta</th>
+              <th style="text-align: center;">Empresa Vencedora</th>
+              <th style="text-align: center;">Repasse</th>
+              <th style="text-align: center;">Contrapartida</th>
+              <th style="text-align: center;">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngIf="licitacaoDetalhada?.lotes?.length; else nenhumRegistro">
+              <ng-container *ngFor="let lote of licitacaoDetalhada.lotes">
+                <ng-container *ngFor="let submeta of lote.submetas">
+                  <tr>
+                    <td>{{lote.numero}}</td>
+                    <td>{{submeta.meta}}</td>
+                    <td>{{submeta.submeta}}</td>
+                    <td>{{fornecedores.get(lote.numero)}}</td>
+                    <td style="text-align: right;">{{submeta.vlRepasse | currency:'BRL':'symbol':'1.2-2'}}</td>
+                    <td style="text-align: right;">{{submeta.vlContrapartida | currency:'BRL':'symbol':'1.2-2'}}
+                    </td>
+                    <td style="text-align: right;">{{submeta.valorLicitado | currency:'BRL':'symbol':'1.2-2'}}</td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+            <ng-template #nenhumRegistro>
+              <tr>
+                <td colspan="8">
+                  Nenhum registro encontrado.
+                </td>
+              </tr>
+            </ng-template>
+          </tbody>
+
+        </siconv-table>
+
+      </siconv-sub-fieldset>
+
+      <!-- Grupo 2 - Aspectos Gerais da Licitação -->
+      <siconv-sub-fieldset fieldsetTitle="1.{{contadorDeGrupo(1)}} - {{template.grupos[2].titulo}}" [collapsible]="true"
+        *ngIf="exibeAspectosGeraisDaLicitacao()">
+        <div class="form-row">
+          <div class="col-md-10">
+            <label>{{template.grupos[2].perguntas[0].titulo}}</label>
+          </div>
+          <div class="col-md-2">
+            <siconv-select [labels]="['Sim', 'Não', 'Não se aplica']" [values]="['Sim', 'Não', 'Não se aplica']" [(ngModel)]="grupo2resposta0"
+              [disabled]="!podeEditar">
+            </siconv-select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-md-12">
+            <p>
+              a) os critérios de aceitabilidade (variações admissíveis) dos percentuais de incidência de cada
+              etapa/macrosserviço estabelecido no orçamento estimado;
+            </p>
+            <p>
+              b) as metodologias diferenciadas de execução admissíveis para a implementação do objeto do contrato de
+              fornecimento;
+            </p>
+            <p>
+              c) os parâmetros de desempenho mínimo a serem atendidos pelas metodologias diferenciadas de execução
+              apresentadas pela empresa vencedora, quando estas metodologias forem permitidas;
+            </p>
+            <p>
+              d) matriz contratual definidora de riscos e responsabilidades entre as partes e caracterizadora do
+              equilíbrio econômico-financeiro inicial do contrato de fornecimento, contendo, no mínimo, listagem de
+              possíveis eventos supervenientes à assinatura do contrato.
+            </p>
+          </div>
+        </div>
+      </siconv-sub-fieldset>
+
+      <!-- Grupo 3 - Aspectos da Análise do Lote -->
+      <siconv-sub-fieldset fieldsetTitle="1.{{contadorDeGrupo(2)}} - {{template.grupos[3].titulo}}"
+        [collapsible]="true">
+
+        <ng-container *ngFor="let lote of licitacaoDetalhada.lotes">
+          <siconv-fieldset [fieldsetTitle]="loteNumero(lote.numero)" [collapsible]="true">
+
+            <siconv-sub-fieldset fieldsetTitle="Fornecedor" [collapsible]="true">
+              <div class="form-row">
+                <div class="col-md-9">
+                  <label>Nome</label>
+                  <p class="informacao">{{lote.fornecedor.nome}}</p>
+                </div>
+
+                <div class="col-md-3" *ngIf="lote.fornecedor.identificacao.tipo; else exibeCPF">
+                  <span *ngIf="lote.fornecedor.identificacao.tipo === 'CNPJ'">
+                    <label>CNPJ</label>
+                    <p class="informacao">{{lote.fornecedor.identificacao.valor | cnpj}}</p>
+                  </span>
+
+                  <span *ngIf="lote.fornecedor.identificacao.tipo === 'IG'">
+                    <label>IG</label>
+                    <p class="informacao">{{lote.fornecedor.identificacao.valor}}</p>
+                  </span>
+                </div>
+
+                <ng-template #exibeCPF>
+                  <div class="col-md-3">
+                    <label>CPF</label>
+                    <p class="informacao">{{lote.fornecedor.identificacao | cpf}}</p>
+                  </div>
+                </ng-template>
+              </div>
+
+              <div class="form-row">
+                <div class="col-md-12">
+                  <label>Regime de Execução</label>
+                  <p class="informacao">{{lote.submetas[0].regimeExecucao}}</p>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="col-md-4">
+                  <label>Valor Total do Lote</label>
+                  <p class="informacao">{{lote.valorVerificadoLicitado | currency:'BRL':'symbol':'1.2-2'}}</p>
+                </div>
+                <div class="col-md-8">
+                  <label>Diferença entre Valores Projeto Aprovado e Proposta Vencedora</label>
+                  <p class="informacao">
+                    {{(lote.valorAceitoAnalise - lote.valorVerificadoLicitado) | currency:'BRL':'symbol':'1.2-2'}}
+                  </p>
+                </div>
+              </div>
+
+            </siconv-sub-fieldset>
+
+            <siconv-sub-fieldset fieldsetTitle="Orçamento" [collapsible]="true">
+
+              <div class="form-row">
+                <div class="col-md-8">
+                  <label >{{template.grupos[3].perguntas[0].titulo}}</label>
+                </div>
+                <div class="col-md-4">
+                  <span style="float: right;">
+                    <p class="informacao" style="text-align: right">{{referencia(lote.referencia)}}</p>
+                  </span>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="col-md-10">
+                  <label 
+                    [ngStyle]="{'color': lote.vlTotalLicitadoMenorOuIgualRef === true? '#666666' : '#dc3545'}">
+                    {{template.grupos[3].perguntas[1].titulo}}
+                  </label>
+                </div>
+                <div class="col-md-2">
+                  <span style="float: right;">
+                    <p class="informacao">{{lote.vlTotalLicitadoMenorOuIgualRef | simnao}}</p>
+                  </span>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="col-md-10">
+                  <label [ngStyle]="{'color': lote.precoUnitarioMenorOuIgualRef === true? '#666666' : '#dc3545'}">{{template.grupos[3].perguntas[2].titulo}}</label>
+                </div>
+                <div class="col-md-2">
+                  <span style="float: right;">
+                    <p class="informacao">{{lote.precoUnitarioMenorOuIgualRef | simnao}}</p>
+                  </span>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="col-md-12">
+                  <textarea 
+                      rows="4" cols="100" maxlength="1500" 
+                      [(ngModel)]="comentariosOrcamentoLote.get(lote.numero).texto" 
+                      [disabled]="!podeEditar"
+                      (keyup)="calcularCaracteresRestantesOrcamentoLote(lote.numero)" 
+                      [ngStyle]="{'border-color': ((lote.vlTotalLicitadoMenorOuIgualRef === false || lote.precoUnitarioMenorOuIgualRef === false) && (comentariosOrcamentoLote.get(lote.numero).texto === '' || comentariosOrcamentoLote.get(lote.numero).texto === undefined || comentariosOrcamentoLote.get(lote.numero).texto === null))? '#dc3545' : '#666666', 'width' : '100%'}">
+                   </textarea>
+                  <p>{{calcularCaracteresRestantesOrcamentoLote(lote.numero)}} caracteres restantes</p>
+                  <div *ngIf="podeEditar"
+                    [ngStyle]="{ display: ((lote.vlTotalLicitadoMenorOuIgualRef === false || lote.precoUnitarioMenorOuIgualRef === false) && (comentariosOrcamentoLote.get(lote.numero).texto === '' || comentariosOrcamentoLote.get(lote.numero).texto === undefined || comentariosOrcamentoLote.get(lote.numero).texto === null))? 'block' : 'none' }"
+                    class="invalid-feedback">
+                    <div>O campo é de preenchimento obrigatório.</div>
+                  </div>
+                </div>
+              </div>
+            </siconv-sub-fieldset>
+
+            <siconv-sub-fieldset fieldsetTitle="Cronograma Físico-Financeiro" [collapsible]="true">
+
+              <div class="form-row">
+                <div class="col-md-10">
+                  <label>{{template.grupos[3].perguntas[4].titulo}}</label>
+                </div>
+                <div class="col-md-2">
+                  <span style="float: right;">
+                    <p>{{lote.previsaoTermino | date:'MM/yyyy'}}</p>
+                  </span>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="col-md-10">
+                  <label
+                    [ngStyle]="{'color': getColor(grupo8resposta0.get(lote.numero).texto)}">{{template.grupos[8].perguntas[0].titulo}}</label>
+                </div>
+                <div class="col-md-2">
+                  <siconv-select [labels]="['Sim', 'Não', 'Não se aplica']" [values]="['Sim', 'Não', 'Não se aplica']"
+                    [(ngModel)]="grupo8resposta0.get(lote.numero).texto" [disabled]="!podeEditar">
+                  </siconv-select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="col-md-12">
+                  <textarea 
+                      rows="4" cols="100" maxlength="1500" 
+                      [(ngModel)]="comentarioCronogramaLote.get(lote.numero).texto" 
+                      [disabled]="!podeEditar"
+                      (keyup)="calcularCaracteresRestantesCronogramaLote(lote.numero)" 
+                      [ngStyle]="{'border-color': verificarObrigatoriedadeComentarioCronograma(lote.numero)? '#dc3545' : '#666666', 'width' : '100%'}">
+                   </textarea>
+                  <p>{{calcularCaracteresRestantesCronogramaLote(lote.numero)}} caracteres restantes</p>
+                  <div *ngIf="podeEditar"
+                    [ngStyle]="{ display: verificarObrigatoriedadeComentarioCronograma(lote.numero)? 'block' : 'none' }"
+                    class="invalid-feedback">
+                    <div>O campo é de preenchimento obrigatório.</div>
+                  </div>
+                </div>
+              </div>
+            </siconv-sub-fieldset>
+
+          </siconv-fieldset>
+        </ng-container>
+      </siconv-sub-fieldset>
+    </siconv-fieldset>
+
+    <!-- Grupo 4 - Relação de Anexos -->
+    <siconv-fieldset fieldsetTitle="2 - {{template.grupos[4].titulo}}" [collapsible]="true">
+
+      <siconv-table [data]="anexosObservable | async" fileExportName="anexos" [pagination]="true" [export]="exportAnexos"
+        (listaPaginada)="getListaPaginada($event)" *ngIf="anexosObservable | async">
+        <thead header>
+          <tr>
+            <th sortable-column="descricao" sortable-type="string" scope="col">Descrição</th>
+            <th sortable-column="tipoDoAnexo" sortable-type="string" scope="col">Tipo</th>
+            <th sortable-column="dataUpload" sortable-type="date" scope="col" style="text-align: center;">Data de Envio
+            </th>
+            <th sortable-column="nomeDoUsuarioQueEnviou" sortable-type="string" scope="col">Enviado por</th>
+            <th sortable-column="perfilUsuarioEnvio" sortable-type="string" scope="col" style="text-align: center;">
+              Perfil
+            </th>
+            <th style="text-align: center;" scope="col">Ações</th>
+          </tr>
+        </thead>
+        <tbody *ngIf="anexosObservable | async as anexos">
+          <ng-container *ngIf="anexos?.length; else nenhumRegistro">
+            <tr *ngFor="let anexo of anexos">
+              <td>{{anexo.descricao}}</td>
+              <td>{{anexo.tipoDoAnexoAsString}}</td>
+              <td style="text-align: center;">{{anexo.dataUpload | date:'dd/MM/yyyy'}}</td>
+              <td>{{anexo.nomeDoUsuarioQueEnviou}}</td>
+              <td style="text-align: center;">{{anexo.perfilUsuarioEnvio}}</td>
+              <td style="text-align: center">
+                <a *ngIf="mostrarBotaoDownload(anexo.linkToDownload)" title="Download" (click)="downloadFile(anexo.linkToDownload)" alt="Download">
+                  <i class="fa fa-download"></i>
+                </a>
+              </td>
+            </tr>
+          </ng-container>
+          <ng-template #nenhumRegistro>
+            <tr>
+              <td colspan="7">
+                Nenhum registro encontrado.
+              </td>
+            </tr>
+          </ng-template>
+        </tbody>
+      </siconv-table>
+    </siconv-fieldset>
+
+    <!-- Grupo 5 - Anexos do Parecer -->
+    <siconv-fieldset fieldsetTitle="3 - {{template.grupos[5].titulo}}" [collapsible]="true">
+      <vrpl-anexo (changed)="onAnexosChanged()" tipoDoAnexo="VRPL" [anexos]="anexosParecerObservable"
+        [podeEditar]="podeEditar"></vrpl-anexo>
+    </siconv-fieldset>
+
+    <!-- Grupo 6 - Pendências e Prazos para Solução -->
+    <siconv-fieldset fieldsetTitle="4 - {{template.grupos[6].titulo}}" [collapsible]="true">
+      <vrpl-pendencia (changed)="onPendenciasChanged()" [pendencias]="pendenciasObservable" [submetas]="submetas"
+        [laudoId]="laudoId" [podeEditar]="podeEditar"></vrpl-pendencia>
+    </siconv-fieldset>
+
+    <!-- Grupo 7 - Conclusão -->
+    <siconv-fieldset fieldsetTitle="5 - {{template.grupos[7].titulo}}" [collapsible]="true">
+      <div class="form-row">
+        <div class="col-md-12">
+          <label>{{template.grupos[7].perguntas[0].titulo}}</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="col-md-2">
+          <div class="br-check">
+            <input [(ngModel)]="parecerViavel" type="radio" name="radios" id="viavel" [value]="'Viável'"
+              [disabled]="!podeEditar">
+            <label for="viavel">&nbsp;&nbsp;Viável</label>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="br-check">
+            <input [(ngModel)]="parecerViavel" type="radio" name="radios" id="inviavel" [value]="'Inviável'"
+              [disabled]="!podeEditar">
+            <label for="inviavel">&nbsp;&nbsp;Inviável</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="col-md-12">
+          <div *ngIf="parecerViavel === 'Inviável'">
+            <siconv-textarea [disabled]="!podeEditar" label="{{template.grupos[7].perguntas[1].titulo}}"
+              required="true" [(ngModel)]="justicativaConclusao" maxlength="1500" rows="4"
+              cols="100" (keyup)="calcularCaracteresRestantesJustificativa()">
+            </siconv-textarea>
+          </div>
+          <div *ngIf="parecerViavel !== 'Inviável'">
+              <siconv-textarea [disabled]="!podeEditar" label="{{template.grupos[7].perguntas[1].titulo}}"
+              required="false" [(ngModel)]="justicativaConclusao" maxlength="1500" rows="4"
+              cols="100" (keyup)="calcularCaracteresRestantesJustificativa()"
+              [ngStyle]="{'border-color': validarJustificativa()? '#dc3545' : '#666666'}">
+            </siconv-textarea>
+          </div>
+          <p>{{calcularCaracteresRestantesJustificativa()}} caracteres restantes</p>
+          <div *ngIf="podeEditar" [ngStyle]="{ display: validarJustificativa()? 'block' : 'none' }"
+            class="invalid-feedback">
+            <div>O campo é de preenchimento obrigatório.</div>
+          </div>
+        </div>
+      </div>
+    </siconv-fieldset>
+
+    <ng-container *ngIf="laudoObservable | async as laudo">
+      <ng-container *ngIf="templateObservable | async as template">
+
+        <footer class="footer-botoes">  
+          <button type="button" class="btn btn-secondary" style="margin-left: 20px; margin-right: 5px;" (click)="voltar()" >
+            Voltar
+          </button>
+          <button  type="button" class="btn btn-primary" style="margin-right:5px"
+            (click)="salvarRascunho(template, laudo, templateModal)"  *ngIf="temPermissaoParaSalvarRascunho">
+            Salvar Rascunho
+          </button>
+          <button type="button" class="btn btn-primary"  style="margin-right:5px"
+            (click)="emitir(template, laudo, templateModal)" *ngIf="temPermissaoParaEmitir">
+            Emitir
+          </button>
+          <button type="button" class="btn btn-primary" style="margin-right:5px"
+            (click)="cancelarEmissao(template, laudo, templateModal)" *ngIf="temPermissaoParaCancelar">
+            Cancelar Emissão
+          </button>
+          <button type="button" class="btn btn-primary" style="margin-right:5px"
+            (click)="assinar(template, laudo, templateModal)" *ngIf="temPermissaoParaAssinar">
+            Assinar
+          </button>
+        </footer>
+
+        <ng-template #templateModal>
+          <div class="modal-body text-center">
+            <p style="text-align:justify; padding-right: 30px;">{{msgModal}}</p>
+            <button type="button" class="btn btn-primary" (click)="confirmaModal()">Sim</button>
+            &nbsp;&nbsp;&nbsp;
+            <button type="button" class="btn btn-secondary" (click)="cancelaModal()">Não</button>
+          </div>
+        </ng-template>
+      </ng-container>
+    </ng-container>
+
+  </ng-container>
+</siconv-fieldset>

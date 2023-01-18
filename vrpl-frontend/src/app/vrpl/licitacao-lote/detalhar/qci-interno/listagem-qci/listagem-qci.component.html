@@ -1,0 +1,95 @@
+<!doctype html>
+<siconv-fieldset fieldsetTitle="Itens de Licitação">
+
+  <ng-container *ngIf="qciObservable | async as qci">
+    <div class="form-row">
+      <div class="col-md-12">
+        <siconv-table [data]="qci.lotes" fileExportName="itens_de_licitacao" [pagination]="true" [export]="export"
+          (listaPaginada)="getListaPaginada($event)" *ngIf="qci.lotes">
+          <thead header>
+            <tr>
+              <th style="text-align: center;">Lote de Licitação</th>
+              <th>Meta</th>
+              <th>Submeta</th>
+              <th>Situação</th>
+              <th style="text-align: right;">Repasse</th>
+              <th style="text-align: right;">Contrapartida</th>
+              <th style="text-align: right;">Total</th>
+              <th style="text-align: center;" scope="col">Ações</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <ng-container *ngIf="qci.lotes?.length; else nenhumRegistro">
+              <ng-container *ngFor="let lote of qci.lotes">
+                <ng-container *ngFor="let meta of lote.metas; let mId = index">
+                  <ng-container *ngFor="let submeta of meta.submetas; let sId = index">
+                    <tr>
+                      <td style="text-align:center;vertical-align:middle" *ngIf="submeta.exibeLote"
+                        [attr.rowspan]="lote.rowspan">{{lote.numero}}</td>
+                      <td style="vertical-align:middle" *ngIf="submeta.exibeMeta" [attr.rowspan]="meta.rowspan">
+                        {{meta.descricao}}</td>
+                      <td>{{submeta.descricao}}</td>
+                      <td>{{submeta.situacaoDoProcessoLicitatorio}}</td>
+                      <td style="text-align: right;">{{submeta.repasseLicitado  | currency:'BRL':'symbol':'1.2-2'}}</td>
+                      <td style="text-align: right;">{{submeta.contrapartidaLicitada  | currency:'BRL':'symbol':'1.2-2'}}
+                      </td>
+                      <td style="text-align: right;">{{submeta.totalLicitado  | currency:'BRL':'symbol':'1.2-2'}}
+                        <ng-container *ngIf="submeta.vlOutros > 0"><span style="color:red">&nbsp;*</span></ng-container>
+                      </td>
+                      <td style="text-align: center;">
+                        <a title="Detalhar" [routerLink]="['../detalhar', submeta.idSubmeta]" alt="Detalhar">
+                          <i class="fa fa-search-plus" aria-hidden="true"></i>
+                        </a>
+                        <a title="Editar" *ngIf="podeEditar" [routerLink]="['../editar', submeta.idSubmeta]" alt="Editar">
+                          <i class="fa fa-pencil"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+            <ng-template #nenhumRegistro>
+              <tr>
+                <td colspan="8">
+                  Nenhum registro encontrado.
+                </td>
+              </tr>
+            </ng-template>
+          </tbody>
+          <tfoot style="background: none repeat scroll 0 0 #EEEFF1; font-weight: bold; text-align: center;">
+            <tr>
+              <td colspan="4" style="text-align: right;"> Total Geral </td>
+              <td>{{qci.repasseLicitado | currency:'BRL':'symbol':'1.2-2'}}</td>
+              <td>{{qci.contrapartidaLicitada | currency:'BRL':'symbol':'1.2-2'}}</td>
+              <td>{{qci.totalLicitado | currency:'BRL':'symbol':'1.2-2'}}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+          <ng-template #loading>
+            <tbody>
+              <tr>
+                <td colspan="9">
+                  Carregando...
+                </td>
+              </tr>
+            </tbody>
+          </ng-template>
+        </siconv-table>
+      </div>
+    </div>
+  </ng-container>
+  
+  <div class="form-row" *ngIf="possuiValorInformadoParaOutros">
+    <div class="form-group col-md-12">
+      <span style="color:red; font-size: 70%">* Essa submeta possui valor informado para o campo Outros</span>
+    </div>
+  </div>
+ 
+</siconv-fieldset>
+
+<footer class="footer-botoes">  
+  <button type="button" class="btn btn-secondary" style="margin-left: 20px; margin-right: 5px;" (click)="voltar()" >Voltar</button>
+</footer>

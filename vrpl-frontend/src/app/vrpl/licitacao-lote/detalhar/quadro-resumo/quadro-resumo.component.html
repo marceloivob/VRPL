@@ -1,0 +1,150 @@
+<!doctype html>
+<siconv-fieldset fieldsetTitle="" [collapsible]="false">
+
+  <div class="form-row" *ngIf="exibirPapel" >
+    <div class="col-md-6">
+      <label >Atribuição do Responsável</label>
+      <ng-select
+          style="border-radius: 4px"
+          [ngStyle]="{ 'border': exibirErroPapelVazio ? '1px solid #721c24' : '1px solid #ccc' }"
+          notFoundText="Nenhum elemento encontrado"
+          [items]="papeisDoUsuario"
+          [(ngModel)]="papelSelecionado"
+          (change)="papelSelecionadoChanged($event)"
+          >
+      </ng-select>
+    </div>
+  </div>
+
+  <form *ngIf="historicoEdicao" [formGroup]="historicoForm" (ngSubmit)="submit()">
+
+    <div class="form-row">
+      <div class="col-md-12">
+        <label>Considerações</label>
+        <textarea rows="4" cols="100" maxlength="1500" class="form-control" formControlName="consideracoes"
+          [ngClass]="{ 'is-invalid': showError('consideracoes')}"
+          (keyup)="calcularCaracteresRestantesTxConsideracoes()"></textarea>
+        <p>{{caracteresRestantesTxConsideracoes}} caracteres restantes</p>
+
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-md-12">
+        <siconv-sub-fieldset fieldsetTitle="Anexos" [collapsible]="true">
+          <vrpl-anexo (changed)="onAnexosChanged()" tipoDoAnexo="QUADRO_RESUMO" [anexos]="anexosObservable"
+            [podeEditar]="podeEditar">
+          </vrpl-anexo>
+        </siconv-sub-fieldset>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="col-md-12">
+        <siconv-sub-fieldset fieldsetTitle="Histórico de Comunicações" [collapsible]="true">
+          <div class="col-md-12" style="display: flex; justify-content: flex-end">
+
+
+          </div>
+
+          <div class="col-md-12">
+            <siconv-table [data]="listaHistoricoObservable | async " [fileExportName]="historico" [pagination]="true"
+              [export]="export" (listaPaginada)="getListaPaginada($event)">
+              <thead header>
+                <tr>
+                  <th sortable-column="dataDeRegistro" sortable-type="date" scope="col" style="text-align: center;" width="10%">Data</th>
+                  <th sortable-column="eventoGerador" sortable-type="object" scope="col">Evento</th>
+                  <th sortable-column="nomeDoResponsavel" sortable-type="string" scope="col">Responsável</th>
+                  <th sortable-column="consideracoes" sortable-type="string" scope="col">Considerações</th>
+                  <th sortable-column="situacaoDaLicitacao" sortable-type="object" scope="col">Situação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container>
+                  <ng-container *ngFor="let registro of lista">
+                    <tr>
+                      <td style="text-align: center;">{{registro.dataDeRegistro | date: 'dd/MM/yyyy HH:mm:ss'}}</td>
+                      <td>{{registro.eventoGerador.descricao}}</td>
+                      <td *ngIf="registro.cpfDoResponsavel.length == 11"><div>{{registro.cpfDoResponsavel | cpf}}</div>{{registro.nomeDoResponsavel}}</td>
+                      <td *ngIf="registro.cpfDoResponsavel.length == 14"><div>{{registro.cpfDoResponsavel | cnpj}}</div>{{registro.nomeDoResponsavel}}</td>
+                      <td>{{registro.consideracoes}}</td>
+                      <td>{{registro.situacaoDaLicitacao.descricao}}</td>
+                    </tr>
+                  </ng-container>
+                </ng-container>
+                <ng-template #nenhumRegistro>
+                  <tr>
+                    <td colspan="6">
+                      Nenhum registro encontrado.
+                    </td>
+                  </tr>
+                </ng-template>
+              </tbody>
+            </siconv-table>
+          </div>
+        </siconv-sub-fieldset>
+      </div>
+
+    </div>
+  </form>
+  <ng-template #template>
+    <div style="margin-right: 7%;" class="modal-body text-center">
+      <p *ngIf="titulo">{{titulo}}</p>
+      <p style="text-align:justify; text-indent: 30px;">{{mensagemConfirmacao}}</p>
+      <button type="button" class="btn btn-primary" (click)="confirmarAcao()">Sim</button>
+      &nbsp;&nbsp;&nbsp;
+      <button type="button" class="btn btn-secondary" (click)="cancelarAcao()">Não</button>
+    </div>
+  </ng-template>
+</siconv-fieldset>
+
+<footer class="footer-botoes">
+  <button type="button" class="btn btn-secondary" style="margin-left: 20px; margin-right: 5px;" (click)="voltar()" >Voltar</button>
+  <button type="button" class="btn btn-primary" style="margin-right:10px"
+    *ngIf="quadroResumo && quadroResumo.podeEnviarParaAnalise" (click)="enviarParaAnalise()">
+    Enviar para Análise
+  </button>
+  <button type="button" class="btn btn-primary" style="margin-right:10px"
+    *ngIf="quadroResumo && quadroResumo.podeIniciarComplementacao" (click)="iniciarComplementacaoConvenente()">
+    Iniciar Complementação
+  </button>
+  <button type="button" class="btn btn-primary" style="margin-right:10px"
+    *ngIf="quadroResumo && quadroResumo.podeCancelarEnvio" (click)="confirmarCancelarEnvioParaAnalise(template)">
+    Cancelar Envio
+  </button>
+  <button type="button" class="btn btn-primary" style="margin-right:10px"
+    *ngIf="quadroResumo && quadroResumo.podeCancelarEnvioComplementacao"
+    (click)="confirmarCancelarEnvioParaAnaliseComplementacao(template)">
+    Cancelar Envio
+  </button>
+  <button type="button" class="btn btn-primary" style="margin-right:10px"
+    *ngIf="quadroResumo && quadroResumo.podeIniciarAnalise" (click)="iniciarAnalise()">
+    Iniciar Análise
+  </button>
+  <button type="button" class="btn btn-primary" style="margin-right:10px"
+    *ngIf="quadroResumo && quadroResumo.podeSolicitarComplementacao" (click)="solicitarComplementacao()">
+    Solicitar Complementação
+  </button>
+  <button type="button" class="btn btn-primary" style="margin-right:10px"
+    *ngIf="quadroResumo && quadroResumo.podeAceitarDocumentacao" (click)="confirmarAceitarDocumentacao(template)">
+    Aceitar
+  </button>
+  <button type="button" class="btn btn-primary" style="margin-right:10px"
+    *ngIf="quadroResumo && quadroResumo.podeRejeitarDocumentacao" (click)="confirmarRejeitarDocumentacao(template)">
+    Rejeitar
+  </button>
+  <button type="button" class="btn btn-primary" style="margin-right:10px"
+    *ngIf="quadroResumo && quadroResumo.podeCancelarSolicitacaoComplementacao"
+    (click)="confirmarCancelarComplementacao(template)">
+    Cancelar Envio
+  </button>
+  <button type="button" class="btn btn-primary" style="margin-right:10px"
+    *ngIf="quadroResumo && quadroResumo.podeCancelarAceite"
+    (click)="confirmarCancelarAceite(template)">
+    Cancelar Aceite
+  </button>
+  <button type="button" class="btn btn-primary" style="margin-right:10px"
+    *ngIf="quadroResumo && quadroResumo.podeCancelarRejeite"
+    (click)="confirmarCancelarRejeite(template)">
+    Cancelar Rejeição
+  </button>
+</footer>

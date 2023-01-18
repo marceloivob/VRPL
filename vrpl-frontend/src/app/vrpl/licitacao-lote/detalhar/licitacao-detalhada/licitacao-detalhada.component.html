@@ -1,0 +1,135 @@
+<div *ngIf="licitacaoDetalhadaCarregada">
+  <siconv-fieldset fieldsetTitle="Dados Gerais da {{licitacaoDetalhada.descricaoProcessoExecucao}}"
+  [collapsible]="true">
+  
+    <div class="form-row">
+      <div class="col-md-12">
+        <label>Número</label>
+        <p class="informacao">{{licitacaoDetalhada.numeroAno}}</p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="col-md-12">
+        <label>Objeto</label>
+        <p class="informacao">{{licitacaoDetalhada.objeto}}</p>
+      </div>
+    </div>
+
+    <div class="form-row" *ngIf="licitacaoDetalhada.descricaoProcessoExecucao == 'Licitação'">
+      <div class="col-md-4">
+        <label>Modalidade</label>
+        <p class="informacao">{{licitacaoDetalhada.modalidade}}</p>
+      </div>
+      <div class="col-md-8">
+        <label>Regime de Contratação</label>
+        <p class="informacao">{{licitacaoDetalhada.regimeContratacao}}</p>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-md-4">
+        <label>Valor</label>
+        <p class="informacao">{{licitacaoDetalhada.valorTotalEdital | currency:'BRL':'symbol'}}</p>
+      </div>
+      <div class="col-md-4" *ngIf="licitacaoDetalhada.descricaoProcessoExecucao == 'Licitação'">
+        <label>Data de Publicação do Edital</label>
+        <p class="informacao">{{licitacaoDetalhada.dataPublicacaoEdital | date:'dd/MM/yyyy'}}</p>
+      </div>
+      <div class="col-md-4">
+        <label>Data de Homologação</label>
+        <p class="informacao">{{licitacaoDetalhada.dataHomologacao | date:'dd/MM/yyyy'}}</p>
+      </div>
+    </div>
+  </siconv-fieldset>
+
+  <ng-container *ngIf="licitacaoDetalhada?.lotes.length; else nenhumRegistro">
+    <ng-container *ngFor="let lote of licitacaoDetalhada.lotes">
+      <siconv-fieldset fieldsetTitle="Lote {{lote.numero}}" [collapsible]="true">
+        <siconv-sub-fieldset fieldsetTitle="Fornecedor">
+          <div class="form-row">
+            <div class="col-md-12">
+              <label>Nome</label>
+              <p class="informacao" *ngIf="lote.fornecedor">{{lote.fornecedor.nome}}</p>
+            </div>
+          </div>
+
+          <div class="form-row" *ngIf="lote.fornecedor && lote.fornecedor.identificacao.tipo; else exibeCPF">
+            <div class="col-md-12" *ngIf="lote.fornecedor.identificacao.tipo === 'CNPJ'">
+              <label>CNPJ</label>
+              <p class="informacao">{{lote.fornecedor.identificacao.valor | cnpj}}</p>
+            </div>
+
+            <div class="col-md-12" *ngIf="lote.fornecedor.identificacao.tipo === 'IG'">
+              <label>IG</label>
+              <p class="informacao">{{lote.fornecedor.identificacao.valor}}</p>
+            </div>
+            
+          </div>
+          <ng-template #exibeCPF>
+            <div class="form-row" *ngIf="lote.fornecedor && lote.fornecedor.identificacao">
+              <div class="col-md-12">
+                <label>CPF</label>
+                <p class="informacao">{{lote.fornecedor.identificacao | cpf}}</p>
+              </div>
+            </div>
+          </ng-template>
+
+          <div class="form-row">
+            <div class="col-md-12">
+            <siconv-table *ngIf="lote.submetas" [data]="lote.submetas" fileExportName="submetasLote" [pagination]="true"
+              [export]="recuperarExport(lote.id)" (listaPaginada)="getListaPaginada($event)"> 
+              <thead header>
+                <tr>
+                  <th>Meta</th>
+                  <th>Submeta</th>
+                  <th>Regime de Execução</th>
+                  <th style="text-align: right;">Valor Licitado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngIf="lote?.submetas.length; else nenhumRegistro2">
+                  <ng-container *ngFor="let submeta of lote.submetas">
+                    <tr>
+                      <td>{{submeta.meta}}</td>
+                      <td>{{submeta.submeta}}</td>
+                      <td>{{submeta.regimeExecucao}}</td>
+                      <td style="text-align: right;">{{submeta.valorLicitado | currency: 'BRL'}}</td>
+                    </tr>
+                  </ng-container>
+                </ng-container>
+              </tbody>
+              <tfoot style="background: none repeat scroll 0 0 #EEEFF1; font-weight: bold; text-align: center;">
+                <tr>
+                  <td colspan="3" style="text-align: right;"> Valor Total do Lote: </td>
+                  <td style="text-align: right;">{{lote.valorVerificadoLicitado | currency:'BRL':'symbol':'1.2-2'}}</td>
+                </tr>
+              </tfoot>
+            </siconv-table>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-12">
+              <label>Diferença entre Valores do Projeto Aprovado e Proposta Vencedora</label>
+              <p class="informacao">
+                {{(lote.valorAceitoAnalise - lote.valorVerificadoLicitado) | currency:'BRL':'symbol'}}</p>
+            </div>
+          </div>
+        </siconv-sub-fieldset>
+      </siconv-fieldset>
+  
+    </ng-container>
+  </ng-container>
+  <ng-template #nenhumRegistro>
+    <siconv-fieldset fieldsetTitle="Lote {{lote.id}}" [collapsible]="true">
+      <div class="form-row">
+        <div class="col-md-4">
+          <label>Nenhum Registro Encontrado.</label>
+        </div>
+      </div>
+    </siconv-fieldset>
+  </ng-template>
+</div>
+
+<footer class="footer-botoes">  
+  <button type="button" class="btn btn-secondary" style="margin-left: 20px; margin-right: 5px;" (click)="voltar()" >Voltar</button>
+</footer>

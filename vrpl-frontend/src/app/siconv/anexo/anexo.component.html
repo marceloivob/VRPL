@@ -1,0 +1,130 @@
+<!doctype html>
+<div class="form-row">
+  <div class="col-md-12">
+    <button *ngIf="podeEditar" type="button" class="btn btn-primary float-right" (click)="cadastrar()">
+      Adicionar
+    </button>
+  </div>
+</div>
+
+<div class="form-row">
+  <div class="col-md-12">
+    <siconv-table [data]="anexos | async" fileExportName="anexos" [pagination]="true" [export]="export"
+      (listaPaginada)="getListaPaginada($event)" *ngIf="anexos | async">
+      <thead header>
+        <tr>
+          <th sortable-column="descricao" sortable-type="string" scope="col">Descrição</th>
+          <th sortable-column="tipoDoAnexoAsString" sortable-type="string" scope="col">Tipo</th>
+          <th sortable-column="dataUpload" sortable-type="date" scope="col" style="text-align: center;">Data de Envio
+          </th>
+          <th sortable-column="nomeDoUsuarioQueEnviou" sortable-type="string" scope="col">Enviado por</th>
+          <th sortable-column="perfilUsuarioEnvio" sortable-type="string" scope="col" style="text-align: center;">Perfil
+          </th>
+          <th style="text-align: center;" scope="col">Ações</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="anexos | async as async_anexos">
+        <ng-container *ngIf="async_anexos?.length; else nenhumRegistro">
+          <tr *ngFor="let anexo of lista">
+            <td>{{anexo.descricao}}</td>
+            <td>{{anexo.tipoDoAnexoAsString}}</td>
+            <td style="text-align: center;">{{anexo.dataUpload | date:'dd/MM/yyyy'}}</td>
+            <td>{{anexo.nomeDoUsuarioQueEnviou}}</td>
+            <td style="text-align: center;">{{anexo.perfilUsuarioEnvio}}</td>
+            <td style="text-align: center;">
+              <a *ngIf="podeEditar" title="Editar" (click)="editar(anexo)" alt="Editar">
+                <i class="fa fa-pencil"></i>
+              </a>
+              <a title="Download" (click)="downloadFile(anexo.linkToDownload)" alt="Download">
+                <i class="fa fa-download"></i>
+              </a>
+              <a *ngIf="podeEditar" title="Excluir" (click)="deleteAnexo(anexo, template)" alt="Excluir">
+                <i class="fa fa-trash"></i>
+              </a>
+            </td>
+          </tr>
+        </ng-container>
+        <ng-template #nenhumRegistro>
+          <tr>
+            <td colspan="6">
+              Nenhum registro encontrado.
+            </td>
+          </tr>
+        </ng-template>
+      </tbody>
+    </siconv-table>
+  </div>
+</div>
+
+<form *ngIf="showCadastro" [formGroup]="anexoForm" (ngSubmit)="onSubmit()">
+
+  <div class="form-row">
+    <div class="col-md-6">
+      <label>Descrição do Arquivo</label>
+      <input type="text" class="form-control" (input)="descricao = $event.target.value" [value]="descricao"
+        formControlName="descricao" [ngClass]="{ 'is-invalid': showError('descricao') }" maxlength="30">
+      <div *ngIf="showError('descricao')" class="invalid-feedback">
+        <div *ngIf="field('descricao').errors.required">O campo é de preenchimento obrigatório.</div>
+      </div>
+      <div *ngIf="showError('descricao')" class="invalid-feedback">
+        <div *ngIf="field('descricao').errors.maxlength">Tamanho máximo do campo é de 30 caracteres!</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <label>Perfil do Responsável pelo Envio</label>
+      <input *ngIf="usuario.profile" type="text" readonly class="form-control-plaintext"
+        [value]="usuario.profile | perfil">
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="col-md-6">
+      <label id="lblDescricaoArquivo">Anexo</label>
+      <div class="row">
+        <div class="col-md-12">
+
+          <div class="input-group input-file">
+
+            <input *ngIf="showAnexoInput" type="file" class="form-control" #anexoInput
+              accept=".pdf, .png, .xls, .jpg, .jpeg, .odt, .ods, .xlsx, .dwg, .doc, .docx"
+              (input)="onFileChange($event)" />
+
+            <button type="button" (click)="addAnexo()" class="input-file button">
+              <i class="fa fa-arrow-circle-up"></i>
+            </button>
+            <input type="text" class="form-control file-text" disabled [value]="nomeArquivo">
+          </div>
+
+          <div class="description">Formatos permitidos: PDF, XLS, JPG, JPEG, PNG, ODT, ODS, XLSX, DWG, DOC e
+            DOCX. Tamanho máximo: 10 MB</div>
+
+          <h5 *ngIf="!nomeArquivo && submitted" style="font-size: 80%; color: #dc3545;">O campo é de preenchimento
+            obrigatório.</h5>
+
+          <h5 *ngIf="nomeArquivo?.length > 100" style="font-size: 80%; color: #dc3545;">
+            O tamanho do nome do arquivo não deve ultrapassar 100 caracteres.
+          </h5>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="col-md-12">
+      <button type="button" class="btn btn-secondary" style="margin-right:10px" (click)="cancelar()">
+        Cancelar
+      </button>
+      <button type="submit" class="btn btn-primary">
+        Salvar
+      </button>
+    </div>
+  </div>
+</form>
+
+<ng-template #template>
+  <div class="modal-body text-center">
+    <p>Tem certeza que deseja excluir o arquivo '{{anexoASerExcluido.nomeArquivo}}'?</p>
+    <button type="button" class="btn btn-primary" (click)="confirmaExclusao()">Sim</button>
+    &nbsp;&nbsp;&nbsp;
+    <button type="button" class="btn btn-secondary" (click)="cancelaExclusao()">Não</button>
+  </div>
+</ng-template>

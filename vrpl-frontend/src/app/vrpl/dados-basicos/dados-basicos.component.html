@@ -1,0 +1,72 @@
+<!doctype html>
+<siconv-fieldset>
+  <form *ngIf="proposta">
+    <div class="form-row">
+      <div class="col-md-3">
+        <label for="numeroProposta">Número da Proposta</label>
+        <p class="informacao" id="numeroProposta">{{proposta.numeroProposta}}/{{proposta.anoProposta}}</p>
+      </div>
+      <div class="col-md-9">
+        <label *ngIf="isPropostaDoTipoConvenio()" for="numero">Número do Convênio</label>
+        <label *ngIf="isPropostaDoTipoContratoDeRepasse()" for="numero">Número do Contrato de
+          Repasse</label>
+        <label *ngIf="isPropostaDoTipoTermoDeCompromisso()" for="numero">Número do Termo de
+           Compromisso</label>
+        <p class="informacao" *ngIf="isDeveExibirNumero()" id="numero">
+          {{proposta.numeroConvenio}}/{{proposta.anoConvenio}}</p>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-md-12">
+        <label for="programa">Programa</label>
+        <p class="informacao" id="programa">{{proposta.codigoPrograma}} - {{proposta.nomePrograma}}</p>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-md-12">
+        <label for="objeto">Objeto</label>
+        <p class="informacao" id="objeto">{{proposta.objeto}}</p>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-md-3">
+        <label for="proponente">Proponente</label>
+        <p class="informacao" id="proponente">{{proposta.nomeProponente}}</p>
+      </div>
+      <div class="col-md-9">
+        <label for="uf">UF</label>
+        <p class="informacao" id="uf">{{proposta.uf}}</p>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-md-3">
+        <label for="valorGlobal">Valor Global</label>
+        <p class="informacao" id="valorGlobal">{{proposta.valorGlobal | currency:'BRL':'symbol':'1.2-2'}}</p>
+      </div>
+      <div class="col-md-3">
+        <label for="valorRepasse">Repasse</label>
+        <p class="informacao" id="valorRepasse">{{proposta.valorRepasse | currency:'BRL':'symbol':'1.2-2'}}</p>
+      </div>
+      <div class="col-md-3">
+        <label for="valorContrapartida">Contrapartida</label>
+        <p class="informacao" id="valorContrapartida">{{proposta.valorContrapartida | currency:'BRL':'symbol':'1.2-2'}}
+        </p>
+      </div>
+      <div class="col-md-3">
+        <label for="percentualMinimoContrapartida">Percentual Mínimo da Contrapartida</label>
+        <p class="informacao" id="percentualMinimoContrapartida">
+          {{proposta.percentualMinimoContrapartida/100 | percent:'1.2-2':'pt-BR'}}</p>
+      </div>
+    </div>
+    <div class="form-row" *ngIf="isExibeModalidade()">
+      <div class="col-md-3">
+        <label for="mandataria">Mandatária</label>
+        <p class="informacao" id="mandataria">{{proposta.nomeMandataria}}</p>
+      </div>
+      <div class="col-md-9">
+        <label for="apelidoEmpreendimento">Apelido do Empreendimento</label>
+        <p class="informacao" id="apelidoEmpreendimento">{{proposta.apelidoDoEmpreendimento}}</p>
+      </div>
+    </div>
+  </form>
+</siconv-fieldset>

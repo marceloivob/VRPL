@@ -1,0 +1,177 @@
+<siconv-fieldset fieldsetTitle="Associação de Lotes e Licitações">
+  <div class="form-row">
+    <div class="col-md-12">
+      <div class="form-group col-md;" style="float: right;">
+        <button *ngIf="podeEditar()" type="button" class="btn btn-primary" [routerLink]="['../detalhar-licitacao-ativa']">
+          Associar Lotes à Licitação
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="col-md-12">
+      <siconv-table [data]="licitacoesAssociadas | async" fileExportName="licitacoesAssociadas" [pagination]="true"
+        [export]="exportAssociadas" (listaPaginada)="getListaPaginada($event)">
+        <thead header>
+          <tr>
+            <th sortable-column="numeroAno" sortable-type="string" scope="col">Licitação</th>
+            <th sortable-column="processoDeExecucao" sortable-type="string" scope="col">Processo
+              de Execução</th>
+            <th sortable-column="situacaoDaLicitacaoDescricao" sortable-type="string" scope="col">Situação</th>
+            <th>Lote</th>
+            <th>Meta</th>
+            <th>Submeta</th>
+            <th sortable-column="valorSomatorioSubmeta" sortable-type="number" scope="col" style="text-align: right;">Valor
+              Aceito na Análise</th>
+            <th sortable-column="valorSomatorioSubmetaLicitado" sortable-type="number" scope="col"
+              style="text-align: right;">Valor Verificado Licitado
+            </th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody *ngIf="licitacoesAssociadas | async as licitacoes">
+          <ng-container *ngIf="licitacoes?.length; else nenhumRegistroAssociada">
+            <ng-container *ngFor="let licitacao of listaAtivas">
+              <tr>
+                <td><strong>{{licitacao.numeroAno}}</strong></td>
+                <td><strong>{{licitacao.processoDeExecucao}} </strong> <span
+                    *ngIf="licitacao.modalidade">-</span> <strong> {{licitacao.modalidade}}</strong></td>
+                <td><strong>{{licitacao.situacaoDaLicitacaoDescricao}}</strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td style="color: #989898" style="text-align: right;">
+                  <strong>{{licitacao.valorSomatorioSubmeta | currency: 'BRL'}}</strong></td>
+                <td style="color: #989898" style="text-align: right;">
+                  <strong>{{licitacao.valorSomatorioSubmetaLicitado | currency: 'BRL'}}</strong></td>
+                <td>
+                  <a title="Exibir Dados Detalhados" [routerLink]="['../detalhar-licitacao-ativa', licitacao.id]">
+                    <i class="fa fa-tasks" aria-hidden="true"></i>
+                  </a>
+                  <a *ngIf="mostrarBotaoExclusao(licitacao)" title="Excluir" (click)="deleteLotesLicitacao(licitacao, modalExcluir)"
+                    alt="Excluir">
+                    <i class="fa fa-trash"></i>
+                  </a>
+                </td>
+              </tr>
+              <ng-container *ngFor="let lote of licitacao.lotes">
+                <tr *ngFor="let submeta of lote.submetas">
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td>{{lote.numero}}</td>
+                  <td>{{submeta.meta}}</td>
+                  <td>{{submeta.submeta}}</td>
+                  <td style="color: #989898" style="text-align: right;">{{submeta.valorAceitoAnalise | currency: 'BRL'}}</td>
+                  <td style="text-align: right;">{{submeta.valorLicitado | currency: 'BRL'}}</td>
+                  <td></td>
+                </tr>
+              </ng-container>
+            </ng-container>
+          </ng-container>
+          <ng-template #nenhumRegistroAssociada>
+            <tr>
+              <td colspan="11">
+                Nenhum registro encontrado.
+              </td>
+            </tr>
+          </ng-template>
+        </tbody>
+      </siconv-table>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="col-md-12">
+      <siconv-sub-fieldset fieldsetTitle="Licitações Rejeitadas" [collapsible]="true" collapsed="false">
+        <siconv-table [data]="licitacoesRejeitadas | async" fileExportName="licitacoesRejeitadas" [pagination]="true"
+          [export]="exportRejeitadas" (listaPaginada)="getListaPaginadaRejeitadas($event)">
+          <thead header>
+            <tr>
+              <th sortable-column="numeroAno" sortable-type="string" scope="col">Licitação</th>
+              <th sortable-column="processoDeExecucao" sortable-type="string" scope="col">Processo
+                de Execução</th>
+              <th sortable-column="situacaoDaLicitacaoDescricao" sortable-type="string" scope="col">Situação</th>
+              <th>Lote</th>
+              <th>Meta</th>
+              <th>Submeta</th>
+              <th sortable-column="valorSomatorioSubmeta" sortable-type="number" scope="col" style="text-align: right;">Valor
+                Aceito na Análise</th>
+              <th sortable-column="valorSomatorioSubmetaLicitado" sortable-type="number" scope="col"
+                style="text-align: right;">Valor Verificado Licitado
+              </th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody *ngIf="licitacoesRejeitadas | async as licitacoes">
+            <ng-container *ngIf="licitacoes?.length; else nenhumRegistroRejeitada">
+              <ng-container *ngFor="let licitacao of listaRejeitadas">
+                <tr>
+                  <td><strong>{{licitacao.numeroAno}}</strong></td>
+                  <td><strong>{{licitacao.processoDeExecucao}} </strong> <span
+                      *ngIf="licitacao.modalidade">-</span> <strong> {{licitacao.modalidade}}</strong></td>
+                  <td><strong>{{licitacao.situacaoDaLicitacaoDescricao}}</strong></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td style="color: #989898" style="text-align: right;">
+                    <strong>{{licitacao.valorSomatorioSubmeta | currency: 'BRL'}}</strong></td>
+                  <td style="color: #989898" style="text-align: right;">
+                    <strong>{{licitacao.valorSomatorioSubmetaLicitado | currency: 'BRL'}}</strong></td>
+                  <td>
+                    <a title="Exibir Dados Detalhados" [routerLink]="['../detalhar-licitacao-rejeitada', licitacao.id]">
+                      <i class="fa fa-tasks" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+                <ng-container *ngFor="let lote of licitacao.lotes">
+                  <tr *ngFor="let submeta of lote.submetas">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>{{lote.numero}}</td>
+                    <td>{{submeta.meta}}</td>
+                    <td>{{submeta.submeta}}</td>
+                    <td style="color: #989898" style="text-align: right;">{{submeta.valorAceitoAnalise | currency: 'BRL'}}</td>
+                    <td style="text-align: right;">{{submeta.valorLicitado | currency: 'BRL'}}</td>
+                    <td></td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+            <ng-template #nenhumRegistroRejeitada>
+              <tr>
+                <td colspan="11">
+                  Nenhum registro encontrado.
+                </td>
+              </tr>
+            </ng-template>
+          </tbody>
+          
+        </siconv-table>
+      </siconv-sub-fieldset>
+    </div>
+  </div>
+
+</siconv-fieldset>
+
+<ng-template #modalExcluir>
+  <div class="modal-body text-left">
+    <p>ATENÇÃO: A confirmação da operação excluirá os seguintes dados:</p>
+    
+    <p>Planilhas(s) orçamentária(s) licitada(s) associada(s) ao(s) lote(s):</p>
+    <div [innerHTML]="mensagemExclusaoLotes(licitacaoExcluir, anexosDaLicitacao)"></div>
+    
+    <br>
+    <p *ngIf="anexosDaLicitacao.length > 0">Anexo(s) associado(s):</p>
+    <div [innerHTML]="mensagemExclusaoAnexos(licitacaoExcluir, anexosDaLicitacao)"></div>
+    
+    <br>
+    <p *ngIf="licitacaoExcluir">Tem certeza que deseja excluir a associação do(s) lote(s) listado(s) à licitação
+      {{licitacaoExcluir.numeroAno}}?</p>
+
+    <button type="button" class="btn btn-primary" (click)="confirmaExclusao()">Sim</button>
+    &nbsp;&nbsp;&nbsp;
+    <button type="button" class="btn btn-secondary" (click)="cancelaExclusao()">Não</button>
+  </div>
+</ng-template>

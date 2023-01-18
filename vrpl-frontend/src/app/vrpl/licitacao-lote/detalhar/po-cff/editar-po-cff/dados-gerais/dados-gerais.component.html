@@ -1,0 +1,110 @@
+<!doctype html>
+<form [formGroup]="poForm" (ngSubmit)="submit()" *ngIf="po">
+
+  <div class="form-row">
+
+    <div class="col-md-5">
+      <label>Submeta</label>
+      <p class="informacao">{{po.numeroMeta}}.{{po.numeroSubmeta}} - {{po.descricao}}</p>
+    </div>
+
+    <div class="col-md-4">
+      <label>Total da Submeta Aceita na Análise</label>
+      <p class="informacao">{{ po.precoTotalAnalise | currency:'BRL':'symbol'}}</p>
+    </div>
+
+    <div class="col-md-3">
+      <label>Total da Submeta Licitada</label>
+      <p class="informacao">{{ po.precoTotalLicitacao | currency:'BRL':'symbol'}}</p>
+    </div>
+
+  </div>
+
+  <div class="form-row">
+
+    <div class="col-md-4">
+      <siconv-date-picker label="Previsão de Início da Obra" name="previsaoInicioObra" [required]="true"
+        [siconvMaxDate]="dtMaxima" formControlName="previsaoInicioObra" format="MM/YYYY" [datedisabled]="visualizar">
+      </siconv-date-picker>
+
+      <div [ngStyle]="{ display: showErrorDataInicioObra() ? 'block' : 'none' }" class="invalid-feedback">
+        <div>A data informada não pode ser menor que a data inicialmente prevista
+          ({{inicioObraAnalise | date:'MM/yyyy'}}) para início de obra na fase de análise do Projeto Básico</div>
+      </div>
+
+    </div>
+
+    <div class="col-md-1">
+      <!-- Espaçamento entre elementos. Não remover -->
+    </div>
+
+    <div class="col-md-4">
+      <label>Duração Definida da Obra (meses)</label>
+      <div class="input-group mb-3">
+        <input type="number" class="form-control" name="duracaoObra" id="duracaoObra"
+          [ngClass]="{ 'is-invalid': showError('duracaoObra') }" formControlName="duracaoObra" (keypress)="numberOnly($event)"/>
+        <div *ngIf="showError('duracaoObra')" class="invalid-feedback">
+          <div *ngIf="field('duracaoObra').errors.required">O campo é de preenchimento obrigatório</div>
+        </div>
+        <div *ngIf="showError('duracaoObra')" class="invalid-feedback">
+          <div *ngIf="field('duracaoObra').errors.min">Favor informar um número inteiro maior ou igual a 1</div>
+        </div>
+        <div *ngIf="showError('duracaoObra')" class="invalid-feedback">
+          <div *ngIf="field('duracaoObra').errors.max">Favor informar um número inteiro menor ou igual a 999</div>
+        </div>
+        <div *ngIf="showError('duracaoObra')" class="invalid-feedback">
+          <div *ngIf="field('duracaoObra').errors.maxlength">Favor informar no máximo 3 caracteres</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="form-row">
+
+    <div class="col-md-4">
+      <siconv-date-picker label="Data Base" name="dataBase" [required]="true" [siconvMaxDate]="dtMaxima"
+        formControlName="dataBase" format="MM/YYYY" [datedisabled]="visualizar">
+      </siconv-date-picker>
+
+      <div [ngStyle]="{ display: showErrorDataBaseMenorQueAnalise() ? 'block' : 'none' }" class="invalid-feedback">
+        <div>A data base não pode ser menor do que a data informada na análise.</div>
+      </div>
+
+      <div [ngStyle]="{ display: showErrorDataBaseMaiorQueAtual() ? 'block' : 'none' }" class="invalid-feedback">
+        <div>A data base não pode ser maior que a data atual.</div>
+      </div>
+
+    </div>
+
+    <div class="col-md-1">
+      <!-- Espaçamento entre elementos. Não remover -->
+    </div>
+
+    <div class="col-md-7">
+      <label>
+        <input type="checkbox" *ngIf="po.acompanhamentoEvento" checked disabled>
+        <input type="checkbox" *ngIf="!po.acompanhamentoEvento" disabled>
+        O acompanhamento da execução da obra será por eventos.
+      </label>
+    </div>
+
+  </div>
+
+  <footer class="footer-botoes">  
+    <button type="button" class="btn btn-secondary" style="margin-left: 20px; margin-right: 5px;" (click)="voltar()">Voltar</button>
+    <button type="button" *ngIf="!visualizar" class="btn btn-primary" (click)="confirmaAlteracao(template)">
+      Salvar
+    </button>
+  </footer>
+
+  <ng-template #template>
+    <div class="modal-body text-center">
+      <p>Deseja reaproveitar o CFF sem eventos?</p>
+      <button type="button" class="btn btn-primary" (click)="confirmarAcao()">Sim</button>
+      &nbsp;&nbsp;&nbsp;
+      <button type="button" class="btn btn-secondary" (click)="cancelarAcao()">Não</button>
+    </div>
+  </ng-template>
+
+</form>

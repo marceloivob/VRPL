@@ -1,0 +1,164 @@
+
+.container {
+	padding: 0;
+	max-width: 100%;
+	width: 100%;
+}
+
+p.informacao {
+	font-family: "OpenSans-Bold";
+	font-size: 16px;
+	color: #454546;
+	margin: 0px;
+}
+
+.col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+	padding-bottom: 35px;
+}
+
+.fa-download, .fa-tasks, .fa-pencil, .fa-trash, .fa-search-plus, .fa-check, .fa-times {
+    min-width: 20px;
+    display: inline-block;
+    font-size: 18px;
+    color:#3E67B1;
+    padding: 0px 10px 0px 10px;
+}
+.title {
+  font-family: OpenSans-Regular,sans-serif;
+  font-size: 21px;
+  color: #0a6aa6;
+}
+
+.versao {
+  padding-top: 8px;
+  display: flex;
+  flex-direction: row;
+}
+
+.versao .ng-select.ng-select-single .ng-select-container .ng-value-container .ng-input {
+  position: inherit;
+}
+
+.versao .ng-select.ng-select-single .ng-select-container .ng-value-container .ng-value {
+  overflow: initial;
+}
+
+.versaoCombo {
+  line-height: 1.5;
+  border-bottom: 1px solid #dee2e6;  
+  font-size: 15px;    
+  margin-right: 0px;
+  padding-top: 10px;
+  padding-right: 100px;  
+}
+
+////////////////////////////
+// Início dos estilos das abas - obtido do projeto de componentes visuais do SICONV Componentes
+////////////////////////////
+.tab-pane:not(.active) { 
+  display: none;
+}
+
+.disabled {
+  cursor: not-allowed; 
+}
+
+$tamanho-fonte: 15px;
+$cor-borda: #ccc;
+$aba-ativa-cor-fonte: #fff;
+$aba-ativa-cor-fundo: #0a6aa6;
+$aba-inativa-cor-fonte: #454546;
+$aba-inativa-cor-fundo: #fff;
+$aba-inativa-cor-fundo-hover: #ececec; 
+$aba-cor-background: #f5f5f7;
+
+.tab-container .nav.nav-tabs {
+  background-color: $aba-inativa-cor-fundo;
+}
+
+.tab-content {
+  background: $aba-cor-background;
+  padding: 40px;
+}
+
+.tab-content tab {
+  padding-bottom: 10px;
+  padding-left: 20px;
+}
+
+.tab-content siconv-tab tab {
+  padding-bottom: 10px;
+  padding-left: 20px;
+}
+
+.nav {
+  padding-left: 40px;
+}
+
+.nav-tabs .tab:first-child {
+  margin-left: 40px;
+}
+
+.nav-tabs .nav-link:hover {
+  background-color: $aba-inativa-cor-fundo-hover;
+}
+
+.nav-tabs .nav-link, .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+  border: 1px solid $cor-borda;
+}
+
+// aba ativa
+.nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+  font-size: $tamanho-fonte;
+  color: $aba-ativa-cor-fonte;
+  background-color: $aba-ativa-cor-fundo;
+}
+
+// aba inativa
+.nav-tabs .nav-link, .nav-tabs .nav-item.show .nav-link {
+  font-size: $tamanho-fonte;
+  color: $aba-inativa-cor-fonte;
+  background-color: $aba-inativa-cor-fundo;
+}
+
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:focus, .nav-tabs > li.active > a:hover {
+  background: $aba-ativa-cor-fundo;
+  color: $aba-ativa-cor-fonte;
+}
+
+.nav-tabs .nav-link {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  padding: 10px 24px;
+}
+
+.nav.nav-tabs.segundo-nivel {
+  border-bottom: 1px solid $aba-ativa-cor-fundo;
+  background: $aba-cor-background;
+}
+
+.nav-tabs.segundo-nivel > li.active > a, .nav-tabs.segundo-nivel > li.active > a:focus {
+  border: none;
+  border-bottom: 4px solid $aba-ativa-cor-fundo !important;
+  color: $aba-ativa-cor-fundo;
+  background: $aba-cor-background;
+}
+
+.nav-tabs.segundo-nivel > li.active > a:hover {
+  background: $aba-inativa-cor-fundo;
+}
+
+.nav-link.segundo-nivel {
+  border: none !important;
+  font-size: 14px;
+  border-bottom: 1px solid $aba-ativa-cor-fundo;
+  color: $aba-inativa-cor-fonte;
+  background: $aba-cor-background;
+}
+
+.nav-link.segundo-nivel:hover {
+  background: $aba-ativa-cor-fonte;
+}
+////////////////////////////
+// Fim dos estilos das abas - obtido do projeto de componentes visuais do SICONV Componentes
+////////////////////////////

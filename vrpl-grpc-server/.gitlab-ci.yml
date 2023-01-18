@@ -1,0 +1,113 @@
+variables:
+  URI_ENDPOINT: https://console.estaleiro.serpro.gov.br
+  TOKEN: $TOKEN
+  SYSTEM: siconv # Sistema cadastrado no portal
+  MODULE: vrpl-grpc-server # Módulo criado no portal
+  PLATFORM: java:11-adoptopenjdk-debian # ${PLATAFORM} # Plataforma da aplicação
+  ENVIRONMENT_DESENV: d # Ambiente criado no portal
+  ENVIRONMENT_TESTE: t # Ambiente criado no portal
+  ENVIRONMENT_HOMOLOGACAO: h # Ambiente criado no portal
+  ENVIRONMENT_PRODUCAO: p # Ambiente criado no portal
+  ENVIRONMENT_TREINAMENTO: tre # Ambiente criado no portal
+  ENVIRONMENT_VALIDACAO: v # Ambiente criado no portal
+  ENVIRONMENT_Y: ${ENV_Y_ID} # Ambiente criado no portal
+  URI_ENV_DESENV: ${URI_ENV_DESENV} # URI para o ambiente configurada no portal
+  MAVEN_OPTS: "-Dmaven.repo.local=/.m2"
+  GIT_SSL_NO_VERIFY: "true"
+
+.config_cli_estaleiro: &config_cli_estaleiro
+  image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+  before_script:    
+    - export VERSION=${CI_COMMIT_SHA:0:8}
+    - estaleiro config token --literal $TOKEN
+    - estaleiro config endpoint $URI_ENDPOINT
+    - estaleiro config system siconv
+
+stages:
+    - Build:Compilação
+    - Estaleiro:Construção da Imagem
+    - Estaleiro:Deploy
+    - Estaleiro:Publicação DESENV
+    - Estaleiro:Publicação HOM
+    - Estaleiro:Publicação PRODUCAO
+
+Build:Compilação:
+  before_script:
+    - export VERSION=1.0.0-b$CI_PIPELINE_ID-${CI_COMMIT_SHA:0:8}
+    - echo $CI_BUILD_ID
+    - echo $VERSION
+    - echo "before_script"
+  image: hub.estaleiro.serpro/pipeline/maven:3-jdk-11-slim
+  stage: Build:Compilação
+  script:
+    - echo "Compilando..."
+    - mvn clean package
+  cache:
+    paths:
+        - /.m2
+  artifacts:
+    paths:
+        - target/vrpl-grpc-server.jar 
+        - Docker/Procfile 
+    expire_in: 1 week
+
+Estaleiro:Construção da Imagem:
+  stage: Estaleiro:Construção da Imagem
+  image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+  <<: *config_cli_estaleiro
+  script:
+    - echo $VERSION
+    - echo "Construindo e publicando a imagem para o Estaleiro..."
+    - ls
+    - mv Docker/Procfile .
+    - mv target/vrpl-grpc-server.jar .
+    - estaleiro app build --module $MODULE --platform $PLATFORM --version $VERSION
+  dependencies:
+    - Build:Compilação
+  variables:
+    GIT_STRATEGY: none
+
+Estaleiro:Publicação DESENV:
+  stage: Estaleiro:Deploy
+  image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+  <<: *config_cli_estaleiro
+  script:
+    - echo "Promoção da Build para o Ambiente de Desenvolvimento"
+    - echo "estaleiro app promote mod $ENVIRONMENT_DESENV --module $MODULE --version $VERSION"
+    - estaleiro app promote mod $ENVIRONMENT_DESENV --module $MODULE --version $VERSION
+  when: manual
+  dependencies:
+    - Build:Compilação
+  variables:
+    GIT_STRATEGY: none
+    
+
+Estaleiro:Publicação HOM:
+  stage: Estaleiro:Deploy
+  image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+  <<: *config_cli_estaleiro
+  script:
+    - echo "Promoção da Build para o Ambiente de Homologação"
+    - echo "estaleiro app promote mod $ENVIRONMENT_HOMOLOGACAO --module $MODULE --version $VERSION"
+    - estaleiro app promote mod $ENVIRONMENT_HOMOLOGACAO --module $MODULE --version $VERSION
+  when: manual
+  dependencies:
+    - Build:Compilação
+  variables:
+    GIT_STRATEGY: none
+    
+Estaleiro:Publicação PRODUCAO:
+  stage: Estaleiro:Publicação PRODUCAO
+  only:
+    - /^medicao-r4.*/
+  image: cliente-estaleiro:latest
+  <<: *config_cli_estaleiro
+  script:
+    - echo "Promoção da Build para o Ambiente de Produção"
+    - echo "estaleiro app promote mod $ENVIRONMENT_DESENV --module $MODULE --version $VERSION"
+    - estaleiro app promote mod $ENVIRONMENT_PRODUCAO --module $MODULE --version $VERSION
+  when: manual
+  dependencies:
+    - Build:Compilação
+  variables:
+    GIT_STRATEGY: none        

@@ -1,0 +1,36 @@
+<!-- <siconv-header *ngIf="menu && menuLoaded"
+  appName="Portal dos Convênios do Governo Federal"
+  [user]="usuario"
+  (logout)="logoutFeedback($event)"
+  [totalTime]="2"
+  [warningTime]="2"
+  (sessionTime)="sessionTimeFeedback($event)"
+  [menu]="menu">
+</siconv-header> -->
+
+<div class="header" *ngIf="menu && menuLoaded">
+  <vrpl-siconv-menu
+    [totalTime]=2
+    [warningTime]=2
+    (logout)="logoutFeedback($event)"
+    (sessionTime)="sessionTimeFeedback($event)">
+  </vrpl-siconv-menu>
+</div>
+
+<div class="siconv-container">
+  <div class="convenio-bar">
+
+    <div style="text-align: center">
+      <h4 class="titulo-tela">ALERTA</h4>
+    </div>
+    <div>
+      <p style="text-align: center">Não existem dados referentes a esta proposta neste módulo, pois esta proposta não segue o fluxo de cadastro e aceite do processo licitatório pelo módulo da VRPL (Verificação do Resultado do Processo Licitatório). Para esta proposta, o aceite da licitação é feito na funcionalidade Processo de Execução do SICONV.
+      </p>
+      <ul style="text-align: center">
+        <li>
+          <a [href]=link>Clique aqui para voltar para a Página Principal</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

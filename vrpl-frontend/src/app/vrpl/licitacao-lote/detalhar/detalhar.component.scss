@@ -1,0 +1,21 @@
+.nav {
+    padding-left: 0px; 
+}
+
+// Sobreposição do estilo obtido do Projeto de Componentes Visuais
+
+$aba-ativa-cor-fundo: #0a6aa6;
+$aba-inativa-cor-fundo: #fff;
+$aba-inativa-cor-fundo-hover: #ececec; 
+$aba-cor-background: #f5f5f7;
+
+.nav-tabs.segundo-nivel > li > a.active, .nav-tabs.segundo-nivel > li > a.active:focus {
+    border: none;
+    border-bottom: 4px solid $aba-ativa-cor-fundo !important;
+    color: $aba-ativa-cor-fundo;
+    background: $aba-cor-background;
+}
+
+.nav-tabs.segundo-nivel > li > a.active:hover {
+    background: $aba-inativa-cor-fundo;
+}

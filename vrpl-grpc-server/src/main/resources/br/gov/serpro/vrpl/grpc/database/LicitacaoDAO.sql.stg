@@ -1,0 +1,60 @@
+consultarPermissoesDasLicitacoesDaProposta(proposta) ::= <%
+
+	SELECT  proposta.id_siconv        															prop_fk,							<\n>
+		    licitacao.id_licitacao_fk  															idLicitacao,						<\n>
+			CASE WHEN lote.licitacao_fk IS NOT NULL     THEN submeta.in_situacao         END AS situacaoVRPL,						<\n>
+			CASE WHEN lote.licitacao_fk IS NULL         THEN submeta.in_situacao_analise END AS situacaoAnalise						<\n>
+																																	<\n>
+	FROM		siconv.vrpl_proposta 			proposta																			<\n>
+	INNER JOIN siconv.vrpl_submeta 				submeta 		ON submeta.proposta_fk 	= proposta.id                               <\n>
+	INNER JOIN siconv.vrpl_lote_licitacao 		lote			ON lote.id         		= submeta.vrpl_lote_licitacao_fk			<\n>
+    INNER JOIN siconv.vrpl_licitacao 			licitacao		ON licitacao.id         = lote.licitacao_fk							<\n>
+																																	<\n>
+    WHERE proposta.id_siconv															= :idProposta 								<\n>
+      AND proposta.versao_in_atual																									<\n>
+
+%>
+
+excluirFornecedorLicitacao(numeroProposta, anoProposta) ::= <%
+	DELETE FROM vrpl_fornecedor vf 
+	WHERE vf.id IN ( 
+		SELECT vf.id FROM vrpl_fornecedor vf 
+		JOIN vrpl_licitacao vl ON (vf.licitacao_fk = vl.id) 
+		JOIN vrpl_proposta vp ON (vl.proposta_fk = vp.id) 
+		WHERE vp.numero_proposta = :numeroProposta 
+		AND vp.ano_proposta = :anoProposta 
+	)
+%>
+
+excluirAnexosLicitacao(numeroProposta, anoProposta) ::= <%
+	DELETE FROM vrpl_anexo va 
+	WHERE va.id IN ( 
+		SELECT va.id FROM vrpl_anexo va 
+		JOIN vrpl_licitacao vl ON (va.vrpl_licitacao_fk = vl.id) 
+		JOIN vrpl_proposta vp ON (vl.proposta_fk = vp.id) 
+		WHERE vp.numero_proposta = :numeroProposta 
+		AND vp.ano_proposta = :anoProposta 
+	) 
+%>
+
+excluirHistoricoLicitacao(numeroProposta, anoProposta) ::= <%
+	DELETE FROM vrpl_historico_licitacao vhl2  
+	WHERE vhl2.id IN ( 
+		SELECT vhl.id FROM vrpl_historico_licitacao vhl 
+		JOIN vrpl_licitacao vl ON (vhl.licitacao_fk = vl.id) 
+		JOIN vrpl_proposta vp ON (vl.proposta_fk = vp.id) 
+		WHERE vp.numero_proposta = :numeroProposta 
+		AND vp.ano_proposta = :anoProposta 
+)
+%>
+
+excluirLicitacoes(numeroProposta, anoProposta) ::= <% 
+	DELETE FROM vrpl_licitacao vl2 
+	WHERE vl2.id IN ( 
+		SELECT vl.id FROM vrpl_licitacao vl 
+		JOIN vrpl_proposta vp ON (vl.proposta_fk = vp.id) 
+		WHERE vp.numero_proposta = :numeroProposta 
+		AND vp.ano_proposta = :anoProposta 
+	) 
+%>
+

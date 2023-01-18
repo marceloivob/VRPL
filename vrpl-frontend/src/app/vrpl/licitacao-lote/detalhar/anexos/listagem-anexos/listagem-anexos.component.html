@@ -1,0 +1,68 @@
+<!doctype html>
+<siconv-fieldset fieldsetTitle="Anexos" [collapsible]="false">
+  <div class="form-group col-md">
+    <button *ngIf="podeEditar" type="button" class="btn btn-primary float-right" [routerLink]="['../salvar']">
+      Adicionar
+    </button>
+  </div>
+
+  <siconv-table [data]="anexosObservable | async" fileExportName="anexos" [pagination]="true" [export]="export"
+    (listaPaginada)="getListaPaginada($event)" *ngIf="anexosObservable | async">
+    <thead header>
+      <tr>
+        <th sortable-column="descricao" sortable-type="string" scope="col">Descrição</th>
+        <th sortable-column="tipoDoAnexo" sortable-type="string" scope="col">Tipo</th>
+        <th sortable-column="dataUpload" sortable-type="date" scope="col" style="text-align: center;">Data de Envio</th>
+        <th sortable-column="nomeDoUsuarioQueEnviou" sortable-type="string" scope="col">Enviado por</th>
+        <th sortable-column="perfilUsuarioEnvio" sortable-type="string" scope="col" style="text-align: center;">Perfil</th>
+        <th style="text-align: center;" scope="col">Ações</th>
+      </tr>
+    </thead>
+    <tbody *ngIf="anexosObservable | async as anexos">
+      <ng-container *ngIf="anexos?.length; else nenhumRegistro">
+        <tr *ngFor="let anexo of lista">
+          <td>{{anexo.descricao}}</td>
+          <td>{{anexo.tipoDoAnexoAsString}}</td>
+          <td style="text-align: center;">{{anexo.dataUpload | date:'dd/MM/yyyy'}}</td>
+          <td>{{anexo.nomeDoUsuarioQueEnviou}}</td>
+          <td style="text-align: center;">{{anexo.perfilUsuarioEnvio}}</td>
+          <td style="text-align: center">
+            <a title="Detalhar" [routerLink]="['../detalhar', anexo.id]" alt="Detalhar">
+              <i class="fa fa-search-plus" aria-hidden="true"></i>
+            </a>
+            <a *ngIf="podeEditar" title="Editar" [routerLink]="['../editar', anexo.id]" alt="Editar">
+              <i class="fa fa-pencil"></i>
+            </a>
+            <a *ngIf="mostrarBotaoDownload(anexo.linkToDownload)" title="Download" (click)="downloadFile(anexo.linkToDownload)" alt="Download">
+              <i class="fa fa-download"></i>
+            </a>
+            <a *ngIf="podeEditar" title="Excluir" (click)="deleteAnexo(anexo, template)" alt="Excluir">
+              <i class="fa fa-trash"></i>
+            </a>
+          </td>
+        </tr>
+      </ng-container>
+      <ng-template #nenhumRegistro>
+        <tr>
+          <td colspan="7">
+            Nenhum registro encontrado.
+          </td>
+        </tr>
+      </ng-template>
+    </tbody>
+  </siconv-table>
+  
+  <ng-template #template>
+    <div class="modal-body text-center">
+      <p>Tem certeza que deseja excluir o arquivo '{{anexoASerExcluido.nomeArquivo}}'?</p>
+      <button type="button" class="btn btn-primary" (click)="confirmaExclusao()">Sim</button>
+      &nbsp;&nbsp;&nbsp;
+      <button type="button" class="btn btn-secondary" (click)="cancelaExclusao()">Não</button>
+    </div>
+  </ng-template>
+
+</siconv-fieldset>
+
+<footer class="footer-botoes">  
+  <button type="button" class="btn btn-secondary" style="margin-left: 20px; margin-right: 5px;" (click)="voltar()" >Voltar</button>
+</footer>

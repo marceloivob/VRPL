@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "br.gov.serpro.vrpl.grpc";
+option java_outer_classname = "VrplProto";
+
+package vrpl;
+
+message IdentificadorPropostaRequest {
+	int64 numeroProposta = 1;
+	int64 anoProposta = 2;
+}
+
+message ExclusaoVrplResponse {
+	int32 situacao = 1;
+	string mensagem = 2;
+}
+
+message IdentificadorExclusaoVRPLRequest {
+	int64 numeroProposta = 1;
+	int64 anoProposta = 2;
+	string usuarioLogado = 3;
+}
+
+service Vrpl {
+	
+	rpc verificarExclusaoVrpl (IdentificadorPropostaRequest) returns (ExclusaoVrplResponse);
+
+	rpc excluirVRPL (IdentificadorExclusaoVRPLRequest) returns (ExclusaoVrplResponse);
+}

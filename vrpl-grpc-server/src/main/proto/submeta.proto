@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "br.gov.serpro.vrpl.grpc";
+option java_outer_classname = "SubmetaProto";
+
+package vrpl;
+
+message Submeta {
+	int64 id = 1;
+	string numero = 2;
+	string descricao = 3;
+	string valorLicitado = 4;
+	
+	message FrenteObra {
+		int64 id = 1;
+		string descricao = 2;
+
+		message Evento {
+			int64 id = 1;
+			string descricao = 2;
+			string valorTotal = 3;
+			repeated Servico servicos = 4;
+		}
+		
+		repeated Evento eventos = 3;
+		
+		message MacroServico {
+			int64 id = 1;
+			string descricao = 2;							
+			repeated Servico servicos = 3;
+			int32 numero = 4;
+		}		
+		
+		repeated MacroServico macroServico = 4;
+	
+	}
+	
+	repeated FrenteObra frentesObras = 5;
+}
+
+message Servico {
+	int64 id = 1;
+	string descricao = 2;
+	string qtdeItens = 3;
+	string sgUnidade = 4;	
+	string valorUnitario = 5;
+	int32 numero = 6;	
+}
+
+message SubmetaResponse {
+	Submeta submeta = 1;
+	
+}
+
+message ListaSubmetaResponse {
+	repeated Submeta submeta = 1;
+}
+
+message ListaSubmetaRequest {
+	repeated int64 ids = 1;
+}
+
+message SubmetaRequest {
+	int64 id = 1;
+}
+
+message PropostaLote {
+	int32 numeroConvenio = 1; 
+	int32 anoConvenio = 2;
+	string nomeObjeto = 3; 
+	string uf = 4;
+	int32 modalidade = 5;
+	repeated Lote lotes = 6;
+	bool possuiInstituicaoMandataria = 7;
+	string nomeProponente = 8;
+	
+}
+
+message Lote {
+	int32 numero = 1;
+	
+	message Submeta {
+		int64 id = 1;
+		string numero = 2;
+		string descricao = 3;
+		string situacao = 4;
+		string regimeExecucao = 5;
+		string valorTotal = 6;
+	}
+	
+	repeated Submeta submetas = 2;
+}
+
+message PropostaLotesResponse {
+	PropostaLote propostaLote = 1;
+}
+
+message IdPropostaRequest {
+	int64 idProposta = 1;
+}
+
+message DESubmetaVrplPARASubmetaProjetoBasico {
+	map<int64, int64> submetas = 1;
+}
+
+service SubmetaService {
+	rpc consultarListaSubmetas (ListaSubmetaRequest) returns (ListaSubmetaResponse);	
+	rpc consultarSubmetaPorId (SubmetaRequest) returns (SubmetaResponse);
+	rpc consultarListaLotesComSubmetas (IdPropostaRequest) returns (PropostaLotesResponse);
+	rpc recuperarSubmetasDoProjetoBasicoAPartirDasSubmetasDoVRPL (ListaSubmetaRequest) returns (DESubmetaVrplPARASubmetaProjetoBasico);
+}

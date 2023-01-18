@@ -1,0 +1,57 @@
+<!doctype html>
+<siconv-fieldset *ngIf="loaded">
+  <ul class="nav nav-tabs segundo-nivel">
+    <li *ngIf="exibirAbaAssociacao">
+      <a class="nav-link segundo-nivel" routerLinkActive="active" [routerLink]="['./associar-lote']">
+        Associação a Lote
+      </a>
+    </li>
+    <ng-container *ngIf="licitacaoDetalhadaCarregada">
+    <li>
+      <a class="nav-link segundo-nivel" routerLinkActive="active" [routerLink]="['./licitacao']">
+        Licitação
+      </a>
+    </li>
+    <li>
+      <a class="nav-link segundo-nivel" routerLinkActive="active" [routerLink]="['./anexos']">
+        Anexos
+      </a>
+    </li>
+    <li>
+      <a class="nav-link segundo-nivel" routerLinkActive="active" [routerLink]="['./po-cff']"
+        title="Planilhas Orçamentárias / Cronogramas Físico Financeiro">
+        PO / CFF
+      </a>
+    </li>
+    <li>
+      <a class="nav-link segundo-nivel" routerLinkActive="active" [routerLink]="['./qci']"
+        title="Itens de Licitação">
+        Itens
+      </a>
+    </li>
+    <ng-container *ngIf="exibeParecerDeEngenharia">
+      <li>
+        <a class="nav-link segundo-nivel" routerLinkActive="active" [routerLink]="['./vrpl']" title="Parecer de Engenharia">
+          Parecer
+        </a>
+      </li>
+    </ng-container>
+    <ng-container *ngIf="exibeParecerSocial">
+      <li>
+        <a class="nav-link segundo-nivel" routerLinkActive="active" [routerLink]="['./vrpls']" title="Parecer Social">
+          Parecer Social
+        </a>
+      </li>
+    </ng-container>
+    <li>
+      <a class="nav-link segundo-nivel" routerLinkActive="active" [routerLink]="['./quadro-resumo']"
+        title="Quadro Resumo">
+        Quadro Resumo
+      </a>
+    </li>
+    </ng-container>
+  </ul>
+  <div class="tab-content">
+    <router-outlet></router-outlet>
+  </div>
+</siconv-fieldset>

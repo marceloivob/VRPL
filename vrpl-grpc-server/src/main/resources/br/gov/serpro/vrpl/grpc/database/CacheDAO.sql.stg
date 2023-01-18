@@ -1,0 +1,3 @@
+definirUsuarioLogado(cpf) ::= <%
+	SET LOCAL vrpl.cpf_usuario TO '<cpf>';
+%>

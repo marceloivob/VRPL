@@ -1,0 +1,29 @@
+verificarExclusaoVRPL(numeroProposta, anoProposta) ::= <%
+    SELECT 																		<\n>
+		vp.numero_proposta as numero,											<\n>
+		vp.ano_proposta as ano,													<\n>
+		vp.versao_nr as versao,													<\n>
+		count(vll.id) as qtdLotes												<\n>
+	FROM vrpl_proposta vp 														<\n>
+	LEFT JOIN vrpl_licitacao vl ON (vp.id = vl.proposta_fk 						<\n>
+									AND vl.in_situacao != 'REJ')				<\n>
+	LEFT JOIN vrpl_lote_licitacao vll ON (vl.id = vll.licitacao_fk 				<\n>
+										  AND vll.versao_nr = vp.versao_nr)		<\n>
+	WHERE vp.numero_proposta = :numeroProposta									<\n>
+	AND vp.ano_proposta = :anoProposta											<\n>
+	AND vp.versao_in_atual 														<\n>
+	GROUP BY 1,2,3																<\n>
+%>
+
+
+verificarSeHouveRejeicaoLicitacao(numeroProposta, anoProposta) ::= <%
+    SELECT DISTINCT																<\n>
+		vp.id as id			                         							<\n>
+	FROM vrpl_proposta vp,														<\n>
+	     vrpl_licitacao vl  	                                                <\n>         
+	WHERE   vp.id = vl.proposta_fk 									     		<\n>
+        AND vl.in_situacao = 'REJ'										     	<\n>
+      	AND vp.ano_proposta = :anoProposta								    	<\n>
+      	AND vp.numero_proposta = :numeroProposta								<\n>
+	    AND vp.versao_in_atual 													<\n>
+%>

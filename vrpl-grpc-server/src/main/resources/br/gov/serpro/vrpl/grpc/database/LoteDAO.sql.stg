@@ -1,0 +1,31 @@
+excluirMeta(numeroProposta, anoProposta) ::= <% 
+    DELETE FROM vrpl_meta vm 
+    WHERE vm.id IN ( 
+	    SELECT vm2.id FROM vrpl_meta vm2 
+	    JOIN vrpl_submeta vs ON (vm2.id = vs.meta_fk) 
+	    JOIN vrpl_proposta proposta ON (vs.proposta_fk = proposta.id) 
+	    WHERE proposta.numero_proposta = :numeroProposta 
+	    AND proposta.ano_proposta = :anoProposta 
+    ) 
+%>
+
+excluirSubmetas(numeroProposta, anoProposta) ::= <% 
+    DELETE from vrpl_submeta vs 
+    WHERE vs.id IN ( 
+        SELECT vsm.id FROM vrpl_submeta vsm 
+        JOIN vrpl_proposta proposta ON (vsm.proposta_fk = proposta.id) 
+        WHERE proposta.numero_proposta = :numeroProposta 
+        AND proposta.ano_proposta = :anoProposta 
+    ) 
+%>
+
+excluirLotesLicitacao(numeroProposta, anoProposta) ::= <%
+    DELETE FROM vrpl_lote_licitacao vll2 
+    WHERE vll2.id IN ( 
+        SELECT vll.id FROM vrpl_lote_licitacao vll 
+        JOIN vrpl_licitacao vl ON (vll.licitacao_fk = vl.id) 
+        JOIN vrpl_proposta vp ON (vl.proposta_fk = vp.id) 
+        WHERE vp.numero_proposta = :numeroProposta 
+        AND vp.ano_proposta = :anoProposta 
+    ) 
+%>
