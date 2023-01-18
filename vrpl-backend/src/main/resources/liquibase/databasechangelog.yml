@@ -1,0 +1,13 @@
+databaseChangeLog:
+    - include: 
+        file: liquibase/sprint9/changelog.yml
+    - include:
+        file: liquibase/sprint10/changelog.yml
+    - include:
+        file: liquibase/termoCompromisso/changelog.yml
+    - include:
+        file: liquibase/sprint11/changelog.yml
+    - include:
+        file: liquibase/valoresZeradosFrenteObra/changelog.yml
+    - include:
+        file: liquibase/demanda2907252_duplicacaoPropostas/changelog.yml

@@ -1,0 +1,3 @@
+﻿INSERT INTO siconv.vrpl_licitacao (id,proposta_fk,numero_ano,objeto,valor_processo,status_processo,id_licitacao_fk,adt_login,adt_data_hora,adt_operacao,in_situacao,versao_nr,versao_id,versao_nm_evento,versao) VALUES 
+(nextval('siconv.vrpl_licitacao_seq'::regclass),1,'006/2018','Contratação de empresa para a prestação dos serviços de mão de obra com o fornecimento de todos os materiais necessários a serem empregados, sob o regime de empreitada por menor preço global, na execução das obras de pavimentação asfáltica das ruas Espírito Santo e Martin Berg.',251395.44,'Concluído',615289,'00442999070','2019-06-12 15:22:37.958','INSERT','EPE',0,NULL,NULL,0)
+;

@@ -1,0 +1,1256 @@
+
+updateProposta(propostaOriginal) ::= <%
+	UPDATE siconv.vrpl_proposta																							<\n>
+	SET versao_in_atual	= false,																						<\n>
+		versao 			= versao + 1,																					<\n>
+		adt_login		= current_setting('vrpl.cpf_usuario'),															<\n>
+		adt_data_hora	= LOCALTIMESTAMP,																				<\n>
+		adt_operacao	= 'UPDATE'																						<\n>
+	WHERE id			= :propostaOriginal.id																			<\n>
+	  AND versao_in_atual																								<\n>
+%>
+
+cloneProposta(propostaOriginal, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_proposta																					<\n>	
+		(id_siconv, 																									<\n>
+		numero_proposta, 																								<\n>
+		ano_proposta, 																									<\n>
+		valor_global, 																									<\n>
+		valor_repasse, 																									<\n>
+		valor_contrapartida, 																							<\n>
+		modalidade, 																									<\n>
+		nome_objeto, 																									<\n>
+		numero_convenio, 																								<\n>
+		ano_convenio, 																									<\n>
+		data_assinatura_convenio, 																						<\n>
+		codigo_programa, 																								<\n>
+		nome_programa, 																									<\n>
+		identificacao_proponente, 																						<\n>
+		nome_proponente, 																								<\n>
+		uf, 																											<\n>
+		pc_min_contrapartida, 																							<\n>
+		nome_mandataria, 																								<\n>
+		categoria, 																										<\n>
+		nivel_contrato, 																								<\n>
+		spa_homologado, 																								<\n>
+		apelido_empreendimento,                                             											<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao, 																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento,																								<\n> 
+		versao_nr, 																										<\n>	
+		versao_in_atual,                                                                                                <\n>
+	    termo_compromisso_tem_mandatar                                                                                  <\n>
+		) VALUES																					            		<\n>
+		(:propostaOriginal.idSiconv,																					<\n>
+		 :propostaOriginal.numeroProposta, 																				<\n>
+		 :propostaOriginal.anoProposta,  																				<\n>
+		 :propostaOriginal.valorGlobal,  																				<\n>
+		 :propostaOriginal.valorRepasse, 																				<\n>
+		 :propostaOriginal.valorContrapartida,  																		<\n>
+		 :propostaOriginal.modalidade,  																				<\n>
+		 :propostaOriginal.nomeObjeto,  																				<\n>
+		 :propostaOriginal.numeroConvenio,  																			<\n>
+		 :propostaOriginal.anoConvenio, 																				<\n>
+		 :propostaOriginal.dataAssinaturaConvenio,  																	<\n>
+		 :propostaOriginal.codigoPrograma,  																			<\n>
+		 :propostaOriginal.nomePrograma, 																				<\n>
+		 :propostaOriginal.identificacaoProponente,  																	<\n>
+		 :propostaOriginal.nomeProponente,  																			<\n>
+		 :propostaOriginal.uf,  																						<\n>
+		 :propostaOriginal.pcMinContrapartida, 																			<\n>
+		 :propostaOriginal.nomeMandataria,  																			<\n>
+		 :propostaOriginal.categoria,  																					<\n>
+		 :propostaOriginal.nivelContrato,  																				<\n>
+		 :propostaOriginal.spaHomologado, 																				<\n>
+		 :propostaOriginal.apelidoEmpreendimento,																		<\n>
+		 current_setting('vrpl.cpf_usuario'),																			<\n>
+		 LOCALTIMESTAMP,																								<\n>
+		 'INSERT',																										<\n>
+		 :propostaOriginal.versao,																						<\n>
+		 :propostaOriginal.id::text,																					<\n>
+		 :siglaEvento,																									<\n>
+		 :propostaOriginal.versaoNr + 1,																				<\n>
+		 true,                                                                                                          <\n>
+		 :propostaOriginal.termoCompromissoTemMandatar )															    <\n>						<\n>
+	RETURNING *;																										<\n>
+ 	  
+%>
+
+selectSubItemDeInvestimentoParaClonar(propostaOriginal) ::= <%
+	SELECT DISTINCT subitemInvestimento.*
+	FROM siconv.vrpl_subitem_investimento subitemInvestimento															<\n>
+	JOIN siconv.vrpl_meta 			on (vrpl_meta.subitem_fk 		= subitemInvestimento.id)							<\n>
+	JOIN siconv.vrpl_submeta 		on (vrpl_meta.id 				= vrpl_submeta.meta_fk)								<\n>
+	JOIN siconv.vrpl_proposta 		on (vrpl_submeta.proposta_fk 	= vrpl_proposta.id)									<\n>
+	WHERE siconv.vrpl_proposta.id 	= :propostaOriginal.id																<\n>
+%>
+
+selectMetaParaClonar(propostaOriginal) ::= <%
+	SELECT DISTINCT meta.*																								<\n>
+	FROM siconv.vrpl_meta meta																							<\n>
+	JOIN siconv.vrpl_submeta 		on (meta.id 				= vrpl_submeta.meta_fk)									<\n>
+	JOIN siconv.vrpl_proposta 		on (vrpl_submeta.proposta_fk 	= vrpl_proposta.id)									<\n>
+	WHERE siconv.vrpl_proposta.id 	= :propostaOriginal.id																<\n>
+%>
+
+selectLicitacaoParaClonarPorProposta(propostaOriginal) ::= <%
+	SELECT siconv.vrpl_licitacao.*																						<\n>
+    FROM siconv.vrpl_licitacao  																						<\n>
+    JOIN siconv.vrpl_proposta 			ON siconv.vrpl_licitacao.proposta_fk = siconv.vrpl_proposta.id					<\n>
+    WHERE siconv.vrpl_proposta.id 		= :propostaOriginal.id															<\n>
+%>
+
+selectFornecedorParaClonar(idsLicitacoesOriginais) ::= <%
+	SELECT siconv.vrpl_fornecedor.*																						<\n>
+	FROM siconv.vrpl_fornecedor																							<\n>
+	WHERE siconv.vrpl_fornecedor.licitacao_fk IN (<idsLicitacoesOriginais>)												<\n>
+%>
+
+cloneSubItemDeInvestimento (subItemDeInvestimento, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_subitem_investimento																		<\n>
+		(id_subitem_analise, 																							<\n>
+		descricao,  																									<\n>
+		in_projeto_social,  																							<\n>
+		codigo_und,  																									<\n>
+		descricao_und,  																								<\n>
+		versao,  																										<\n>
+		adt_login,  																									<\n>
+		adt_data_hora,  																								<\n>
+		adt_operacao,  																									<\n>
+		versao_nr,  																									<\n>
+		versao_id,  																									<\n>
+		versao_nm_evento) 																								<\n>
+	VALUES	 																											<\n>
+		(:subItemDeInvestimento.idSubitemAnalise,																		<\n>
+		:subItemDeInvestimento.descricao, 																				<\n>
+		:subItemDeInvestimento.inProjetoSocial,																			<\n>
+		:subItemDeInvestimento.codigoUnd,																				<\n>
+		:subItemDeInvestimento.descricaoUnd, 																			<\n>
+	 	:subItemDeInvestimento.versao,																					<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+	 	:subItemDeInvestimento.versaoNr + 1,																			<\n>
+		:subItemDeInvestimento.id::text,																				<\n>
+	 	:siglaEvento)																									<\n>
+	RETURNING *;																										<\n>
+%>
+
+cloneMeta (meta, subitemInvestimentoClonado, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_meta																						<\n>
+		(id_meta_analise,																								<\n>
+		tx_descricao_analise,																							<\n>
+		nr_meta_analise, 																								<\n>
+		qt_itens_analise, 																								<\n>
+		in_social, 																										<\n>
+		subitem_fk,																										<\n>
+		adt_login,				 																						<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao_nr, 																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento,																								<\n>
+		versao)																											<\n>
+	VALUES																												<\n>
+		(:meta.idMetaAnalise,																							<\n>
+		:meta.descricao,																								<\n>
+		:meta.numero,																									<\n>
+		:meta.quantidade,																								<\n>
+		:meta.social,																									<\n>
+		:subitemInvestimentoClonado.id,																					<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+	 	:meta.numeroVersao + 1,																							<\n>
+		:meta.id::text,			 																						<\n>
+	 	:siglaEvento,																									<\n>
+		:meta.versao)																									<\n>
+	RETURNING *;																										<\n>
+%>
+
+cloneLicitacaoPorProposta(licitacaoOriginal, propostaClonada, siglaEvento)  ::= <%
+	INSERT INTO siconv.vrpl_licitacao 																					<\n>
+		(proposta_fk, 																									<\n>
+		numero_ano, 																									<\n>
+		objeto, 																										<\n>
+		valor_processo, 																								<\n>
+		status_processo, 																								<\n>
+		id_licitacao_fk, 																								<\n>
+		in_situacao, 																									<\n>
+		modalidade, 																									<\n>
+		regime_contratacao, 																							<\n>
+		data_publicacao, 																								<\n>
+		data_homologacao, 																								<\n>
+		processo_de_execucao,																							<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao_nr, 																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento,																								<\n>
+		versao)																											<\n>
+	VALUES																												<\n> 
+		(:propostaClonada.id,																							<\n>
+		:licitacaoOriginal.numeroAno,																					<\n>
+		:licitacaoOriginal.objeto,																						<\n>
+		:licitacaoOriginal.valorProcessoLicitatorio,																	<\n>
+		:licitacaoOriginal.situacaoDoProcessoLicitatorio,																<\n>
+		:licitacaoOriginal.idLicitacaoFk,																				<\n>
+		:licitacaoOriginal.situacaoDaLicitacao,																			<\n>
+		:licitacaoOriginal.modalidade,																					<\n>
+		:licitacaoOriginal.regimeContratacao,																			<\n>
+		:licitacaoOriginal.dataPublicacao,																				<\n>
+		:licitacaoOriginal.dataHomologacao,																				<\n>
+		:licitacaoOriginal.processoDeExecucao,																			<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+	 	:licitacaoOriginal.numeroVersao + 1,																			<\n>
+		:licitacaoOriginal.id::text,																					<\n>
+	 	:siglaEvento,																									<\n>
+		:licitacaoOriginal.versao																						<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>
+%>
+
+cloneFornecedor(fornecedorOriginal, licitacaoClonada, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_fornecedor 																					<\n>
+		(licitacao_fk,																									<\n> 
+		razao_social, 																									<\n>
+		tipo_identificacao, 																							<\n>
+		identificacao, 																									<\n>
+		obsoleto, 			    																						<\n>
+		versao, 																										<\n>
+		versao_nr, 																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao)																									<\n>
+	VALUES																												<\n>
+		(																												<\n>
+		:licitacaoClonada.id,																							<\n>
+		:fornecedorOriginal.razaoSocial,																				<\n>
+		:fornecedorOriginal.tipoIdentificacao,																			<\n>
+		:fornecedorOriginal.identificacao,																				<\n>
+		:fornecedorOriginal.obsoleto,   																				<\n>
+		:fornecedorOriginal.versao,																						<\n>
+	 	:fornecedorOriginal.versaoNr + 1,																				<\n>
+		:fornecedorOriginal.id::text,																					<\n>
+	 	:siglaEvento,																									<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT'  																										<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>
+%>
+
+selectLoteParaClonar(propostaOriginal) ::= <%
+	SELECT DISTINCT siconv.vrpl_lote_licitacao.*																		<\n>
+	FROM siconv.vrpl_lote_licitacao 																					<\n>
+	JOIN siconv.vrpl_submeta 		on (siconv.vrpl_lote_licitacao.id 	= vrpl_submeta.vrpl_lote_licitacao_fk)			<\n>
+	JOIN siconv.vrpl_proposta 		on (vrpl_submeta.proposta_fk 		= vrpl_proposta.id)								<\n>
+	WHERE siconv.vrpl_proposta.id 	= :propostaOriginal.id																<\n>	
+%>
+
+cloneLicitacaoLote(loteOriginal, fornecedorClonado, licitacaoClonada, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_lote_licitacao 																				<\n>
+		(licitacao_fk,  																								<\n>
+	    fornecedor_fk,  																								<\n>
+	    numero_lote,  																									<\n>
+	    adt_login,  																									<\n>
+	    adt_data_hora,  																								<\n>
+	    adt_operacao,  																									<\n>
+	    versao,  																										<\n>
+	    versao_nr,  																									<\n>
+	    versao_id,  																									<\n>
+	    versao_nm_evento) 													 											<\n>
+    VALUES ( 																											<\n>
+   		:licitacaoClonada.id, 																							<\n>
+    	:fornecedorClonado.id, 																							<\n>
+    	:loteOriginal.numeroDoLote, 																					<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:loteOriginal.versao,																							<\n>
+	 	:loteOriginal.numeroVersao + 1,																					<\n>
+		:loteOriginal.id::text,																							<\n>
+	 	:siglaEvento																									<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>
+%>
+
+selectSubmetaParaClonar(propostaOriginal) ::= <%
+    SELECT siconv.vrpl_submeta.*																						<\n>
+    FROM siconv.vrpl_submeta  																							<\n>
+	WHERE siconv.vrpl_submeta.proposta_fk 		= :propostaOriginal.id													<\n>
+%>
+
+cloneSubmeta(submetaOriginal, metaClonada, propostaClonada, loteClonado, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_submeta 																					<\n>
+		(id_submeta_analise,																							<\n>
+		proposta_fk,																									<\n>
+		vrpl_lote_licitacao_fk, 																						<\n>
+		meta_fk, 																										<\n>
+		vl_repasse, 																									<\n>
+		vl_outros, 																										<\n>
+		vl_contrapartida, 																								<\n>
+		vl_total_licitado, 																								<\n>
+		in_situacao, 																									<\n>
+		in_regime_execucao, 																							<\n>
+		nr_submeta_analise,  																							<\n>
+		tx_descricao_analise, 																							<\n>
+		nr_lote_analise, 																								<\n>
+		vl_repasse_analise, 																							<\n>
+		vl_contrapartida_analise,  																						<\n>
+		vl_outros_analise, 																								<\n>
+		vl_total_analise, 																								<\n>
+		in_situacao_analise,																							<\n> 
+		in_regime_execucao_analise,  																					<\n>
+		natureza_despesa_sub_it_fk_analise,  																			<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao,  																									<\n>
+		versao_nr, 																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao) 																										<\n>
+	VALUES																												<\n>
+		(
+		:submetaOriginal.idSubmetaAnalise,																				<\n>
+		:propostaClonada.id,																							<\n>
+		:loteClonado.id,																								<\n>
+		:metaClonada.id,																								<\n>
+		:submetaOriginal.vlRepasse,																						<\n>
+		:submetaOriginal.vlOutros,																						<\n>
+		:submetaOriginal.vlContrapartida,																				<\n>
+		:submetaOriginal.vlTotalLicitado,																				<\n>
+		:submetaOriginal.situacao,																						<\n>
+		:submetaOriginal.regimeExecucao,																				<\n>
+		:submetaOriginal.numero,																						<\n>
+		:submetaOriginal.descricao,																						<\n>
+		:submetaOriginal.lote,																							<\n>
+		:submetaOriginal.vlRepasseAnalise,																				<\n>
+		:submetaOriginal.vlContrapartidaAnalise,																		<\n>
+		:submetaOriginal.vlOutrosAnalise,																				<\n>
+		:submetaOriginal.vlTotalAnalise,																				<\n>
+		:submetaOriginal.situacaoAnalise,																				<\n>
+		:submetaOriginal.regimeExecucaoAnalise,																			<\n>
+		:submetaOriginal.itemPad,																						<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+	 	:submetaOriginal.numeroVersao + 1,																				<\n>
+		:submetaOriginal.id::text,																						<\n>
+	 	:siglaEvento,																									<\n>
+		:submetaOriginal.versao																							<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>
+%>
+
+selectPOParaClonar(idsSubmetasOriginais) ::= <%
+	SELECT siconv.vrpl_po.*																								<\n>
+	FROM siconv.vrpl_po 																								<\n>
+	WHERE siconv.vrpl_po.submeta_fk IN (<idsSubmetasOriginais>)															<\n>
+%>
+
+clonePO(poOriginal, submetaClonada, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_po  																						<\n>
+		(id_po_analise,   																								<\n>
+		submeta_fk,   																									<\n>
+		dt_previsao_inicio_obra,   																						<\n>
+		dt_previsao_inicio_obra_analise,   																				<\n>
+		qt_meses_duracao_obra,  																						<\n>
+		in_acompanhamento_eventos,   																					<\n>
+		in_desonerado,   																								<\n>
+		sg_localidade,   																								<\n>
+		dt_base_analise,   																								<\n>
+		dt_base_vrpl,																									<\n>
+		referencia,                                                                                                     <\n>
+		adt_login,   																									<\n>
+		adt_data_hora,   																								<\n>
+		adt_operacao, 																									<\n>
+		versao_nr,   																									<\n>
+		versao_id, 	  																									<\n>
+		versao_nm_evento,   																							<\n>
+		versao)  																										<\n>
+	VALUES  																											<\n>
+		(  																												<\n>
+        :poOriginal.idPoAnalise,	  																					<\n>
+        :submetaClonada.id,  																							<\n>
+        :poOriginal.dtPrevisaoInicioObra, 	 																			<\n>
+        :poOriginal.dtPrevisaoInicioObraAnalise,	 																	<\n>
+        :poOriginal.qtMesesDuracaoObra,		  																			<\n>
+        :poOriginal.inAcompanhamentoEventos,	  																		<\n>
+        :poOriginal.inDesonerado,	  																					<\n>
+        :poOriginal.sgLocalidade,	  																					<\n>
+        :poOriginal.dtBaseAnalise,																						<\n>
+        :poOriginal.dtBaseVrpl,																							<\n>
+        :poOriginal.referencia,																							<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+	 	:poOriginal.versaoNr + 1,																						<\n>
+		:poOriginal.id::text,																							<\n>
+	 	:siglaEvento,																									<\n>
+		:poOriginal.versao																								<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>		
+%>
+
+clonePOBatch (poClone) ::= <%
+	INSERT INTO siconv.vrpl_po  																						<\n>
+		(id_po_analise,   																								<\n>
+		submeta_fk,   																									<\n>
+		dt_previsao_inicio_obra,   																						<\n>
+		dt_previsao_inicio_obra_analise,   																				<\n>
+		qt_meses_duracao_obra,  																						<\n>
+		in_acompanhamento_eventos,   																					<\n>
+		in_desonerado,   																								<\n>
+		sg_localidade,   																								<\n>
+		dt_base_analise,   																								<\n>
+		dt_base_vrpl,																									<\n>
+		referencia,                                                                                                     <\n>
+		adt_login,   																									<\n>
+		adt_data_hora,   																								<\n>
+		adt_operacao, 																									<\n>
+		versao_nr,   																									<\n>
+		versao_id, 	  																									<\n>
+		versao_nm_evento,   																							<\n>
+		versao)  																										<\n>
+	VALUES  																											<\n>
+		(  																												<\n>
+        :poClone.idPoAnalise,	  																					<\n>
+        :poClone.submetaId,  																							<\n>
+        :poClone.dtPrevisaoInicioObra, 	 																			<\n>
+        :poClone.dtPrevisaoInicioObraAnalise,	 																	<\n>
+        :poClone.qtMesesDuracaoObra,		  																			<\n>
+        :poClone.inAcompanhamentoEventos,	  																		<\n>
+        :poClone.inDesonerado,	  																					<\n>
+        :poClone.sgLocalidade,	  																					<\n>
+        :poClone.dtBaseAnalise,																						<\n>
+        :poClone.dtBaseVrpl,																							<\n>
+        :poClone.referencia,																							<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+	 	:poClone.versaoNr,																						<\n>
+		:poClone.versaoId,																							<\n>
+	 	:poClone.versaoNmEvento,																									<\n>
+		:poClone.versao																								<\n>
+		) 																												<\n>		
+%>
+
+selectEventoParaClonar(idsPosOriginais) ::= <%
+	SELECT siconv.vrpl_evento.*																							<\n> 
+    FROM siconv.vrpl_evento 																							<\n>
+    WHERE siconv.vrpl_evento.po_fk IN (<idsPosOriginais>)																<\n>	
+%>
+
+cloneEvento(eventoOriginal, poClonado, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_evento  																					<\n>
+		(nm_evento, 																									<\n>
+		po_fk, 																											<\n>
+		nr_evento,  																									<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(  																												<\n>
+		:eventoOriginal.nomeEvento,																						<\n>
+		:poClonado.id,																									<\n>
+		:eventoOriginal.numeroEvento,																					<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:eventoOriginal.versao,																							<\n>
+		:eventoOriginal.id::text,																						<\n>
+	 	:siglaEvento,																									<\n>
+	 	:eventoOriginal.numeroVersao + 1																				<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>		
+%>
+
+
+cloneEventoBatch(eventoClone) ::= <%
+	INSERT INTO siconv.vrpl_evento  																					<\n>
+		(nm_evento, 																									<\n>
+		po_fk, 																											<\n>
+		nr_evento,  																									<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(  																												<\n>
+		:eventoClone.nomeEvento,																						<\n>
+		:eventoClone.idPo,																									<\n>
+		:eventoClone.numeroEvento,																					<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:eventoClone.versao,																							<\n>
+		:eventoClone.versaoId,																						<\n>
+	 	:eventoClone.versaoNmEvento,																									<\n>
+	 	:eventoClone.numeroVersao																				<\n>
+		) 																												<\n>		
+%>
+
+selectFrenteDeObraParaClonar(idsPosOriginais) ::= <%
+	SELECT siconv.vrpl_frente_obra.*																					<\n> 
+    FROM siconv.vrpl_frente_obra 																						<\n>
+    WHERE siconv.vrpl_frente_obra.po_fk IN (<idsPosOriginais>)															<\n>	
+%>
+
+cloneFrenteDeObra(frenteDeObraOriginal, poClonado, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_frente_obra																					<\n>
+		(nm_frente_obra, 																								<\n>
+		po_fk,		 																									<\n>
+		nr_frente_obra,																									<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(  																												<\n>
+		:frenteDeObraOriginal.nmFrenteObra,																				<\n>
+		:poClonado.id,																									<\n>
+		:frenteDeObraOriginal.nrFrenteObra,																				<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:frenteDeObraOriginal.versao,																					<\n>
+		:frenteDeObraOriginal.id::text,																					<\n>
+	 	:siglaEvento,																									<\n>
+	 	:frenteDeObraOriginal.numeroVersao + 1																			<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>		
+%>
+
+
+cloneFrenteDeObraBatch (frenteObraClone) ::= <%
+	INSERT INTO siconv.vrpl_frente_obra																					<\n>
+		(nm_frente_obra, 																								<\n>
+		po_fk,		 																									<\n>
+		nr_frente_obra,																									<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(  																												<\n>
+		:frenteObraClone.nmFrenteObra,																				<\n>
+		:frenteObraClone.poFk,																									<\n>
+		:frenteObraClone.nrFrenteObra,																				<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:frenteObraClone.versao,																					<\n>
+		:frenteObraClone.versaoId,																					<\n>
+	 	:frenteObraClone.versaoNmEvento,																									<\n>
+	 	:frenteObraClone.numeroVersao																			<\n>
+		) 																												<\n>		
+%>
+
+selectMacroServicoParaClonar(idsPosOriginais) ::= <%
+	SELECT siconv.vrpl_macro_servico.*																					<\n> 
+    FROM siconv.vrpl_macro_servico 																						<\n>
+    WHERE siconv.vrpl_macro_servico.po_fk IN (<idsPosOriginais>)														<\n>	
+%>
+
+cloneMacroServico(macroServicoOriginal, poClonado, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_macro_servico																				<\n>
+		(tx_descricao,  																								<\n>
+		po_fk,		 																									<\n>
+		nr_macro_servico,																								<\n>
+		id_macro_servico_analise,																						<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(  																												<\n>
+		:macroServicoOriginal.txDescricao,																				<\n>
+		:poClonado.id,																									<\n>
+		:macroServicoOriginal.nrMacroServico,																			<\n>
+		:macroServicoOriginal.idMacroServicoAnalise,																	<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:macroServicoOriginal.versao,																					<\n>
+		:macroServicoOriginal.id::text,																					<\n>
+	 	:siglaEvento,																									<\n>
+	 	:macroServicoOriginal.versaoNr + 1																				<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>		
+%>
+
+
+cloneMacroServicoBatch (macroServicoClone) ::= <%
+	INSERT INTO siconv.vrpl_macro_servico																				<\n>
+		(tx_descricao,  																								<\n>
+		po_fk,		 																									<\n>
+		nr_macro_servico,																								<\n>
+		id_macro_servico_analise,																						<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(  																												<\n>
+		:macroServicoClone.txDescricao,																				<\n>
+		:macroServicoClone.poFk,																									<\n>
+		:macroServicoClone.nrMacroServico,																			<\n>
+		:macroServicoClone.idMacroServicoAnalise,																	<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:macroServicoClone.versao,																					<\n>
+		:macroServicoClone.versaoId,																					<\n>
+	 	:macroServicoClone.versaoNmEvento,																									<\n>
+	 	:macroServicoClone.versaoNr																			<\n>
+		) 																												<\n>		
+%>
+
+selectMacroServicoParcelaParaClonar(idsMacroServicosOriginais) ::= <%
+	SELECT siconv.vrpl_macro_servico_parcela.*																			<\n> 
+    FROM siconv.vrpl_macro_servico_parcela 																				<\n>
+    WHERE siconv.vrpl_macro_servico_parcela.macro_servico_fk IN (<idsMacroServicosOriginais>)							<\n>
+%>
+
+cloneMacroServicoParcela(macroServicoParcelaOriginal, macroServicoClonado, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_macro_servico_parcela 																		<\n>
+		(nr_parcela, 
+		pc_parcela,
+		macro_servico_fk,  																								<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(  																												<\n>
+		:macroServicoParcelaOriginal.nrParcela,																			<\n>
+		:macroServicoParcelaOriginal.pcParcela,																			<\n>
+		:macroServicoClonado.id,																						<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:macroServicoParcelaOriginal.versao,																			<\n>
+		:macroServicoParcelaOriginal.id::text,																			<\n>
+	 	:siglaEvento,																									<\n>
+	 	:macroServicoParcelaOriginal.numeroVersao + 1																	<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>
+%>
+
+
+cloneMacroServicoParcelaBatch(macroServicoParcelaClonada) ::= <%
+	INSERT INTO siconv.vrpl_macro_servico_parcela 																		<\n>
+		(nr_parcela, 
+		pc_parcela,
+		macro_servico_fk,  																								<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(  																												<\n>
+		:macroServicoParcelaClonada.nrParcela,																			<\n>
+		:macroServicoParcelaClonada.pcParcela,																			<\n>
+		:macroServicoParcelaClonada.macroServicoFk,																						<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:macroServicoParcelaClonada.versao,																			<\n>
+		:macroServicoParcelaClonada.versaoId,																			<\n>
+	 	:macroServicoParcelaClonada.versaoNmEvento,																									<\n>
+	 	:macroServicoParcelaClonada.numeroVersao																	<\n>
+		) 																												<\n>
+%>
+
+selectAnexoParaClonar(idsLicitacoesOriginais) ::= <%
+    SELECT siconv.vrpl_anexo.* 																							<\n>
+    FROM siconv.vrpl_anexo  																							<\n>
+    WHERE siconv.vrpl_anexo.vrpl_licitacao_fk IN (<idsLicitacoesOriginais>)												<\n>
+%>
+
+cloneAnexo(anexoOriginal, licitacaoClonada, siglaEvento) ::= <%
+    INSERT INTO siconv.vrpl_anexo  																						<\n>
+        (vrpl_licitacao_fk, 																							<\n>
+        nm_arquivo, 																									<\n>
+        caminho, 																										<\n>
+        dt_upload, 																										<\n>
+        tx_descricao,  																									<\n>
+        in_tipoanexo, 																									<\n>
+        id_cpf_enviadopor, 																								<\n>
+        nome_enviadopor, 																								<\n>
+        in_perfil, 																										<\n>
+        bucket,																											<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(  																												<\n>
+		:licitacaoClonada.id,																							<\n>
+		:anexoOriginal.nomeDoArquivo,																					<\n>
+		:anexoOriginal.caminhoDoArquivo,																				<\n>
+		:anexoOriginal.dataDoUpload,																					<\n>
+		:anexoOriginal.descricaoDoAnexo,																				<\n>
+		:anexoOriginal.tipoDoAnexo,																						<\n>
+		:anexoOriginal.cpfDoUsuarioQueEnviou,																			<\n>
+		:anexoOriginal.nomeDoUsuarioQueEnviou,																			<\n>
+		:anexoOriginal.perfilDoUsuarioQueEnviou,																		<\n>
+		:anexoOriginal.bucket,																							<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:anexoOriginal.versao,																							<\n>
+		:anexoOriginal.identificadorDoAnexo::text,																		<\n>
+	 	:siglaEvento,																									<\n>
+	 	:anexoOriginal.versaoNr + 1																						<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>
+%>
+
+selectHistoricoParaClonar(idsLicitacoesOriginais) ::= <%
+    SELECT siconv.vrpl_historico_licitacao.* 																			<\n>
+    FROM siconv.vrpl_historico_licitacao  																				<\n>
+    WHERE siconv.vrpl_historico_licitacao.licitacao_fk IN (<idsLicitacoesOriginais>)									<\n>
+%>
+
+cloneHistorico(historicoOriginal, licitacaoClonada, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_historico_licitacao 																		<\n>
+		(licitacao_fk,   																								<\n>
+		in_evento,   																									<\n>
+		in_situacao,   																									<\n>
+		tx_consideracoes,  																								<\n>
+		dt_registro,   																									<\n>
+		nm_responsavel,   																								<\n>
+		nr_cpf_responsavel,  																							<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(																												<\n>
+		:licitacaoClonada.id,																							<\n>
+		:historicoOriginal.eventoGerador,																				<\n>
+		:historicoOriginal.situacaoDaLicitacao,																			<\n>
+		:historicoOriginal.consideracoes,																				<\n>
+		:historicoOriginal.dataDeRegistro,																				<\n>
+		:historicoOriginal.nomeDoResponsavel,																			<\n>
+		:historicoOriginal.cpfDoResponsavel,																			<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:historicoOriginal.versao,																						<\n>
+		:historicoOriginal.id::text,																					<\n>
+	 	:siglaEvento,																									<\n>
+	 	:historicoOriginal.versaoNr + 1																					<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>
+%>
+
+cloneHistoricoBatch (historicoClonado) ::= <%
+	INSERT INTO siconv.vrpl_historico_licitacao 																		<\n>
+		(licitacao_fk,   																								<\n>
+		in_evento,   																									<\n>
+		in_situacao,   																									<\n>
+		tx_consideracoes,  																								<\n>
+		dt_registro,   																									<\n>
+		nm_responsavel,   																								<\n>
+		nr_cpf_responsavel,  																							<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(																												<\n>
+		:historicoClonado.identificadorDaLicitacao,																							<\n>
+		:historicoClonado.eventoGerador,																				<\n>
+		:historicoClonado.situacaoDaLicitacao,																			<\n>
+		:historicoClonado.consideracoes,																				<\n>
+		:historicoClonado.dataDeRegistro,																				<\n>
+		:historicoClonado.nomeDoResponsavel,																			<\n>
+		:historicoClonado.cpfDoResponsavel,																			<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:historicoClonado.versao,																						<\n>
+		:historicoClonado.versaoId,																					<\n>
+	 	:historicoClonado.versaoNmEvento,																									<\n>
+	 	:historicoClonado.versaoNr																					<\n>
+		) 
+
+%>
+
+selectLaudoParaClonar(idsLicitacoesOriginais) ::= <%
+    SELECT siconv.vrpl_laudo.* 																							<\n>
+    FROM siconv.vrpl_laudo 				 																				<\n>
+    WHERE siconv.vrpl_laudo.licitacao_fk IN (<idsLicitacoesOriginais>)													<\n>
+%>
+
+cloneLaudo(laudoOriginal, licitacaoClonada, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_laudo  																						<\n>
+		(licitacao_fk, 																									<\n>
+		template_fk, 																									<\n>
+		in_status, 																										<\n>
+		in_resultado,  																									<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(																												<\n>
+		:licitacaoClonada.id,																							<\n>
+		:laudoOriginal.templateFk,																						<\n>
+		:laudoOriginal.inStatus,																						<\n>
+		:laudoOriginal.inResultado,																						<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:laudoOriginal.versao,																							<\n>
+		:laudoOriginal.id::text,																						<\n>
+	 	:siglaEvento,																									<\n>
+	 	:laudoOriginal.versaoNr + 1																						<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>
+%>
+
+selectPendenciaParaClonar (idsLaudosOriginais) ::= <%
+	SELECT siconv.vrpl_pendencia.*																						<\n>
+	FROM siconv.vrpl_pendencia																							<\n>
+	WHERE siconv.vrpl_pendencia.laudo_fk IN (<idsLaudosOriginais>)														<\n>
+%>
+
+clonePendencia(pendenciaOriginal, laudoClonado, submetaClonada, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_pendencia 																					<\n>
+		(in_resolvida, 																									<\n>
+		descricao, 																										<\n>
+		prazo, 																											<\n>
+		laudo_fk, 								 																		<\n>
+		submeta_fk,																										<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(																												<\n>
+		:pendenciaOriginal.inResolvida,																					<\n>
+		:pendenciaOriginal.descricao,																					<\n>
+		:pendenciaOriginal.prazo,																						<\n>
+		:laudoClonado.id,																								<\n>
+		:submetaClonada.id,																								<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:pendenciaOriginal.versao,																						<\n>
+		:pendenciaOriginal.id::text,																					<\n>
+	 	:siglaEvento,																									<\n>
+	 	:pendenciaOriginal.versaoNr + 1																					<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>
+%>
+
+selectRespostaParaClonar(idsLaudosOriginais) ::= <%
+	SELECT siconv.vrpl_resposta.*																						<\n>
+	FROM siconv.vrpl_resposta																							<\n>
+	WHERE siconv.vrpl_resposta.laudo_fk IN (<idsLaudosOriginais>)														<\n>
+%>
+
+cloneResposta(respostaOriginal, laudoClonado, loteClonado, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_resposta  																					<\n>
+		(resposta, 																										<\n>
+		pergunta_fk, 																									<\n>
+		laudo_fk,  																										<\n>
+		lote_fk,																										<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(																												<\n>
+		:respostaOriginal.resposta,
+		:respostaOriginal.perguntaFk,
+		:laudoClonado.id,
+		:loteClonado.id,
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:respostaOriginal.versao,																						<\n>
+		:respostaOriginal.id::text,																						<\n>
+	 	:siglaEvento,																									<\n>
+	 	:respostaOriginal.versaoNr + 1																					<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>
+%>
+
+selectEventoFrenteDeObraParaClonar(idsEventosOriginais) ::= <%
+	SELECT siconv.vrpl_evento_frente_obra.*																				<\n>
+	FROM siconv.vrpl_evento_frente_obra																					<\n>
+	WHERE siconv.vrpl_evento_frente_obra.evento_fk IN (<idsEventosOriginais>)											<\n>
+%>
+
+cloneEventoFrenteObra(eventoFrenteObraOriginal, frenteObraClonado, eventoClonado, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_evento_frente_obra  																		<\n>
+		(evento_fk, 																									<\n>
+		frente_obra_fk, 																								<\n>
+		nr_mes_conclusao,  																								<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(																												<\n>
+		:eventoClonado.id,																								<\n>
+		:frenteObraClonado.id,																							<\n>
+		:eventoFrenteObraOriginal.nrMesConclusao,																		<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:eventoFrenteObraOriginal.versao,																				<\n>
+		:eventoFrenteObraOriginal.eventoFk  || '_' || :eventoFrenteObraOriginal.frenteObraFk,							<\n>
+	 	:siglaEvento,																									<\n>
+	 	:eventoFrenteObraOriginal.versaoNr + 1																			<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>
+%>
+
+
+cloneEventoFrenteObraBatch(eventoFrenteObraClone) ::= <%
+	INSERT INTO siconv.vrpl_evento_frente_obra  																		<\n>
+		(evento_fk, 																									<\n>
+		frente_obra_fk, 																								<\n>
+		nr_mes_conclusao,  																								<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(																												<\n>
+		:eventoFrenteObraClone.eventoFk,																								<\n>
+		:eventoFrenteObraClone.frenteObraFk,																							<\n>
+		:eventoFrenteObraClone.nrMesConclusao,																		<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:eventoFrenteObraClone.versao,																				<\n>
+		:eventoFrenteObraClone.versaoId,							<\n>
+	 	:eventoFrenteObraClone.versaoNmEvento,																									<\n>
+	 	:eventoFrenteObraClone.versaoNr																			<\n>
+		) 																												<\n>
+%>
+
+selectServicoParaClonar(idsMacroServicosOriginais) ::= <%
+	SELECT distinct siconv.vrpl_servico.*																						<\n>
+	FROM siconv.vrpl_servico																							<\n>
+	WHERE SICONV.vrpl_servico.macro_servico_fk IN (<idsMacroServicosOriginais>)											<\n>
+%> 
+
+cloneServico(servicoOriginal, macroServicoClonado, eventoClonado, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_servico  																					<\n>
+		(macro_servico_fk,																								<\n> 
+		evento_fk, 																										<\n>
+		tx_observacao, 																									<\n>
+		nr_servico, 																									<\n>
+		cd_servico, 																									<\n>
+		tx_descricao, 																									<\n>
+		sg_unidade, 																									<\n>
+		vl_custo_unitario_ref_analise, 																					<\n>
+		pc_bdi_analise,																									<\n>
+		qt_total_itens_analise, 																						<\n>
+		vl_custo_unitario_analise, 																						<\n>
+		vl_custo_unitario_database, 																					<\n>
+		vl_preco_unitario_analise,																						<\n>
+		vl_preco_total_analise, 																						<\n>
+		pc_bdi_licitado, 																								<\n>
+		vl_preco_unitario_licitado, 																					<\n>
+		in_fonte, 																										<\n>
+		id_servico_analise,																								<\n> 
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(																												<\n>
+		:macroServicoClonado.id,																						<\n>
+		:eventoClonado.id,																								<\n>
+		:servicoOriginal.txObservacao,																					<\n>
+		:servicoOriginal.nrServico,																						<\n>
+		:servicoOriginal.cdServico,																						<\n>
+		:servicoOriginal.txDescricao,																					<\n>
+		:servicoOriginal.sgUnidade,																						<\n>
+		:servicoOriginal.vlCustoUnitarioRef,																			<\n>
+		:servicoOriginal.pcBdi,																							<\n>
+		:servicoOriginal.qtTotalItensAnalise,																			<\n>
+		:servicoOriginal.vlCustoUnitario,																				<\n>
+		:servicoOriginal.vlCustoUnitarioDatabase,																		<\n>
+		:servicoOriginal.vlPrecoUnitario,																				<\n>
+		:servicoOriginal.vlPrecoTotal,																					<\n>
+		:servicoOriginal.pcBdiLicitado,																					<\n>
+		:servicoOriginal.vlPrecoUnitarioLicitado,																		<\n>
+		:servicoOriginal.inFonte,																						<\n>
+		:servicoOriginal.idServicoAnalise,																				<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:servicoOriginal.versao,																						<\n>
+		:servicoOriginal.id::text,																						<\n>
+	 	:siglaEvento,																									<\n>
+	 	:servicoOriginal.versaoNr + 1																					<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>
+%> 
+
+
+cloneServicoBatch(servicoClonado) ::= <%
+	INSERT INTO siconv.vrpl_servico  																					<\n>
+		(macro_servico_fk,																								<\n> 
+		evento_fk, 																										<\n>
+		tx_observacao, 																									<\n>
+		nr_servico, 																									<\n>
+		cd_servico, 																									<\n>
+		tx_descricao, 																									<\n>
+		sg_unidade, 																									<\n>
+		vl_custo_unitario_ref_analise, 																					<\n>
+		pc_bdi_analise,																									<\n>
+		qt_total_itens_analise, 																						<\n>
+		vl_custo_unitario_analise, 																						<\n>
+		vl_custo_unitario_database, 																					<\n>
+		vl_preco_unitario_analise,																						<\n>
+		vl_preco_total_analise, 																						<\n>
+		pc_bdi_licitado, 																								<\n>
+		vl_preco_unitario_licitado, 																					<\n>
+		in_fonte, 																										<\n>
+		id_servico_analise,																								<\n> 
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(																												<\n>
+		:servicoClonado.macroServicoFk,																						<\n>
+		:servicoClonado.eventoFk,																								<\n>
+		:servicoClonado.txObservacao,																					<\n>
+		:servicoClonado.nrServico,																						<\n>
+		:servicoClonado.cdServico,																						<\n>
+		:servicoClonado.txDescricao,																					<\n>
+		:servicoClonado.sgUnidade,																						<\n>
+		:servicoClonado.vlCustoUnitarioRef,																			<\n>
+		:servicoClonado.pcBdi,																							<\n>
+		:servicoClonado.qtTotalItensAnalise,																			<\n>
+		:servicoClonado.vlCustoUnitario,																				<\n>
+		:servicoClonado.vlCustoUnitarioDatabase,																		<\n>
+		:servicoClonado.vlPrecoUnitario,																				<\n>
+		:servicoClonado.vlPrecoTotal,																					<\n>
+		:servicoClonado.pcBdiLicitado,																					<\n>
+		:servicoClonado.vlPrecoUnitarioLicitado,																		<\n>
+		:servicoClonado.inFonte,																						<\n>
+		:servicoClonado.idServicoAnalise,																				<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:servicoClonado.versao,																						<\n>
+		:servicoClonado.versaoId,																						<\n>
+	 	:servicoClonado.versaoNmEvento,																									<\n>
+	 	:servicoClonado.versaoNr																					<\n>
+		) 																												<\n>
+%> 
+
+selectServicoFrenteDeObraParaClonar(idsServicosOriginais) ::= <%
+	SELECT  siconv.vrpl_servico_frente_obra.* 																			<\n>	
+	FROM siconv.vrpl_servico_frente_obra																				<\n>
+	WHERE siconv.vrpl_servico_frente_obra.servico_fk IN (<idsServicosOriginais>)										<\n>	
+%>
+
+selectServicoFrenteDeObraAnaliseParaClonar(idsServicosOriginais) ::= <%
+	SELECT siconv.vrpl_servico_frente_obra_analise.*                                                                    <\n>
+	FROM siconv.vrpl_servico_frente_obra_analise                                                                        <\n>
+	WHERE siconv.vrpl_servico_frente_obra_analise.servico_fk IN (<idsServicosOriginais>)                                <\n>
+%>
+
+cloneServicoFrenteObra(servicoFrenteObraOriginal, frenteObraClonado, servicoClonado, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_servico_frente_obra 																		<\n>
+		(servico_fk, 																									<\n>
+		frente_obra_fk, 																								<\n>
+		qt_itens,  																										<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(																												<\n>
+		:servicoClonado.id,																								<\n>
+		:frenteObraClonado.id,																							<\n>
+		:servicoFrenteObraOriginal.qtItens,																				<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:servicoFrenteObraOriginal.versao,																				<\n>
+	 	:servicoFrenteObraOriginal.servicoFk  || '_' || :servicoFrenteObraOriginal.frenteObraFk,						<\n>
+	 	:siglaEvento,																									<\n>
+	 	:servicoFrenteObraOriginal.versaoNr + 1																			<\n>
+		) 																												<\n>
+	RETURNING *;																									 	<\n>
+%>
+
+cloneServicoFrenteObraBatch(servicoFrenteObraClonado) ::= <%
+INSERT INTO siconv.vrpl_servico_frente_obra 																		<\n>
+		(servico_fk, 																									<\n>
+		frente_obra_fk, 																								<\n>
+		qt_itens,  																										<\n>
+		adt_login, 																										<\n>
+		adt_data_hora, 																									<\n>
+		adt_operacao, 																									<\n>
+		versao,  																										<\n>
+		versao_id, 																										<\n>
+		versao_nm_evento, 																								<\n>
+		versao_nr)  																									<\n>
+	VALUES																												<\n>
+		(																												<\n>
+		:servicoFrenteObraClonado.servicoFk,																			<\n>
+		:servicoFrenteObraClonado.frenteObraFk,																			<\n>
+		:servicoFrenteObraClonado.qtItens,																				<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',  																										<\n>
+		:servicoFrenteObraClonado.versao,																				<\n>
+	 	:servicoFrenteObraClonado.versaoId,                                                     						<\n>
+	 	:servicoFrenteObraClonado.versaoNmEvento,																		<\n>
+	 	:servicoFrenteObraClonado.versaoNr  		                                                                    <\n>
+		) 																												<\n>
+%>
+
+cloneServicoFrenteObraAnalise(servicoFrenteObraAnaliseOriginal, servicoClonado, siglaEvento) ::= <%
+	INSERT INTO siconv.vrpl_servico_frente_obra_analise (																<\n>
+		servico_fk,																										<\n>
+		qt_itens,																										<\n>
+		nm_frente_obra,																									<\n>
+		nr_frente_obra,																									<\n>
+		adt_login,																										<\n>
+		adt_data_hora,																									<\n>
+		adt_operacao,																									<\n>
+		versao,																											<\n>
+		versao_id,																										<\n>
+		versao_nm_evento,																								<\n>
+		versao_nr																										<\n>
+	) VALUES (																											<\n>
+		:servicoClonado.id,																								<\n>
+		:servicoFrenteObraAnaliseOriginal.qtItens,																		<\n>
+		:servicoFrenteObraAnaliseOriginal.nmFrenteObra,																	<\n>
+		:servicoFrenteObraAnaliseOriginal.nrFrenteObra,																	<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',																										<\n>
+		:servicoFrenteObraAnaliseOriginal.versao,																		<\n>
+		:servicoFrenteObraAnaliseOriginal.id,																			<\n>
+		:siglaEvento,																									<\n>
+		:servicoFrenteObraAnaliseOriginal.versaoNr + 1																	<\n>
+	)																													<\n>
+	RETURNING *;																										<\n>
+%>
+
+
+cloneServicoFrenteObraAnaliseBatch (servicoFrenteObraAnaliseClonado) ::= <%
+	INSERT INTO siconv.vrpl_servico_frente_obra_analise (																<\n>
+		servico_fk,																										<\n>
+		qt_itens,																										<\n>
+		nm_frente_obra,																									<\n>
+		nr_frente_obra,																									<\n>
+		adt_login,																										<\n>
+		adt_data_hora,																									<\n>
+		adt_operacao,																									<\n>
+		versao,																											<\n>
+		versao_id,																										<\n>
+		versao_nm_evento,																								<\n>
+		versao_nr																										<\n>
+	) VALUES (																											<\n>
+		:servicoFrenteObraAnaliseClonado.servicoFk,																								<\n>
+		:servicoFrenteObraAnaliseClonado.qtItens,																		<\n>
+		:servicoFrenteObraAnaliseClonado.nmFrenteObra,																	<\n>
+		:servicoFrenteObraAnaliseClonado.nrFrenteObra,																	<\n>
+		current_setting('vrpl.cpf_usuario'),  																			<\n>
+		LOCALTIMESTAMP,  																								<\n>
+		'INSERT',																										<\n>
+		:servicoFrenteObraAnaliseClonado.versao,																		<\n>
+		:servicoFrenteObraAnaliseClonado.versaoId,																			<\n>
+		:servicoFrenteObraAnaliseClonado.versaoNmEvento,																									<\n>
+		:servicoFrenteObraAnaliseClonado.versaoNr																	<\n>
+	)			
+%>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

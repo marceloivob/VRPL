@@ -1,0 +1,67 @@
+thorntail:
+  datasources:
+    data-sources:
+      vrpl:
+        jndi-name: java:/Mandatarias_VRPL_DS
+        driver-name: postgresql
+        connection-url: ${env.DB_URL_CONNECTION_MANDATARIAS}
+        user-name: ${env.DB_USER_MANDATARIAS}
+        password: ${env.DB_PASSWORD_HOM4}
+        min-pool-size: 10
+        max-pool-size: 20
+        idle-timeout-minutes: 1
+      analise:
+        jndi-name: java:/Mandatarias_Analise_DS
+        driver-name: postgresql
+        connection-url: ${env.DB_URL_CONNECTION_MANDATARIAS}
+        user-name: ${env.DB_USER_MANDATARIAS}
+        password: ${env.DB_PASSWORD_HOM4}
+        min-pool-size: 5
+        max-pool-size: 10
+        idle-timeout-minutes: 1
+  logging:
+    loggers:
+      br.gov.planejamento:
+        level: INFO
+publickey.jwt: ${env.JWT_PUBLIC_KEY}
+liquibase:
+  context: sprint9, sprint9_hom
+  shouldRun: false
+integrations:
+   PUBLIC:
+      IDP:
+         endpoint: ${env.URL_IDP_VRPL}
+      SICONV:
+         endpoint: ${env.URL_SICONV_VRPL}
+   PRIVATE:
+      CEPH:
+         bucket: mandatarias
+         endpoint: https://storagegw.estaleiro.serpro.gov.br
+         region: undefined
+         maxFileSizeInMB: 10
+         useSSL: false
+      GRPC:
+         LICITACAO:
+            endpoint: pe-server.siconv-h
+            port: 8001
+            useSSL: false
+         SICONV:
+            endpoint: siconv-grpc-server.siconv-h            
+            port: 8001
+            useSSL: false
+         CONTRATOS:
+            endpoint: contratos-grpc-server.siconv-h
+            port: 8001
+            useSSL: false
+         CPS:
+            endpoint: cps-grpc-server-h4.siconv-h
+            port: 8001
+            useSSL: false                       
+      REST:
+         SICONV:
+            endpoint: ${env.URL_SICONV_VRPL}/api/licitacao/
+            secretKey: ${env.SICONV_SECRET_KEY_PROCESSO_EXECUCAO}
+      MAIL:
+         from: plataformamaisbrasil@economia.gov.br
+         remote-host: mail-apl.serpro.gov.br
+         remote-port: 25

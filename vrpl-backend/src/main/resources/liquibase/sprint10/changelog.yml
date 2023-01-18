@@ -1,0 +1,319 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_coluna_dt_previsao_inicio_obra
+      context: sprint10
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_01_add_column_vrpl_po_DAAN.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: adicao_constraint_anexo
+      context: sprint10
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_02_constraint_anexo.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: create_table_auditoria
+      context: sprint10
+      author: ivan.leite
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_03_tables_log_rec.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: grants_log_rec_owner_siconv_p
+      context: grants_des
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_04_grants_log_rec_owner_siconv_p.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: add_column_vrpl_resposta_laudo_fk
+      context: sprint10
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_05_add_column_vrpl_resposta_LEO.sql
+            splitStatements: false
+
+  - changeSet:
+      id: povoamento_dominio_parecer
+      context: sprint10
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_06_povoamento_dominio_parecer_LEO.sql
+            splitStatements: false
+
+  - changeSet:
+      id: add_column_vrpl_pendencia
+      context: sprint10
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_07_add_column_vrpl_pendencia_LEO.sql
+            splitStatements: false            
+
+  - changeSet:
+      id: check_constraint_vrpl_pendencia
+      context: sprint10
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_08_check_constraint_vrpl_pendencia_LEO.sql
+            splitStatements: false            
+
+  - changeSet:
+      id: povoamento_parecer_social
+      context: sprint10
+      author: ivan.leite
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_09_povoamento_parecer_social_IVAN.sql
+            splitStatements: false            
+   
+  - changeSet:
+      id: povoamento_parecer_social_02
+      context: sprint10
+      author: ivan.leite
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_09_povoamento_parecer_social_02_IVAN.sql
+            splitStatements: false            
+
+  - changeSet:
+      id: alterar_constraint_anexo_add_vrpls
+      context: sprint10
+      author: ivan.leite
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_10_alterar_constraint_anexo_IVAN.sql
+            splitStatements: false
+
+  - changeSet:
+      id: remocao_tabelas_nao_usadas
+      context: sprint10
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_11_delete_vrpl_laudo_grupo_pergunta_DAAN.sql
+            splitStatements: false
+
+  - changeSet:
+      id: alter_constraint_vrpl_fornecedor_add_ig
+      context: sprint10
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_12_alterar_constraint_vrpl_fornecedor_DAAN.sql
+            splitStatements: false
+
+  - changeSet:
+      id: carga_sinapi
+      context: sprint9_local
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/data/carga_acffo_sinapi.sql
+            splitStatements: false            
+            
+  - changeSet:
+      id: add_column_vrpl_proposta
+      context: sprint10
+      author: fabio.guerra
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_13_add_column_vrpl_proposta_FGA.sql
+            splitStatements: false
+
+  - changeSet:
+      id: add_constraints
+      context: sprint10
+      author: fabio.guerra
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_14_add_constraints_FGA.sql
+            splitStatements: false
+
+  - changeSet:
+      id: correcao_size_adt_login
+      context: sprint10
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_16_correcao_adt_login_DAAN.sql
+            splitStatements: false
+            
+  - changeSet:
+      id: alteracao_parecer_social
+      context: sprint10
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_17_alteracao_parecer_social_DAAN.sql
+            splitStatements: false
+
+  - changeSet:
+      id: resize_vrpl_resposta
+      context: sprint10
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_18_resize_vrpl_resposta_DAAN.sql
+            splitStatements: false
+
+  - changeSet:
+      id: resize_vrpl_historico
+      context: sprint10
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_19_resize_vrpl_historico_DAAN.sql
+            splitStatements: false
+
+  - changeSet:
+      id: define_repostas_esperadas
+      context: sprint10
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_20_define_repostas_esperadas_DAAN.sql
+            splitStatements: false
+
+  - changeSet:
+      id: alter_constaint_vrpl_laudo_in_status
+      context: sprint10
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_21_alter_constaint_vrpl_laudo_in_status_DAAN.sql
+            splitStatements: false
+
+  - changeSet:
+      id: create_triggers_auditoria
+      context: sprint10
+      author: ivan.leite
+      runOnChange: true
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_99_triggers_log_rec.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: alterar_texto_pergunta_pareceres
+      context: sprint10
+      author: daniel.alcantara
+      runOnChange: true
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_22_alter_resposta_parecer_DAAN.sql
+            splitStatements: false 
+            
+  - changeSet:
+      id: criar_tabela_convenio
+      context: sprint9_local
+      author: carlos.purificacao
+      runOnChange: true
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_23_create_table_convenio_CEPP.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: carga_convenio
+      context: sprint9_local
+      author: carlos.purificacao
+      runOnChange: true
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/data/SICONV_SS1741515_01_dados_convenio_CEPP.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: criar_tabela_org_administrativo
+      context: sprint9_local
+      author: carlos.purificacao
+      runOnChange: true
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_24_create_table_org_administrativo_CEPP.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: carga_org_administrativo
+      context: sprint9_local
+      author: carlos.purificacao
+      runOnChange: true
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/data/SICONV_SS1741515_02_dados_org_administrativo_CEPP.sql
+            splitStatements: false 
+
+
+  - changeSet:
+      id: alteracao_registros_log_rec
+      context: sprint10
+      author: ivan.leite
+      runOnChange: true
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS2275093_99_02_alterar_log_rec.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: add_column_vrpl_po_log_rec
+      context: sprint10
+      author: fabio.guerra
+      runOnChange: true
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_25_add_column_vrpl_po_log_rec_FGA.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: correcao_grupo_parecer_engenharia
+      context: sprint10
+      author: ivan.leite
+      runOnChange: true
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_26_correcao_grupo_parecer_engenharia_IVAN.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: alter_valor_default_submeta
+      context: sprint10
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/struct/do/SICONV_SS1741515_01_alter_valor_default_submeta_DAAN.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: alter_in_situacao_submeta
+      context: sprint10
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/data/SICONV_SS1741515_01_alter_valor_in_situacao_EPE_DAAN.sql
+            splitStatements: false 
+            
+  - changeSet:
+      id: alter_in_situacao_historico
+      context: sprint10
+      author: ivan.leite
+      changes:
+        - sqlFile:
+            path: liquibase/sprint10/data/SICONV_SS1741515_02_alter_valor_in_situacao_EPE_HISTORICO.sql
+            splitStatements: false 
+
+
+

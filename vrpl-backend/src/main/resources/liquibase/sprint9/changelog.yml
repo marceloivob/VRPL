@@ -1,0 +1,420 @@
+databaseChangeLog:
+  - changeSet:
+      id: definicoes_gerais
+      context: sprint9_local
+      author: leonardo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_20190315_01_definicoes_gerais.sql
+            splitStatements: false 
+  - changeSet:
+      id: estrutura_banco
+      context: sprint9
+      author: leonardo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_20190315_02_estrutura_banco.sql
+            splitStatements: false
+  - changeSet:
+      id: povoamento_dominio
+      context: sprint9
+      author: leonardo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_20190315_04_povoamento_dominio.sql
+            splitStatements: false
+  - changeSet:
+      id: grants_hom
+      context: sprint9_hom
+      author: leonardo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_20190318_24_grants_hom4.sql
+            splitStatements: false
+  - changeSet:
+      id: acffo_local
+      context: sprint9_local
+      author: leonardo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_20190422_01_acffo_local.sql
+            splitStatements: false
+  - changeSet:
+      id: acffo_data_local
+      context: sprint9_acffo
+      author: leonardo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_anexo.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_art_rrt.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_doc_complementar_meta.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_doc_complementar.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_evento_frente_obra.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_evento.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_frente_obra.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_grupo_pergunta.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_historico.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_laudo.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_macro_servico_parcela.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_macro_servico.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_meta.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_pendencia_submeta.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_pendencia.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_pergunta.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_po.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_projeto_social_acao.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_projeto_social_atividade.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_projeto_social_eixo.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_projeto_social_responsavel_tecnico.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_projeto_social.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_proposta.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_qci.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_responsavel_tecnico_po.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_responsavel_tecnico.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_resposta_grupo_pergunta.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_resposta.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_servico_frente_obra.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_servico.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_spa_participantes.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_spa.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_submeta.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_template_laudo.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_tipo_art_rrt.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_tp_doc_complementar.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_tp_manif_ambiental.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo_sinapi.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/acffo.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/contrato.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/prop.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/sub_it_investimento.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/und_fornecimento.sql
+            splitStatements: false
+  - changeSet:
+      id: inclusao_auditoria_controle_concorrencia
+      context: sprint9
+      author: ivan.leite
+      runOnChange: true
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_20190513_05_triggers.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: alter_constraint_licitacao
+      context: sprint9
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_05_add_constraints_vrpl_licitacao_DAAN.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: add_column_bucket_anexo
+      context: sprint9
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_06_add_column_bucket_anexo_DAAN.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: alter_constraint_tipo_anexo
+      context: sprint9
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_07_alter_constraint_tipo_anexo_DAAN.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: add_constraints_vrpl_lote_licitacao
+      context: sprint9
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_08_add_constraints_vrpl_lote_licitacao_LEO.sql
+            splitStatements: false
+            
+  - changeSet:
+      id: add_constraints_vrpl_macroservico
+      context: sprint9
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_09_add_constraints_vrpl_macroservico_LEO.sql
+            splitStatements: false
+            
+  - changeSet:
+      id: add_constraints_vrpl_macroservico_parcela
+      context: sprint9
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_10_add_constraints_vrpl_macroservico_parcela_LEO.sql
+            splitStatements: false
+
+  - changeSet:
+      id: add_constraints_vrpl_meta
+      context: sprint9
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_11_add_constraints_vrpl_meta_LEO.sql
+            splitStatements: false
+
+  - changeSet:
+      id: add_constraints_vrpl_pendencia
+      context: sprint9
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_12_add_constraints_vrpl_pendencia_LEO.sql
+            splitStatements: false
+ 
+  - changeSet:
+      id: add_constraints_vrpl_pergunta
+      context: sprint9
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_13_add_constraints_vrpl_pergunta_LEO.sql
+            splitStatements: false
+
+  - changeSet:
+      id: add_constraints_vrpl_po
+      context: sprint9
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_14_add_constraints_vrpl_po_LEO.sql
+            splitStatements: false
+
+  - changeSet:
+      id: add_constraints_vrpl_resposta
+      context: sprint9
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_15_add_constraints_vrpl_resposta_LEO.sql
+            splitStatements: false
+            
+  - changeSet:
+      id: add_constraints_vrpl_servico
+      context: sprint9
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_16_add_constraints_vrpl_servico_LEO.sql
+            splitStatements: false            
+
+  - changeSet:
+      id: add_constraints_vrpl_servico_frente_obra
+      context: sprint9
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_17_add_constraints_vrpl_servico_frente_obra_LEO.sql
+            splitStatements: false
+
+  - changeSet:
+      id: add_constraints_vrpl_subitem_investimento
+      context: sprint9
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_18_add_constraints_vrpl_subitem_investimento_LEO.sql
+            splitStatements: false
+
+  - changeSet:
+      id: add_constraints_vrpl_laudo_grupo_pergunta
+      context: sprint9
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_19_add_constraints_vrpl_laudo_grupo_pergunta_LEO.sql
+            splitStatements: false            
+ 
+  - changeSet:
+      id: add_column_po_referencia
+      context: sprint9
+      author: leo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_20_add_column_po_referencia_LEO.sql
+            splitStatements: false
+
+  - changeSet:
+      id: add_column_po_dt_base
+      context: sprint9
+      author: fabio.guerra
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_21_add_column_po_dt_base_vrpl_FGA.sql
+            splitStatements: false
+
+  - changeSet:
+      id: vrpl_data_local
+      context: sprint9_acffo
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/data/do/01-vrpl_proposta.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/02-vrpl_licitacao.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/03-vrpl_historico_licitacao.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/04-vrpl_fornecedor.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/05-vrpl_subitem_investimento.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/06-vrpl_meta.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/07-vrpl_lote_licitacao.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/08-vrpl_submeta.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/09-vrpl_po.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/10-vrpl_frente_obra.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/11-vrpl_macro_servico.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/12-vrpl_macro_servico_parcela.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/13-vrpl_servico.sql
+            splitStatements: false
+        - sqlFile:
+            path: liquibase/sprint9/data/do/14-vrpl_servico_frente_obra.sql
+            splitStatements: false
+
+  - changeSet:
+      id: add_column_licitacao_detalhe
+      context: sprint9
+      author: ivan.leite
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_22_add_column_vrpl_licitacao.sql
+            splitStatements: false
+  - changeSet:
+      id: add_column_licitacao_detalhe
+      context: sprint9
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_23_alter_column_regime_contratacao_1024.sql
+            splitStatements: false
+
+  - changeSet:
+      id: grants_owner_siconv_p
+      context: grants_des
+      author: daniel.alcantara
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_24_grants_owner_siconv_p.sql
+            splitStatements: false
+
+  - changeSet:
+      id: grants_seq_usr_hom
+      context: sprint9_hom
+      author: leonardo.assis
+      changes:
+        - sqlFile:
+            path: liquibase/sprint9/struct/do/SICONV_SS1741515_25_grants_seq_usr_hom4.sql
+            splitStatements: false

@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: alter_column_pc_min_contrapartida
+      context: sprint11
+      author: fabio.guerra
+      changes:
+        - sqlFile:
+            path: liquibase/sprint11/struct/do/SICONV_SS1856943_01_alter_column_pc_min_contrapartida_FGA.sql
+            splitStatements: false 

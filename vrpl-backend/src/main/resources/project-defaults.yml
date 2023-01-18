@@ -1,0 +1,118 @@
+thorntail:
+  io:
+    workers:
+      default:
+        io-threads: 10
+        task-max-threads: 20
+  cdi:
+    thread-pool-size: 10
+  project:
+    stage: LOCAL
+  datasources:
+    data-sources:
+      vrpl:
+        jndi-name: java:/Mandatarias_VRPL_DS
+        driver-name: postgresql
+        connection-url: ${env.DB_URL_CONNECTION_MANDATARIAS}
+        user-name: ${env.DB_USER_MANDATARIAS}
+        password: ${env.DB_PASSWORD_MANDATARIAS}
+        min-pool-size: 1
+        max-pool-size: 5
+        idle-timeout-minutes: 10
+      analise:
+        jndi-name: java:/Mandatarias_Analise_DS
+        driver-name: postgresql
+        connection-url: ${env.DB_URL_CONNECTION_MANDATARIAS}
+        user-name: ${env.DB_USER_MANDATARIAS}
+        password: ${env.DB_PASSWORD_MANDATARIAS}
+        min-pool-size: 1
+        max-pool-size: 1
+        idle-timeout-minutes: 10
+  undertow:
+    servers:
+      default-server:
+        http-listeners:
+          default:
+            max-post-size: 10485760
+  logging:
+    pattern-formatters:
+      LOG_FORMATTER:
+        pattern: "d{yyyy-MM-dd HH:mm:ss,SSS} %-5p (%t) [%c.%M()] %s%e%n"
+      LOG_COLOR_FORMATTER:
+        pattern: "%K{level}%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p (%t) [%c.%M()] %s%e%n"
+    console-handlers:
+      CONSOLE:
+        named-formatter: LOG_COLOR_FORMATTER
+    custom-handlers:
+      SENTRY:
+        module: io.sentry
+        attribute-class: io.sentry.jul.SentryHandler
+        level: ERROR
+    periodic-rotating-file-handlers:
+      FILE:
+        file:
+          path: /tmp/server.log
+        suffix: .yyyy-MM-dd
+        named-formatter: LOG_FORMATTER
+    root-logger:
+      level: INFO
+      handlers:
+      - CONSOLE
+      - SENTRY
+    loggers:
+      br.gov.planejamento:
+        level: DEBUG
+
+publickey.jwt: ${env.JWT_PUBLIC_KEY}
+
+sentry:
+  stacktrace:
+    app:
+      packages: br.gov.planejamento.siconv.mandatarias.licitacoes
+
+liquibase:
+  context: sprint9_local, sprint9, sprint10, grants_des, termoCompromisso, sprint11
+  shouldRun: false
+
+integrations:
+   CONFIGURATIONS:
+      STUB: false
+   PUBLIC:
+      IDP:
+         endpoint: https://10.139.67.54:8443/idp
+      SICONV:
+         endpoint: https://10.139.67.53:8443/voluntarias
+   PRIVATE:
+      CEPH:
+         bucket: mandatarias-local
+         endpoint: https://storagegw.estaleiro.serpro.gov.br
+         accessToken: 9b32d0b70e3840c2a5e607f238f1916a
+         secretKey: 54e740daf2ed4b05b0accd6b38b6f77f
+         region: undefined
+         maxFileSizeInMB: 10
+         useSSL: false
+      GRPC:
+        LICITACAO:
+          endpoint: nodes.estaleiro.serpro
+          port: 30287
+          useSSL: false
+        SICONV:
+          endpoint: nodes.estaleiro.serpro
+          port: 32424
+          useSSL: false
+        CONTRATOS:
+          endpoint: nodes.estaleiro.serpro
+          port: 30806
+        CPS:
+          endpoint: nodes.estaleiro.serpro
+          port: 30082
+          useSSL: false
+
+      REST:
+         SICONV:
+            endpoint: https://10.139.67.53:8443/voluntarias
+            secretKey: ${env.SICONV_SECRET_KEY_PROCESSO_EXECUCAO}
+      MAIL:
+         from: plataformamaisbrasil@economia.gov.br
+         remote-host: localhost
+         remote-port: 1025

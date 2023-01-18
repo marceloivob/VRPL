@@ -1,0 +1,187 @@
+definirUsuarioLogado(cpf) ::= <%
+	SET LOCAL vrpl.cpf_usuario TO '<cpf>';
+%>
+
+consultarUsuarioLogado() ::= <%
+	SELECT current_setting('vrpl.cpf_usuario');
+%>
+
+recuperarRegistrosPermitidos(usuarioLogado) ::= <% 
+
+ SELECT proposta.id_siconv as proposta, licitacao.id as id, 'vrpl_licitacao' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_licitacao licitacao 
+ WHERE proposta.id_siconv = :idProposta AND 
+       licitacao.proposta_fk = proposta.id  
+
+ UNION 
+
+ SELECT proposta.id_siconv as proposta, anexo.id as id, 'vrpl_anexo' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_licitacao licitacao, 
+      siconv.vrpl_anexo anexo 
+ WHERE proposta.id_siconv = :idProposta AND 
+       licitacao.proposta_fk = proposta.id AND 
+       anexo.vrpl_licitacao_fk = licitacao.id  
+
+
+ UNION 
+
+ SELECT proposta.id_siconv as proposta, fornecedor.id as id, 'vrpl_fornecedor' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_licitacao licitacao, 
+      siconv.vrpl_fornecedor fornecedor 
+ WHERE proposta.id_siconv = :idProposta AND 
+       licitacao.proposta_fk = proposta.id AND 
+       fornecedor.licitacao_fk = licitacao.id  
+
+
+ UNION 
+
+ SELECT proposta.id_siconv as proposta, historico_licitacao.id as id, 'vrpl_historico_licitacao' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_licitacao licitacao, 
+      siconv.vrpl_historico_licitacao historico_licitacao 
+ WHERE proposta.id_siconv = :idProposta AND 
+       licitacao.proposta_fk = proposta.id AND 
+       historico_licitacao.licitacao_fk = licitacao.id  
+
+
+ UNION 
+
+ SELECT proposta.id_siconv as proposta, laudo.id as id, 'vrpl_laudo' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_licitacao licitacao, 
+      siconv.vrpl_laudo laudo 
+ WHERE proposta.id_siconv = :idProposta AND 
+       licitacao.proposta_fk = proposta.id AND 
+       laudo.licitacao_fk = licitacao.id  
+
+ UNION 
+
+ SELECT proposta.id_siconv as proposta, pendencia.id as id, 'vrpl_pendencia' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_licitacao licitacao, 
+      siconv.vrpl_laudo laudo, 
+      siconv.vrpl_pendencia pendencia 
+ WHERE proposta.id_siconv = :idProposta AND 
+       licitacao.proposta_fk = proposta.id AND 
+       laudo.licitacao_fk = licitacao.id AND 
+       pendencia.laudo_fk = laudo.id  
+
+
+ UNION 
+
+ SELECT proposta.id_siconv as proposta, resposta.id as id, 'vrpl_resposta' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_licitacao licitacao, 
+      siconv.vrpl_laudo laudo, 
+      siconv.vrpl_resposta resposta 
+ WHERE proposta.id_siconv = :idProposta AND 
+       licitacao.proposta_fk = proposta.id AND 
+       laudo.licitacao_fk = licitacao.id AND 
+       resposta.laudo_fk = laudo.id  
+
+
+ UNION 
+
+ SELECT proposta.id_siconv as proposta, submeta.id as id, 'vrpl_submeta' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_submeta submeta 
+ WHERE proposta.id_siconv = :idProposta AND 
+       submeta.proposta_fk = proposta.id  
+
+
+ UNION 
+
+ SELECT proposta.id_siconv as proposta, po.id as id, 'vrpl_po' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_submeta submeta, 
+      siconv.vrpl_po po 
+ WHERE proposta.id_siconv = :idProposta AND 
+       submeta.proposta_fk = proposta.id AND 
+       po.submeta_fk = submeta.id  
+
+
+ UNION 
+
+ SELECT proposta.id_siconv as proposta, evento.id as id, 'vrpl_evento' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_submeta submeta, 
+      siconv.vrpl_po po, 
+      siconv.vrpl_evento evento 
+ WHERE proposta.id_siconv = :idProposta AND 
+       submeta.proposta_fk = proposta.id AND 
+       po.submeta_fk = submeta.id AND 
+       evento.po_fk = po.id  
+
+UNION 
+
+ SELECT proposta.id_siconv as proposta, evento_frente_obra.evento_fk as id, 'vrpl_evento_frente_obra' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_submeta submeta, 
+      siconv.vrpl_po po, 
+      siconv.vrpl_evento evento, 
+      siconv.vrpl_evento_frente_obra evento_frente_obra 
+ WHERE proposta.id_siconv = :idProposta AND 
+       submeta.proposta_fk = proposta.id AND 
+       po.submeta_fk = submeta.id AND  
+       evento.po_fk = po.id AND 
+       evento.id = evento_frente_obra.evento_fk 
+
+ UNION 
+
+ SELECT proposta.id_siconv as proposta, frente_obra.id as id, 'vrpl_frente_obra' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_submeta submeta, 
+      siconv.vrpl_po po, 
+      siconv.vrpl_frente_obra frente_obra 
+ WHERE proposta.id_siconv = :idProposta AND 
+       submeta.proposta_fk = proposta.id AND 
+       po.submeta_fk = submeta.id AND 
+       frente_obra.po_fk = po.id  
+
+
+ UNION 
+
+ SELECT proposta.id_siconv as proposta, macro_servico.id as id, 'vrpl_macro_servico' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_submeta submeta, 
+      siconv.vrpl_po po, 
+      siconv.vrpl_macro_servico macro_servico 
+ WHERE proposta.id_siconv = :idProposta AND 
+       submeta.proposta_fk = proposta.id AND 
+       po.submeta_fk = submeta.id AND 
+       macro_servico.po_fk = po.id  
+
+
+ UNION 
+
+ SELECT proposta.id_siconv as proposta, macro_servico_parcela.id as id, 'vrpl_macro_servico_parcela' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_submeta submeta, 
+      siconv.vrpl_po po, 
+      siconv.vrpl_macro_servico macro_servico, 
+      siconv.vrpl_macro_servico_parcela macro_servico_parcela 
+ WHERE proposta.id_siconv = :idProposta AND 
+       submeta.proposta_fk = proposta.id AND 
+       po.submeta_fk = submeta.id AND 
+       macro_servico.po_fk = po.id AND 
+       macro_servico_parcela.macro_servico_fk = macro_servico.id  
+
+
+ UNION 
+
+ SELECT proposta.id_siconv as proposta, servico.id as id, 'vrpl_servico' as tabela 
+ FROM siconv.vrpl_proposta proposta, 
+      siconv.vrpl_submeta submeta, 
+      siconv.vrpl_po po, 
+      siconv.vrpl_macro_servico macro_servico, 
+      siconv.vrpl_servico servico 
+ WHERE proposta.id_siconv = :idProposta AND 
+       submeta.proposta_fk = proposta.id AND 
+       po.submeta_fk = submeta.id AND 
+       macro_servico.po_fk = po.id AND 
+       servico.macro_servico_fk = macro_servico.id  
+
+%>

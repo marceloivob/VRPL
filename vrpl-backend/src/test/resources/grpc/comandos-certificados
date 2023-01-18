@@ -1,0 +1,40 @@
+Obtem e inclui as cadeias de certificados em truststore
+./getjks.sh des-siconv-grpc.estaleiro.serpro.gov.br:443 cliente.jks changeit
+
+Detalha as cadeias obtidas
+keytool -list -keystore cliente.jks -v | less
+
+remove uma entrada (alias01)
+keytool -delete -keystore cliente.jks -storepass changeit -alias alias01
+
+
+VM Arguments
+-Djavax.net.ssl.trustStore=/home/03796348483/log/siconvdesenv.jks -Djavax.net.ssl.trustStorePassword=changeit
+
+1 - RESTEASY004655: Unable to invoke request: javax.net.ssl.SSLHandshakeException: 
+	sun.security.validator.ValidatorException: 
+	PKIX path building failed: 
+	sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+	
+	=> Teste com: -Djavax.net.ssl.trustStore=/home/03796348483/log/siconvdesenv.jks -Djavax.net.ssl.trustStorePassword=changeit
+	=> Teste com: -Djavax.net.ssl.trustStore=/home/03796348483/log/certificado.pem -Djavax.net.ssl.trustStorePassword=changeit
+	
+	=> Resultado:
+    2 - RESTEASY004655: Unable to invoke request: javax.net.ssl.SSLHandshakeException: java.security.cert.CertificateException: No X509TrustManager implementation available
+
+
+	=> Teste com: -Djavax.net.ssl.trustStore=/home/03796348483/log/siconvdesrest.jks -Djavax.net.ssl.trustStorePassword=changeit    
+	=> Resultado:
+    2 - javax.ws.rs.ProcessingException: RESTEASY003145: Unable to find a MessageBodyReader of content-type text/html;charset=UTF-8 and type class br.gov.planejamento.siconv.mandatarias.licitacoes.integracao.siconv.restclient.ContratoDocLiquidacaoResponse
+    
+    
+http://localhost:8080/test-siconv/s1?licitacao=615289
+http://localhost:8080/test-siconv/s1?licitacao=594778
+
+
+
+Novo teste
+
+-Djavax.net.ssl.trustStore=/home/03796348483/log/siconvao-des-ambdes.crt -Djavax.net.ssl.trustStorePassword=changeit
+
+1 - RESTEASY004655: Unable to invoke request: javax.net.ssl.SSLHandshakeException: java.security.cert.CertificateException: No X509TrustManager implementation available

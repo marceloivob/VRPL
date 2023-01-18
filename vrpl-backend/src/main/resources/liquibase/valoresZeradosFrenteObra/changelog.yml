@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_tabela_vrpl_servico_frente_obra_analise
+      context: valoresZeradosFrenteObra
+      author: ivan.leite
+      changes:
+        - sqlFile:
+            path: liquibase/valoresZeradosFrenteObra/struct/do/SICONV_SS2767659_01_criar_tabela_vrpl_servico_frente_obra_analise.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: alterar_tabela_vrpl_servico_frente_obra_rmv_qtditensanalise
+      context: valoresZeradosFrenteObra
+      author: ivan.leite
+      changes:
+        - sqlFile:
+            path: liquibase/valoresZeradosFrenteObra/struct/do/SICONV_SS2767659_02_alterar_tabela_vrpl_servico_frente_obra_remover_qtdItensanalise.sql
+            splitStatements: false 
+
+
+
+
+
+
+  
+
+
+
+

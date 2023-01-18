@@ -1,0 +1,241 @@
+variables:
+  VERSION: 1.0.0-p$CI_PIPELINE_ID-b$CI_BUILD_ID-c${CI_COMMIT_SHA:0:8}
+  URI_ENDPOINT: https://console.estaleiro.serpro.gov.br 
+  TOKEN: $TOKEN
+  URI_SMOKE_TEST: https://git.serpro/gscvi/pipeline/raw/master/scripts/smoke-test/smoke_test
+  SYSTEM: ${SYSTEM} # Sistema cadastrado no portal
+  MODULE: ${MODULE} # Módulo criado no portal
+  PLATFORM: java:11-adoptopenjdk-debian # Plataforma da aplicação
+  ENVIRONMENT_DESENV: d # Ambiente criado no portal
+  ENVIRONMENT_TESTE: t # Ambiente criado no portal
+  ENVIRONMENT_HOMOLOGACAO: h # Ambiente criado no portal
+  ENVIRONMENT_PRODUCAO: p # Ambiente criado no portal
+  URI_ENV_DESENV: https://des-siconv.estaleiro.serpro.gov.br/vrpl-backend/monitor/status # URI para o ambiente configurada no portal
+  URI_ENV_Y: ${URI_ENV_Y} # URI para o ambiente configurada no portal
+  MAVEN_CLI_OPTS: "-Dmaven.repo.local=/.m2 --batch-mode --errors --no-transfer-progress --fail-at-end --show-version"
+  GIT_SSL_NO_VERIFY: "true"
+
+stages:
+- Build:Testes Unitários
+- Build:Testes Integrados de DAOs
+- Build:Testes Integrados de BCs
+- Build:Compilação
+- Build:Análise de Qualidade de Código
+- Estaleiro:Construção da Imagem
+- Estaleiro:Publicação DESENV
+- Estaleiro:Publicação TESTE
+- Estaleiro:Publicação HOMOLOGACAO
+- Estaleiro:Publicação PRODUCAO
+
+Build:Testes Unitários:
+  before_script:
+    - echo $CI_BUILD_ID
+    - echo $VERSION
+  image: hub.estaleiro.serpro/pipeline/maven:3-jdk-11-slim
+  stage: Build:Testes Unitários
+  script:
+    - echo "Teste Unitário"
+  artifacts:
+    paths:
+      - target/surefire-reports/
+      - target/coverage-reports/jacoco-ut.exec
+      - target/site/
+      - target/test-classes/
+  variables:
+    GIT_STRATEGY: clone
+
+Build:Testes Integrados de DAOs:
+  before_script:
+    - echo $CI_BUILD_ID
+    - echo $VERSION
+  image: hub.estaleiro.serpro/pipeline/maven:3-jdk-11-slim
+  stage: Build:Testes Integrados de DAOs
+  script:
+    - echo "Teste Integrados de DAOs"
+    - groupadd --system --gid 1000 postgres
+    - useradd --system --gid postgres --uid 1000 --shell /bin/bash --create-home postgres
+    - mkdir -p /home/postgres/.m2
+    - cp /root/.m2/settings.xml /home/postgres/.m2/settings.xml
+    - chmod -R 777 /home/postgres/.m2
+    - su postgres
+    - export JAVA_HOME=/usr/local/openjdk-11
+    - runuser -l postgres -c 'export JAVA_HOME=/usr/local/openjdk-11 && mvn -f /builds/siconv-42811/Mandatarias-Licitacoes/vrpl-backend/pom.xml -B -e verify -DskipUTs -DskipITBC'
+  artifacts:
+    paths:
+      - target/surefire-reports/
+      - target/failsafe-reports/
+      - target/coverage-reports/jacoco-it.exec
+      - target/coverage-reports/jacoco-ut.exec
+      - target/site/
+      - target/test-classes/
+  when: manual
+
+Build:Testes Integrados de BCs:
+  before_script:
+    - echo $CI_BUILD_ID
+    - echo $VERSION
+  image: hub.estaleiro.serpro/pipeline/maven:3-jdk-11-slim
+  stage: Build:Testes Integrados de BCs
+  script:
+    - echo "Teste Integrados de BCs"
+    - groupadd --system --gid 1000 postgres
+    - useradd --system --gid postgres --uid 1000 --shell /bin/bash --create-home postgres
+    - mkdir -p /home/postgres/.m2
+    - cp /root/.m2/settings.xml /home/postgres/.m2/settings.xml
+    - chmod -R 777 /home/postgres/.m2
+    - su postgres
+    - export JAVA_HOME=/usr/local/openjdk-11    
+    - runuser -l postgres -c 'export JAVA_HOME=/usr/local/openjdk-11 && mvn -f /builds/siconv-42811/Mandatarias-Licitacoes/vrpl-backend/pom.xml -B -e verify -DskipUTs -DskipITDAO'
+  artifacts:
+    paths:
+      - target/surefire-reports/
+      - target/failsafe-reports/
+      - target/coverage-reports/jacoco-it.exec
+      - target/coverage-reports/jacoco-ut.exec
+      - target/site/
+      - target/test-classes/
+  when: manual
+
+Build:Compilação:
+  before_script:
+    - echo $CI_BUILD_ID
+    - echo $VERSION
+  image: hub.estaleiro.serpro/pipeline/maven:3-jdk-11-slim
+  stage: Build:Compilação
+  script:
+    - echo "Atualizando a versão do Projeto..."
+    - mvn ${MAVEN_CLI_OPTS} versions:set -DnewVersion=$VERSION  
+    - mvn ${MAVEN_CLI_OPTS} -e package org.jacoco:jacoco-maven-plugin:0.8.3:prepare-agent -Dmaven.test.skip=true
+  artifacts:
+    paths:
+      - target/vrpl-backend-thorntail.jar
+      - docker/Procfile
+      - src/
+      - target/vrpl-backend/
+      - target/surefire-reports/
+      - target/failsafe-reports/
+      - target/coverage-reports/jacoco-it.exec
+      - target/coverage-reports/jacoco-ut.exec
+      - target/site/
+      - target/test-classes/
+      - sonar-project.properties
+
+Build:Análise de Qualidade de Código:
+  stage: Build:Análise de Qualidade de Código
+  image: hub.estaleiro.serpro/pipeline/sonar-scanner:latest
+  script:
+    - sonar-scanner -Dsonar.projectVersion=$VERSION -Dsonar.links.scm=$CI_PROJECT_URL 
+  allow_failure: true
+  dependencies:
+    - Build:Compilação
+  variables:
+    GIT_STRATEGY: none
+
+Estaleiro:Construção da Imagem:
+   stage: Estaleiro:Construção da Imagem
+   image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+   before_script:
+     - export VERSION=1.0.0-b$CI_PIPELINE_ID-${CI_COMMIT_SHA:0:8}
+     - echo "Construção da Imagem no estaleiro"
+     - estaleiro config token --literal $TOKEN
+     - estaleiro config endpoint $URI_ENDPOINT
+     - estaleiro config system siconv
+   script:
+     - mv docker/Procfile .
+     - mv target/vrpl-backend-thorntail.jar .
+     - rm -rf docker/
+     - rm -rf src/
+     - rm -rf target/
+     - sed -i "s#VERSION#$VERSION#g" Procfile 
+     - cat Procfile
+     - echo "estaleiro app build --module $MODULE --platform $PLATFORM --version $VERSION"
+     - estaleiro app build --module $MODULE --platform $PLATFORM --version $VERSION
+   dependencies:
+     - Build:Compilação
+   variables:
+     GIT_STRATEGY: none
+
+Estaleiro:Publicação DESENV:
+   stage: Estaleiro:Publicação DESENV
+   image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+   before_script:
+     - export VERSION=1.0.0-b$CI_PIPELINE_ID-${CI_COMMIT_SHA:0:8}
+     - estaleiro config token --literal $TOKEN
+     - estaleiro config endpoint $URI_ENDPOINT
+     - estaleiro config system siconv
+   script:
+     - echo "Promoção da Build para o Ambiente de Desenvolvimento"
+     - echo "estaleiro app promote mod $ENVIRONMENT_DESENV --module $MODULE --version $VERSION"
+     - estaleiro app promote mod $ENVIRONMENT_DESENV --module $MODULE --version $VERSION
+   environment:
+     name: desenv
+     url: https://des-siconv.estaleiro.serpro.gov.br/vrpl-backend/monitor/status
+   when: manual
+   dependencies:
+     - Build:Compilação
+   variables:
+     GIT_STRATEGY: none
+
+
+Estaleiro:Publicação TESTE:
+  stage: Estaleiro:Publicação TESTE
+  image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+  before_script:
+    - export VERSION=1.0.0-b$CI_PIPELINE_ID-${CI_COMMIT_SHA:0:8}
+    - estaleiro config token --literal $TOKEN
+    - estaleiro config endpoint $URI_ENDPOINT
+    - estaleiro config system siconv
+  script:
+    - echo "Promoção da Build para o Ambiente de Teste"
+    - echo "estaleiro app promote mod $ENVIRONMENT_TESTE --module $MODULE --version $VERSION"
+    - estaleiro app promote mod $ENVIRONMENT_TESTE --module $MODULE --version $VERSION
+  environment:
+    name: teste
+    url: https://tes-siconv.estaleiro.serpro.gov.br/vrpl-backend/monitor/status
+  when: manual
+  dependencies:
+    - Build:Compilação
+  variables:
+    GIT_STRATEGY: none
+
+Estaleiro:Publicação HOMOLOGACAO:
+  stage: Estaleiro:Publicação HOMOLOGACAO
+  image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+  before_script:
+    - export VERSION=1.0.0-b$CI_PIPELINE_ID-${CI_COMMIT_SHA:0:8}
+    - estaleiro config token --literal $TOKEN
+    - estaleiro config endpoint $URI_ENDPOINT
+    - estaleiro config system siconv
+  script:
+    - echo "Promoção da Build para o Ambiente de Homologação"
+    - echo "estaleiro app promote mod $ENVIRONMENT_HOMOLOGACAO --module $MODULE --version $VERSION"
+    - estaleiro app promote mod $ENVIRONMENT_HOMOLOGACAO --module $MODULE --version $VERSION
+  environment:
+    name: teste
+    url: https://hom-siconv.estaleiro.serpro.gov.br/vrpl-backend/monitor/status
+  when: manual
+  dependencies:
+    - Build:Compilação
+  variables:
+    GIT_STRATEGY: none
+
+Estaleiro:Publicação PRODUCAO:
+  stage: Estaleiro:Publicação PRODUCAO
+  image: hub.estaleiro.serpro/pipeline/cliente-estaleiro:latest
+  before_script:
+    - export VERSION=1.0.0-b$CI_PIPELINE_ID-${CI_COMMIT_SHA:0:8}
+    - estaleiro config token --literal $TOKEN
+    - estaleiro config endpoint $URI_ENDPOINT
+    - estaleiro config system siconv
+  script:
+    - echo "Promoção da Build para o Ambiente de Produção"
+    - echo "estaleiro app promote mod $ENVIRONMENT_PRODUCAO --module $MODULE --version $VERSION"
+    - estaleiro app promote mod $ENVIRONMENT_PRODUCAO --module $MODULE --version $VERSION
+  environment:
+    name: teste
+    url: https://pro-siconv.estaleiro.serpro.gov.br/vrpl-backend/monitor/status
+  when: manual
+  dependencies:
+    - Build:Compilação
+  variables:
+    GIT_STRATEGY: none

@@ -1,0 +1,306 @@
+recuperarQCIInternoByIdLicitacao(idLicitacao) ::= <%
+    select                                                                                                          <\n>
+        meta.id 									meta_id,                                                        <\n>
+        meta.id_meta_analise 						meta_id_meta_analise,                                           <\n>
+        meta.tx_descricao_analise 					meta_tx_descricao_analise,                                      <\n>
+        meta.qt_itens_analise 						meta_qt_itens_analise,                                          <\n>
+        meta.subitem_fk 							meta_subitem_fk,                                                <\n>
+        meta.nr_meta_analise 						meta_nr_meta_analise,                                           <\n>
+        meta.in_social 								meta_in_social,                                                 <\n>
+                                                                                                                    <\n>
+        item.id 									item_id,                                                        <\n>
+        item.id_subitem_analise 					item_subitem_analise_fk,                                        <\n>
+        item.in_projeto_social 						item_in_projeto_social,                                         <\n>
+		item.descricao 								item_descricao,                                                 <\n>
+        item.codigo_und 							item_codigo_und,                                                <\n>
+		item.descricao_und 							item_descricao_und,                                             <\n>
+                                                                                                                    <\n>
+		submeta.id 									submeta_id,                                                     <\n>
+        submeta.id_submeta_analise 					submeta_id_submeta_analise,                                     <\n>
+        submeta.vl_repasse 							submeta_vl_repasse,                                             <\n>
+        submeta.vl_outros 							submeta_vl_outros,                                              <\n>
+        submeta.vl_contrapartida 					submeta_vl_contrapartida,                                       <\n>
+        submeta.vl_total_licitado 					submeta_vl_total_licitado,                                      <\n>
+        submeta.in_situacao 						submeta_in_situacao,                                            <\n>
+        submeta.in_regime_execucao 					submeta_in_regime_execucao,                                     <\n>
+        submeta.tx_descricao_analise 				submeta_tx_descricao_analise,                                   <\n>
+        lote.numero_lote        					submeta_nr_lote_analise,                                        <\n>
+        submeta.vl_repasse_analise 					submeta_vl_repasse_analise,                                     <\n>
+        submeta.vl_contrapartida_analise 			submeta_vl_contrapartida_analise,                               <\n>
+        submeta.vl_outros_analise 					submeta_vl_outros_analise,                                      <\n>
+        submeta.vl_total_analise 					submeta_vl_total_analise,                                       <\n>
+        submeta.nr_submeta_analise 					submeta_nr_submeta_analise,                                     <\n>
+        submeta.in_situacao_analise 				submeta_in_situacao_analise,                                    <\n>
+        submeta.in_regime_execucao_analise 			submeta_in_regime_execucao_analise,                             <\n>
+        submeta.natureza_despesa_sub_it_fk_analise 	submeta_natureza_despesa_sub_it_fk_analise,                     <\n>
+		submeta.versao 								submeta_versao													<\n>        
+    
+    from       siconv.vrpl_meta meta                                                                                <\n>
+    inner join siconv.vrpl_submeta submeta                 on meta.id         = submeta.meta_fk                     <\n>
+    inner join siconv.vrpl_lote_licitacao lote             on lote.id         = submeta.vrpl_lote_licitacao_fk      <\n>
+    inner join siconv.vrpl_licitacao licitacao             on licitacao.id    = lote.licitacao_fk                   <\n>
+    inner join siconv.vrpl_subitem_investimento item       on item.id         = meta.subitem_fk                     <\n>
+    																												<\n>
+    where licitacao.id = :idLicitacao																				<\n>
+																													<\n>    
+    order by nr_lote_analise, nr_meta_analise, 	nr_submeta_analise																					<\n>
+%>
+
+recuperarMetasAtivasParaQCIExternoByPropFk(usuarioLogado, versaoDaProposta) ::= <%
+    SELECT DISTINCT																													<\n>
+	    meta.id_meta_analise				idMetaAnalise,																			<\n> 
+        meta.tx_descricao_analise 			descricao,																				<\n>
+        meta.nr_meta_analise				numero,																					<\n>
+        meta.qt_itens_analise				quantidade, 																			<\n>
+        meta.in_social						metaSocial, 																			<\n>
+		item.descricao						itemInvestimento,																		<\n>
+        item.codigo_und						unidade                                    												<\n>
+                               																										<\n>
+    FROM       siconv.vrpl_meta meta																								<\n>                                                                                                  
+    INNER JOIN siconv.vrpl_submeta submeta                     ON meta.id         		= submeta.meta_fk                           <\n>
+    INNER JOIN siconv.vrpl_subitem_investimento item           ON item.id         		= meta.subitem_fk                           <\n>
+    INNER JOIN siconv.vrpl_proposta proposta           		   ON submeta.proposta_fk 	= proposta.id                               <\n>
+																																	<\n>
+    WHERE proposta.id_siconv 							   	   = :idProposta                                                        <\n>
+      AND proposta.versao_nr								   = :versaoDaProposta													<\n>	
+																																	<\n>    
+	ORDER BY 												   meta.id_meta_analise													<\n>
+%>
+
+recuperarSubMetasParaQCIExternoByMetaId(usuarioLogado, versaoDaProposta, idsMetas) ::= <%
+(     																																<\n>
+		SELECT				  																										<\n>
+			meta.id_meta_analise				idMeta,																				<\n>
+			submeta.id                          id,                                                                                 <\n>
+			submeta.nr_submeta_analise			numero, 																			<\n>
+			submeta.tx_descricao_analise		descricao,																			<\n>
+			CASE WHEN lote.licitacao_fk IS NOT NULL     THEN submeta.in_situacao         END AS situacaoAsString,					<\n>
+			CASE WHEN lote.licitacao_fk IS NULL         THEN submeta.in_situacao_analise END AS situacaoAnaliseAsString,			<\n>
+		    lote.numero_lote					lote,																				<\n>
+			submeta.vl_repasse					valorRepasseLicitado,																<\n>
+			submeta.vl_outros					valorOutrosLicitado,																<\n>
+			submeta.vl_contrapartida			valorContrapartidaLicitado,															<\n>
+			submeta.vl_total_licitado			valorTotalLicitado,																	<\n>
+			submeta.vl_repasse_analise			valorRepasseAnalise,																<\n>
+			submeta.vl_outros_analise			valorOutrosAnalise,		     														<\n>
+			submeta.vl_contrapartida_analise	valorContrapartidaAnalise,															<\n>
+			submeta.vl_total_analise			valorTotalAnalise																	<\n>
+																																	<\n>
+	FROM		siconv.vrpl_submeta 			submeta                           													<\n>
+	INNER JOIN siconv.vrpl_meta					meta			ON meta.id         		= submeta.meta_fk                           <\n>
+    INNER JOIN siconv.vrpl_lote_licitacao 		lote			ON lote.id         		= submeta.vrpl_lote_licitacao_fk			<\n>
+	INNER JOIN siconv.vrpl_proposta 			proposta		ON submeta.proposta_fk 	= proposta.id                               <\n>
+																																	<\n>
+    WHERE proposta.id_siconv									= :idProposta   													<\n>
+      AND proposta.versao_nr									= :versaoDaProposta													<\n>
+      AND meta.id_meta_analise									in (<idsMetas>)														<\n>
+      AND submeta.in_situacao 									!= 'REJ'															<\n>
+)																																	<\n>
+UNION																																<\n>
+(																																	<\n>
+		SELECT DISTINCT					 																							<\n>
+			meta.id_meta_analise				idMeta,																				<\n>
+			submeta.id                          id,                                                                                 <\n>
+			submeta.nr_submeta_analise			numero, 																			<\n>
+			submeta.tx_descricao_analise		descricao,																			<\n>
+			CASE WHEN lote.licitacao_fk IS NOT NULL     THEN submeta.in_situacao         END AS situacaoAsString,					<\n>
+			CASE WHEN lote.licitacao_fk IS NULL         THEN submeta.in_situacao_analise END AS situacaoAnaliseAsString,			<\n>
+		    lote.numero_lote					lote,																				<\n>
+		    submeta.vl_repasse					valorRepasseLicitado,																<\n>
+			submeta.vl_outros					valorOutrosLicitado,																<\n>
+			submeta.vl_contrapartida			valorContrapartidaLicitado,															<\n>
+			submeta.vl_total_licitado			valorTotalLicitado,                                                                 <\n>
+			submeta.vl_repasse_analise			valorRepasseAnalise,																<\n>
+			submeta.vl_outros_analise			valorOutrosAnalise,		     														<\n>
+			submeta.vl_contrapartida_analise	valorContrapartidaAnalise,															<\n>
+			submeta.vl_total_analise			valorTotalAnalise																	<\n>
+																																	<\n>
+	FROM		siconv.vrpl_submeta 			submeta                           													<\n>
+	INNER JOIN siconv.vrpl_meta					meta			ON meta.id         		= submeta.meta_fk                           <\n>
+    INNER JOIN siconv.vrpl_lote_licitacao 		lote			ON lote.id         		= submeta.vrpl_lote_licitacao_fk			<\n>
+	INNER JOIN siconv.vrpl_proposta 			proposta		ON submeta.proposta_fk 	= proposta.id                               <\n>
+																																	<\n>
+    WHERE proposta.id_siconv									= :idProposta   													<\n>
+      AND proposta.versao_nr									= :versaoDaProposta													<\n>
+      AND meta.id_meta_analise									in (<idsMetas>)														<\n>
+      AND submeta.in_situacao 									= 'REJ'																<\n>
+)      																																<\n>
+ORDER BY 2;																															<\n>
+%>
+
+insertSubmetas(submeta) ::= <%
+   INSERT INTO siconv.vrpl_submeta                                                                     <\n>
+       (id_submeta_analise,                                                                            <\n>
+        proposta_fk,                                                                                   <\n>
+        vrpl_lote_licitacao_fk,                                                                        <\n>
+        meta_fk,                                                                                       <\n>
+        in_regime_execucao,                                                                            <\n>
+        vl_repasse,                                                                                    <\n>
+        vl_contrapartida,                                                                              <\n>
+        vl_total_licitado,                                                                             <\n>
+        vl_outros,                                                                                     <\n>
+        nr_submeta_analise,                                                                            <\n>
+        tx_descricao_analise,                                                                          <\n>
+        nr_lote_analise,                                                                               <\n>
+        vl_repasse_analise,                                                                            <\n>
+        vl_contrapartida_analise,                                                                      <\n>
+        vl_outros_analise,                                                                             <\n>
+        vl_total_analise,                                                                              <\n>
+        in_situacao_analise,                                                                           <\n>
+        in_regime_execucao_analise,                                                                    <\n>
+        natureza_despesa_sub_it_fk_analise,                                                            <\n>
+        versao,                                                                                        <\n>
+        adt_login, adt_data_hora, adt_operacao)                                                        <\n>
+   VALUES(                                                                                             <\n>
+    :idSubmetaAnalise,                                                                                 <\n>
+    :idProposta,                                                                                       <\n>
+    :vrplLoteLicitacaoFk,                                                                              <\n>
+    :idMeta,                                                                                           <\n>
+    :regimeExecucao,                                                                                   <\n>
+    :vlRepasse,                                                                                        <\n>
+    :vlContrapartida,                                                                                  <\n>
+    :vlTotalLicitado,                                                                                  <\n>
+    :vlOutros,                                                                                         <\n>
+    :numero,                                                                                           <\n>
+    :descricao,                                                                                        <\n>
+    :lote,                                                                                             <\n>
+    :vlRepasseAnalise,                                                                                 <\n>
+    :vlContrapartidaAnalise,                                                                           <\n>
+    :vlOutrosAnalise,                                                                                  <\n>
+    :vlTotalAnalise,                                                                                   <\n>
+    :situacaoAnalise,                                                                                  <\n>
+    :regimeExecucaoAnalise,                                                                            <\n>
+    :itemPad,                                                                                          <\n>
+    1,                                                                                                 <\n>
+    current_setting('vrpl.cpf_usuario'), LOCALTIMESTAMP, 'INSERT');                                    <\n>
+%>
+
+recuperarMetaPorFkAnalise(idsMetaAnalise) ::= <%
+    SELECT                                                                                                          <\n>
+        id,                                                                                                         <\n>
+        id_meta_analise,                                                                                            <\n>
+        tx_descricao_analise,                                                                                       <\n>
+        nr_meta_analise,                                                                                            <\n>
+        qt_itens_analise                                                                                           <\n>
+    FROM siconv.vrpl_meta                                                                                           <\n>
+    WHERE id_meta_analise IN (<idsMetaAnalise>);                                                                    <\n>
+%>
+
+insertMetas(metas) ::= <%
+   INSERT INTO siconv.vrpl_meta                                                                                     <\n>
+        (id_meta_analise,                                                                                           <\n>
+        tx_descricao_analise,                                                                                       <\n>
+        nr_meta_analise,                                                                                            <\n>
+        qt_itens_analise,                                                                                           <\n>
+        subitem_fk,                                                                                                 <\n>
+        in_social,                                                                                                  <\n>
+        versao,                                                                                                     <\n>
+        adt_login, adt_data_hora, adt_operacao)                                                                     <\n>
+   VALUES(                                                                                                          <\n>
+        :idMetaAnalise,                                                                                             <\n>
+        :descricao,                                                                                                 <\n>
+        :numero,                                                                                                    <\n>
+        :quantidade,                                                                                                <\n>
+        :subItemFk,                                                                                                 <\n>
+        :social,                                                                                                    <\n>
+        1,                                                                                                          <\n>
+        current_setting('vrpl.cpf_usuario'), LOCALTIMESTAMP, 'INSERT');                                             <\n>
+%>
+
+findSubmetasSemPo(idLicitacao) ::= <%
+    select                                                                                                          <\n>
+        submeta.id,                                                                                                 <\n>
+        submeta.id_submeta_analise,                                                                                 <\n>
+        submeta.nr_submeta_analise,                                                                                 <\n>
+        submeta.tx_descricao_analise                                                                                <\n>
+    from siconv.vrpl_submeta submeta                                                                                <\n>
+    inner join siconv.vrpl_lote_licitacao lote         on submeta.vrpl_lote_licitacao_fk    = lote.id               <\n>
+    inner join siconv.vrpl_licitacao licitacao         on lote.licitacao_fk                 = licitacao.id          <\n>
+    left join siconv.vrpl_po po                        on po.submeta_fk                     = submeta.id            <\n>
+    WHERE licitacao.id = :idLicitacao                                                                               <\n>
+      AND po.id is null;                                                                                            <\n>
+%>
+
+insertSubitensInvestimento(subItens) ::= <%
+   INSERT INTO siconv.vrpl_subitem_investimento                                                                     <\n>
+   (id_subitem_analise,                                                                                             <\n>
+    descricao,                                                                                                      <\n>
+    in_projeto_social,                                                                                              <\n>
+    codigo_und,                                                                                                     <\n>
+    descricao_und,                                                                                                  <\n>
+    versao,                                                                                                         <\n>
+    adt_login,                                                                                                      <\n>
+    adt_data_hora,                                                                                                  <\n>
+    adt_operacao)                                                                                                   <\n>
+   VALUES(                                                                                                          <\n>
+    :idSubitemAnalise,                                                                                              <\n>
+    :descricao,                                                                                                     <\n>
+    :inProjetoSocial,                                                                                               <\n>
+    :codigoUnd,                                                                                                     <\n>
+    :descricaoUnd,                                                                                                  <\n>
+    1,                                                                                                              <\n>
+    current_setting('vrpl.cpf_usuario'), LOCALTIMESTAMP, 'INSERT');                                                 <\n>
+%>
+
+recuperarSubitemPorFkAnalise(idsSubitemAnalise) ::= <%
+    SELECT                                                                                                          <\n>
+        id,                                                                                                         <\n>
+        id_subitem_analise,                                                                                         <\n>
+        descricao,                                                                                                  <\n>
+        in_projeto_social,                                                                                          <\n>
+        codigo_und,                                                                                                 <\n>
+        descricao_und,                                                                                              <\n>
+        versao,                                                                                                     <\n>
+        versao_nr,                                                                                                  <\n>
+        versao_id,                                                                                                  <\n>
+        versao_nm_evento                                                                                            <\n>
+    FROM siconv.vrpl_subitem_investimento                                                                           <\n>
+    WHERE id_subitem_analise IN (<idsSubitemAnalise>);                                                              <\n>
+%>
+
+atualizaValorTotalLicitadoDaSubmetaByID(submeta) ::= <%
+    UPDATE siconv.vrpl_submeta                                                         <\n>
+        SET vl_total_licitado           = :vlTotalLicitado,                            <\n>
+            vl_contrapartida            = :vlContrapartida,                            <\n>
+            vl_repasse                  = :vlRepasse,		                           <\n>
+            vl_outros                   = :vlOutros,                                   <\n>
+            adt_login                   = current_setting('vrpl.cpf_usuario'),         <\n>
+            adt_data_hora               = LOCALTIMESTAMP,                              <\n>
+            adt_operacao                = 'UPDATE',                                    <\n>
+            versao                     = (:versao + 1)                                 <\n>
+      WHERE id                          = :id;				                           <\n>
+%>
+
+atualizaLoteDaSubmeta(submetas) ::= <%
+    UPDATE siconv.vrpl_submeta                                                <\n>
+        SET vrpl_lote_licitacao_fk      = :vrplLoteLicitacaoFk,               <\n>
+            adt_login                   = current_setting('vrpl.cpf_usuario'),<\n>
+            adt_data_hora               = LOCALTIMESTAMP,                     <\n>
+            adt_operacao                = 'UPDATE',                           <\n>
+            versao                     = (:versao + 1)                        <\n>
+      WHERE id = :id;                                                         <\n>
+%>
+
+
+verificaSubmetasMesmoTipoPorLote(idsLotes) ::= <%
+    select case when count(distinct meta.in_social) = 1 then true else false end                        <\n>
+    from siconv.vrpl_submeta submeta                                                                    <\n>
+    left join siconv.vrpl_meta meta on meta.id = submeta.meta_fk                                        <\n>
+    left join siconv.vrpl_lote_licitacao lote on submeta.vrpl_lote_licitacao_fk = lote.id               <\n>
+    where lote.id in (<idsLotes>);                                                                      <\n>
+%>
+
+verificaAcompanhamentoPoMesmoTipoPorLote(idsLotes) ::= <%
+    select case when count(distinct po.in_acompanhamento_eventos) = 1 then true else false end     <\n>
+    from siconv.vrpl_submeta submeta                                                               <\n>
+    left join siconv.vrpl_lote_licitacao lote on submeta.vrpl_lote_licitacao_fk = lote.id          <\n>
+    left join siconv.vrpl_po po on po.submeta_fk = submeta.id                                      <\n>
+    where lote.id in (<idsLotes>);                                                                 <\n>
+%>
+
+verificaSubmetaMesmoRegimePorLote(idsLotes) ::= <%
+    select case when count(distinct submeta.in_regime_execucao) = 1 then true else false end              <\n>
+    from siconv.vrpl_submeta submeta                                                                      <\n>
+    left join siconv.vrpl_lote_licitacao lote on submeta.vrpl_lote_licitacao_fk = lote.id                 <\n>
+    where lote.id in (<idsLotes>);                                                                        <\n>
+%>

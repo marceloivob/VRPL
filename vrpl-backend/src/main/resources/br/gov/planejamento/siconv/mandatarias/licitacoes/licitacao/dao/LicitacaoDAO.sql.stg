@@ -1,0 +1,348 @@
+recuperarLotesDaLicitacao(identificadorDaProposta) ::= <%
+    SELECT                                                              <\n>
+        VRPL_LOTE_LICITACAO.NUMERO_LOTE                                 <\n>
+    FROM                                                                <\n>
+        SICONV.VRPL_LICITACAO                                           <\n>
+    INNER JOIN SICONV.VRPL_LOTE_LICITACAO ON                            <\n>
+        (                                                               <\n>
+            VRPL_LICITACAO.ID = VRPL_LOTE_LICITACAO.LICITACAO_FK        <\n>
+        )                                                               <\n>
+    WHERE VRPL_LICITACAO.PROPOSTA_FK = :identificadorDaProposta         <\n>
+    ORDER BY VRPL_LOTE_LICITACAO.NUMERO_LOTE;                           <\n>
+%>
+
+recuperarLicitacoesAssociadasDaProposta(proposta, licitacoesAtivas) ::= <%
+    select                                                                                                              <\n>
+                                                                                                                        
+        licitacao.id lic_id,                                                                                            <\n>
+        licitacao.proposta_fk lic_proposta_fk,                                                                          <\n>
+        licitacao.numero_ano lic_numero_ano,                                                                            <\n>
+        licitacao.processo_de_execucao lic_processoDeExecucao,												            <\n>
+        licitacao.modalidade lic_modalidade,																            <\n>
+        licitacao.objeto lic_objeto,                                                                                    <\n>
+        licitacao.valor_processo lic_valor_processo,                                                                    <\n>
+        licitacao.status_processo lic_status_processo,                                                                  <\n>
+        licitacao.id_licitacao_fk lic_id_licitacao_fk,                                                                  <\n>
+        licitacao.in_situacao lic_in_situacao,                                                                          <\n>
+        licitacao.versao_nr lic_versao_nr,                                                                              <\n>
+        licitacao.versao lic_versao,                                                                  		            <\n>
+        v_max.lic_maior_versao,																							<\n>
+                                                                                                                        
+        fornecedor.id for_id,                                                                                           <\n>
+        fornecedor.razao_social for_razao_social,                                                                       <\n>
+        fornecedor.tipo_identificacao for_tipo_identificacao,                                                           <\n>
+        fornecedor.identificacao for_identificacao,                                                                     <\n>
+        fornecedor.obsoleto for_obsoleto,				                                                                    <\n>
+        fornecedor.versao for_versao,				                                                                    <\n>
+                                                                                                                        
+        lote.id lote_id,                                                                                                <\n>
+        lote.numero_lote lote_numero_lote,                                                                              <\n>
+        lote.licitacao_fk lote_licitacao_fk,                                                                            <\n>
+        lote.fornecedor_fk lote_fornecedor_fk,                                                                          <\n>
+        lote.versao lote_versao,																			            <\n>
+                                                                                                                        
+        submeta.id submeta_id,                                                                                          <\n>
+        submeta.nr_submeta_analise submeta_nr_submeta_analise,                                                          <\n>
+        submeta.nr_lote_analise submeta_nr_lote_analise,                                                                <\n>
+        submeta.tx_descricao_analise submeta_tx_descricao_analise,                                                      <\n>
+        submeta.nr_submeta_analise submeta_numero,                                                                      <\n>
+        submeta.vl_total_analise submeta_vl_total_analise,                                                              <\n>
+        submeta.vl_total_licitado submeta_vl_total_licitado,                                                            <\n>
+        submeta.versao submeta_versao,						                                                            <\n>
+                                                                                                                        
+        meta.id meta_id,                                                                                                <\n>
+        meta.tx_descricao_analise meta_tx_descricao_analise,                                                            <\n>
+        meta.nr_meta_analise meta_nr_meta_analise,                                                                      <\n>
+        meta.versao meta_versao					                                                                        <\n>
+
+    from siconv.vrpl_licitacao licitacao                                                                                <\n>
+    left join siconv.vrpl_lote_licitacao 	lote 		on lote.licitacao_fk 				= licitacao.id              <\n>
+    left join siconv.vrpl_submeta 			submeta 	on submeta.vrpl_lote_licitacao_fk 	= lote.id                   <\n>
+    left join siconv.vrpl_meta 				meta 		on submeta.meta_fk 					= meta.id                   <\n>
+    left join siconv.vrpl_fornecedor 		fornecedor 	on fornecedor.licitacao_fk 			= licitacao.id              <\n>
+    inner join siconv.vrpl_proposta 		proposta 	on proposta.id 						= licitacao.proposta_fk     <\n>
+    left join (                                                                                             			<\n>
+                                                                                                            			<\n>
+        select max(vl.versao_nr) lic_maior_versao                                                                		<\n>
+          from siconv.vrpl_licitacao vl                                                                            		<\n>
+         join siconv.vrpl_proposta vp on vp.id = vl.proposta_fk 														<\n>
+          where vp.id_siconv = :proposta.idSiconv																		<\n>                                                                                
+                                                                                                            			<\n>
+    ) v_max on proposta.id = :proposta.id																				<\n>                                                                                                    
+
+    where proposta.id 				= :proposta.id																		<\n>
+    
+    <if(licitacoesAtivas)>
+    	and licitacao.in_situacao 		!= 'REJ'																		<\n>
+    <else>
+    	and licitacao.in_situacao 		= 'REJ'																			<\n>
+	<endif>
+
+    order by licitacao.numero_ano, lote.numero_lote, submeta.nr_submeta_analise;                            			<\n>
+%>
+
+findLicitacaoByIdLicitacao(idLicitacao) ::= <%
+    select                                                                                                      <\n>
+        licitacao.id lic_id,                                                                                    <\n>
+        licitacao.proposta_fk lic_proposta_fk,                                                                  <\n>
+        licitacao.numero_ano lic_numero_ano,                                                                    <\n>
+        licitacao.valor_processo lic_valor_processo,                                                            <\n>
+        licitacao.in_situacao lic_in_situacao,                                                                  <\n>
+        licitacao.status_processo lic_status_processo,                                                          <\n>
+        licitacao.id_licitacao_fk lic_id_licitacao_fk,                                                          <\n>
+        licitacao.regime_contratacao lic_regime_contratacao,                                                    <\n>
+        licitacao.objeto lic_objeto,                                                                            <\n>
+        licitacao.versao_nr lic_versao_nr,                                                                      <\n>
+        licitacao.versao 	lic_versao,                                                                      	<\n>
+        v_max.lic_maior_versao,																					<\n>
+
+        fornecedor.id for_id,                                                                               	<\n>
+        fornecedor.razao_social for_razao_social,                                                           	<\n>
+        fornecedor.tipo_identificacao for_tipo_identificacao,                                               	<\n>
+        fornecedor.identificacao for_identificacao,                                                         	<\n>
+        fornecedor.obsoleto for_obsoleto,			                                                         	<\n>
+
+        lote.id lote_id,                                                                                        <\n>
+        lote.numero_lote lote_numero_lote,                                                                      <\n>
+        lote.licitacao_fk lote_licitacao_fk,																    <\n>
+        lote.versao lote_versao,																				<\n>
+        lote.fornecedor_fk lote_fornecedor_fk,																    <\n>
+
+        submeta.id submeta_id,                                                                                  <\n>
+        submeta.nr_submeta_analise submeta_nr_submeta_analise,                                                  <\n>
+        submeta.nr_lote_analise submeta_nr_lote_analise,                                                        <\n>
+        submeta.tx_descricao_analise submeta_tx_descricao_analise,                                              <\n>
+        submeta.nr_submeta_analise submeta_numero,                                                              <\n>
+        submeta.vl_total_analise submeta_vl_total_analise,                                                      <\n>
+        submeta.vl_total_licitado submeta_vl_total_licitado,                                                    <\n>
+        submeta.vl_repasse submeta_vl_repasse,                                                                  <\n>
+        submeta.vl_outros submeta_vl_outros,                                                                    <\n>
+        submeta.vl_contrapartida submeta_vl_contrapartida,                                                      <\n>
+        submeta.in_situacao submeta_in_situacao,                                                                <\n>
+        
+        submeta.in_regime_execucao_analise submeta_in_regime_execucao_analise,                                  <\n>
+        submeta.in_regime_execucao submeta_in_regime_execucao,                                                  <\n>
+        meta.id meta_id,                                                                                        <\n>
+        meta.tx_descricao_analise meta_tx_descricao_analise,                                                    <\n>
+        meta.nr_meta_analise meta_nr_meta_analise                                                               <\n>
+
+    from siconv.vrpl_licitacao 					licitacao                                                       <\n>
+        left join siconv.vrpl_lote_licitacao 	lote 		on lote.licitacao_fk 				= licitacao.id 	<\n>
+        left join siconv.vrpl_submeta 			submeta 	on submeta.vrpl_lote_licitacao_fk 	= lote.id 		<\n>
+        left join siconv.vrpl_meta 				meta 		on submeta.meta_fk 					= meta.id 		<\n>
+        left join siconv.vrpl_fornecedor 		fornecedor 	on fornecedor.licitacao_fk 			= licitacao.id  <\n>
+        left join (                                                                                             <\n>
+                                                                                                                <\n>
+            select vl.versao_nr lic_maior_versao																<\n>
+              from siconv.vrpl_licitacao vl                                                                     <\n>
+             where proposta_fk =                                                                                <\n>
+            (                                                                                                   <\n>
+                select vp.id from siconv.vrpl_proposta vp where id_siconv =                                     <\n>
+                (                                                                                               <\n>
+                    (   select vp.id_siconv                                                                     <\n>
+                          from siconv.vrpl_licitacao vl                                                         <\n>
+                          join siconv.vrpl_proposta vp on vl.proposta_fk = vp.id                                <\n>
+                         where vl.id = :id                                                                      <\n>
+                    )                                                                                           <\n>
+                )                                                                                               <\n>
+                order by vp.id desc                                                                             <\n>
+                limit 1                                                                                         <\n>
+            )
+            order by lic_maior_versao desc                                                                                                      <\n>
+            limit 1                                                                                             <\n>
+                                                                                                                <\n>
+        ) v_max on licitacao.id = :id                                                                           <\n>                         
+                                                                                                                <\n>
+        where licitacao.id = :id                                                                                <\n>
+%>
+
+recuperaFornecedoresDasLicitacoes(idsLicitacoes) ::= <%
+																										<\n>
+	select vrpl_fornecedor.* 																			<\n>
+																										<\n>
+	from siconv.vrpl_fornecedor 																		<\n>
+																										<\n>
+	join siconv.vrpl_licitacao on siconv.vrpl_fornecedor.licitacao_fk = siconv.vrpl_licitacao.id		<\n>
+																										<\n>
+	where vrpl_licitacao.id in (<idsLicitacoes>);			 											<\n>
+%>
+
+insertLicitacao(licitacao) ::= <%
+    INSERT INTO siconv.VRPL_LICITACAO(                       <\n>
+        proposta_fk,                                         <\n>
+        numero_ano,                                          <\n>
+        objeto,                                              <\n>
+        valor_processo,                                      <\n>
+        status_processo,                                     <\n>
+        in_situacao,                                         <\n>
+        id_licitacao_fk,                                     <\n>
+        adt_login,                                           <\n>
+        adt_data_hora,                                       <\n>
+        adt_operacao,                                        <\n>
+        modalidade,                                          <\n>
+        regime_contratacao,                                  <\n>
+        data_publicacao,                                     <\n>
+        data_homologacao,                                    <\n>
+        processo_de_execucao,								 <\n>
+        versao,                                              <\n>
+        versao_nr)				                             <\n>
+    VALUES (                                                 <\n>
+        :identificadorDaProposta,                            <\n>
+        :numeroAno,                                          <\n>
+        :objeto,                                             <\n>
+        :valorProcessoLicitatorio,                           <\n>
+        :situacaoDoProcessoLicitatorio,                      <\n>
+        :situacaoDaLicitacao, 		                         <\n>
+        :idLicitacaoFk,                                      <\n>
+        current_setting('vrpl.cpf_usuario'),                 <\n>
+        LOCALTIMESTAMP,                                      <\n>
+        'INSERT',                                            <\n> 
+        :modalidade,                                         <\n>
+        :regimeContratacao,                                  <\n>
+        :dataPublicacao,                                     <\n>
+        :dataHomologacao,                                    <\n>
+        :processoDeExecucao,								 <\n>
+        1,                                                   <\n>
+        :versaoNr)                         					 <\n>
+%>
+
+atualizaLicitacao(licitacao) ::= <%
+
+UPDATE siconv.vrpl_licitacao											<\n>
+																		<\n>
+SET proposta_fk				= :identificadorDaProposta,					<\n>
+    numero_ano				= :numeroAno,								<\n>
+    objeto					= :objeto,									<\n>
+    valor_processo			= :valorProcessoLicitatorio,				<\n>
+    status_processo			= :situacaoDoProcessoLicitatorio, 			<\n>
+    id_licitacao_fk			= :idLicitacaoFk,							<\n>
+    in_situacao				= :situacaoDaLicitacao,						<\n>
+    versao_nr				= :numeroVersao,							<\n>
+    modalidade				= :modalidade, 								<\n>
+    regime_contratacao		= :regimeContratacao, 						<\n>
+    data_publicacao			= :dataPublicacao, 							<\n>
+    data_homologacao		= :dataHomologacao, 						<\n>
+    processo_de_execucao	= :processoDeExecucao,						<\n>
+    versao					= (:versao + 1),							<\n>
+    adt_login 				= current_setting('vrpl.cpf_usuario'),		<\n>
+    adt_data_hora			= LOCALTIMESTAMP, 							<\n>
+    adt_operacao			= 'UPDATE' 									<\n>
+																		<\n>
+WHERE id					= :id;										<\n>
+%>
+
+
+recuperarValorRepassePorListaLicitacoes(idsLicitacoes) ::= <%
+	SELECT SUM(submeta.vl_repasse)										<\n>
+		  FROM															<\n>
+				siconv.vrpl_lote_licitacao lote_licitacao,				<\n>
+				siconv.vrpl_submeta submeta								<\n>
+		WHERE															<\n>
+			  lote_licitacao.licitacao_fk in (<idsLicitacoes>)			<\n>
+		  AND lote_licitacao.id = submeta.vrpl_lote_licitacao_fk;		<\n>
+
+%>
+
+recuperarLicitacoesAtuaisDaProposta(usuarioLogado) ::= <%
+	SELECT licitacao.* 																			<\n>
+																								<\n>
+	 FROM siconv.vrpl_licitacao			licitacao												<\n>
+																								<\n>
+	INNER JOIN siconv.vrpl_proposta 	proposta 	on (licitacao.proposta_fk = proposta.id)	<\n>
+																								<\n>
+	WHERE proposta.id_siconv 			= :idProposta											<\n>
+	  AND proposta.versao_in_atual;																<\n>
+%>
+
+recuperarLicitacoesDaPropostaPorVersao(usuarioLogado, versao) ::= <%
+	SELECT licitacao.* 																			<\n>
+																								<\n>
+	 FROM siconv.vrpl_licitacao			licitacao												<\n>
+																								<\n>
+	INNER JOIN siconv.vrpl_proposta 	proposta 	on (licitacao.proposta_fk = proposta.id)	<\n>
+																								<\n>
+	WHERE proposta.id_siconv 			= :idProposta		            						<\n>
+	  AND proposta.versao_nr            = :versao;												<\n>
+%>
+
+insertFornecedores(fornecedor) ::= <%
+    INSERT INTO siconv.vrpl_fornecedor          <\n>
+        (licitacao_fk,                          <\n>
+        razao_social,                           <\n>
+        tipo_identificacao,                     <\n>
+        identificacao,                          <\n>
+        obsoleto,                               <\n>
+        versao,                                 <\n>
+        adt_login,                              <\n>
+        adt_data_hora,                          <\n>
+        adt_operacao)                           <\n>
+    VALUES(                                     <\n>
+        :licitacaoFk,                           <\n>
+        :razaoSocial,                           <\n>
+        :tipoIdentificacao,                     <\n>
+        :identificacao,                         <\n>
+        :obsoleto,                              <\n>
+        1,                                      <\n>
+        current_setting('vrpl.cpf_usuario'),	<\n>
+        LOCALTIMESTAMP,                         <\n>
+        'INSERT');                              <\n>
+%>
+
+atualizaFornecedores(fornecedor) ::= <%
+	UPDATE siconv.vrpl_fornecedor									<\n>
+																	<\n>
+	SET licitacao_fk		= :licitacaoFk,							<\n>
+	    razao_social		= :razaoSocial,							<\n>	
+	    tipo_identificacao	= :tipoIdentificacao, 					<\n>
+	    identificacao		= :identificacao, 						<\n>
+	    obsoleto    		= :obsoleto,    						<\n>
+	    versao_nr			= :versaoNr, 							<\n>
+	    versao_id			= :versaoId, 							<\n>
+	    versao_nm_evento	= :versaoNmEvento, 						<\n>
+	    versao				= (versao + 1), 						<\n>	
+	    adt_login			= current_setting('vrpl.cpf_usuario'),	<\n> 
+	    adt_data_hora		= LOCALTIMESTAMP, 						<\n>
+	    adt_operacao		= 'UPDATE'								<\n>
+																	<\n>
+	WHERE id				= :id;									<\n>
+%>
+
+recuperarSomatorioDosValoresDasPOsLicitadas(idLicitacao, versao) ::= <%
+	SELECT SUM(vrpl_submeta.vl_total_licitado)																					<\n>
+																																<\n>
+	FROM siconv.vrpl_licitacao																									<\n>
+																																<\n>
+	JOIN siconv.vrpl_lote_licitacao 	ON siconv.vrpl_lote_licitacao.licitacao_fk  	= siconv.vrpl_licitacao.id				<\n>
+	JOIN siconv.vrpl_submeta 			ON siconv.vrpl_submeta.vrpl_lote_licitacao_fk  	= siconv.vrpl_lote_licitacao.id			<\n>
+																																<\n>
+	WHERE siconv.vrpl_licitacao.id 		= :idLicitacao																			<\n>
+	AND siconv.vrpl_licitacao.versao 	= :versao;																				<\n>
+%>
+
+recuperarIndicadorSocialLicitacao(id) ::= <%
+	SELECT DISTINCT meta.in_social																								<\n>
+	FROM siconv.vrpl_licitacao lic,  																							<\n>
+		siconv.vrpl_lote_licitacao lote, 																						<\n>
+		siconv.vrpl_submeta submeta, 																							<\n>
+		siconv.vrpl_meta meta  																									<\n>
+	WHERE lic.id 		= lote.licitacao_fk																						<\n>
+	and	lote.id 		= submeta.vrpl_lote_licitacao_fk																		<\n>
+	and submeta.meta_fk = meta.id																								<\n>
+	and	lic.id 			= :id																									<\n>
+%>
+
+recuperarOutrasLicitacoesRejeitadasComMesmosNumerosLotes(licitacao, nrLotes) ::= <%
+	SELECT DISTINCT                                                                                                             <\n>
+		lic.id lic_id,                                                                                                          <\n>
+		lic.numero_ano lic_numeroAno,                                                                                           <\n>
+        lote.id lote_id,                                                                                                        <\n>
+        lote.numero_lote lote_numero_lote                                                                                       <\n>        
+	FROM siconv.vrpl_licitacao lic                                                                                              <\n>
+	INNER JOIN siconv.vrpl_lote_licitacao lote ON lote.licitacao_fk = lic.id                                                    <\n>
+	INNER JOIN siconv.vrpl_proposta prop ON prop.id = lic.proposta_fk                                                           <\n>	
+	WHERE lote.numero_lote in (<nrLotes>)                                                                                       <\n>
+		AND lic.in_situacao = 'REJ'                                                                                             <\n>
+		AND lic.versao_nr = :numeroVersao          			 											                        <\n>
+		AND lic.id != :id            	 											                                            <\n>
+		AND prop.id = :identificadorDaProposta										                                            <\n>				
+%>

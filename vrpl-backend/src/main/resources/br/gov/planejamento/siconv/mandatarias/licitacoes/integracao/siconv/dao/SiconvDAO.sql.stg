@@ -1,0 +1,440 @@
+recuperarDadosBasicos(usuarioLogado) ::= <%
+    SELECT  																		                   <\n>
+        ACFFO_PROPOSTA.PROP_SICONV_ID,  											                   <\n>
+        ACFFO_PROPOSTA.NUMERO_PROPOSTA,  											                   <\n>
+        ACFFO_PROPOSTA.ANO_PROPOSTA,  												                   <\n>
+        (ACFFO_PROPOSTA.VALOR_GLOBAL::numeric)::text,								                   <\n>
+        (ACFFO_PROPOSTA.VALOR_REPASSE::numeric)::text,  							                   <\n>
+        (ACFFO_PROPOSTA.VALOR_CONTRA_PARTIDA::numeric)::text,  						                   <\n>
+        ACFFO_PROPOSTA.MODALIDADE,  												                   <\n>
+        ACFFO_PROPOSTA.NOME_OBJETO,  												                   <\n>
+        ACFFO_PROPOSTA.NUMERO_CONVENIO,  											                   <\n>
+        ACFFO_PROPOSTA.ANO_CONVENIO,  												                   <\n>
+        ACFFO_PROPOSTA.DATA_ASSINATURA_CONVENIO,  									                   <\n>
+        ACFFO_PROPOSTA.CODIGO_PROGRAMA,  											                   <\n>
+        ACFFO_PROPOSTA.NOME_PROGRAMA,  												                   <\n>
+        ACFFO_PROPOSTA.IDENTIFICACAO_PROPONENTE,  									                   <\n>
+        ACFFO_PROPOSTA.NOME_PROPONENTE,  											                   <\n>
+        ACFFO_PROPOSTA.UF,  														                   <\n>
+        (ACFFO_PROPOSTA.PC_MIN_CONTRA_PARTIDA::numeric)::text,  					                   <\n>
+        ACFFO_PROPOSTA.NOME_MANDATARIA,  											                   <\n>
+        ACFFO_PROPOSTA.CATEGORIA,  													                   <\n>
+        ACFFO_PROPOSTA.NIVEL_CONTRATO,  											                   <\n>
+        ACFFO.TX_APELIDO,  															                   <\n>
+        ACFFO.IN_SITUACAO,																			   <\n>
+        ACFFO_PROPOSTA.TERMO_COMPROMISSO_TEM_MANDATAR  												   <\n>
+    FROM  																			                   <\n>
+        SICONV.ACFFO 			AS ACFFO,  											                   <\n>
+        SICONV.ACFFO_PROPOSTA 	AS ACFFO_PROPOSTA 									                   <\n>
+    WHERE 																			                   <\n>
+        ACFFO.PROP_FK 						= :idProposta 							                   <\n>
+        AND ACFFO_PROPOSTA.PROP_SICONV_ID 	= ACFFO.PROP_FK 						                   <\n>
+        AND ACFFO_PROPOSTA.VERSAO_NR 		= ACFFO.VERSAO_NR						                   <\n>
+        AND ACFFO.VERSAO_NR 				= (SELECT MAX(VERSAO_NR) 				                   <\n>
+        						 				 FROM SICONV.ACFFO					                   <\n>
+        										WHERE ID = ACFFO.ID 				                   <\n>
+                                  				  AND ACFFO.PROP_FK = :idProposta)                     <\n>
+        AND ACFFO_PROPOSTA.VERSAO_NR 		= (SELECT MAX(VERSAO_NR)                                   <\n>
+                                                 FROM SICONV.ACFFO_PROPOSTA                            <\n>
+                                                WHERE ACFFO_PROPOSTA.prop_siconv_id = :idProposta);	   <\n>
+%>
+
+existeSPAHomologadoParaProposta(usuarioLogado) ::= <%
+    SELECT 												<\n>
+        COUNT(*) > 0 as EXISTE 							<\n>
+    FROM 												<\n>
+        SICONV.ACFFO 									<\n>
+    WHERE 												<\n>
+        IN_SITUACAO IN ('HOM','HAS')					<\n>
+        AND VERSAO_NM_EVENTO IS NULL 					<\n>
+        AND PROP_FK = :idProposta; 						<\n>
+%>
+
+findNumerosLoteByIdProposta(identificadorDaProposta) ::= <%
+    select distinct(submeta.nr_lote) from siconv.acffo_submeta submeta 							<\n>
+    left join siconv.acffo_meta meta on submeta.meta_fk = meta.id 								<\n>
+    left join siconv.acffo_qci qci on meta.qci_fk = qci.id  									<\n>
+    left join siconv.acffo on qci.acffo_fk = acffo.id 											<\n>
+    where acffo.prop_fk = :identificadorDaProposta 												<\n>
+    AND acffo.versao_nr = (SELECT MAX(versao_nr) 												<\n>
+    						 FROM siconv.acffo													<\n>
+    						WHERE prop_fk = :identificadorDaProposta)  							<\n>
+%>
+
+recuperarLotesDaProposta(identificadorDaProposta) ::= <%
+    select distinct submeta.nr_lote  as numero_lote  											<\n>
+     from siconv.acffo_submeta submeta,  														<\n>
+           siconv.acffo_meta meta,  															<\n>
+           siconv.acffo_qci qci, 																<\n>
+           siconv.acffo acffo,  																<\n>
+           siconv.prop proposta  																<\n>
+   where submeta.meta_fk = meta.id  															<\n>
+     and meta.qci_fk = qci.id  																	<\n>
+     and qci.acffo_fk = acffo.id  																<\n>
+     and acffo.prop_fk = :identificadorDaProposta  												<\n>
+     and acffo.versao_nr = (select max(versao_nr) from siconv.acffo where id = acffo.id  		<\n>
+        and acffo.prop_fk = :identificadorDaProposta);  										<\n>
+%>
+
+recuperarSubmetasDaPropostaPorLote(identificadorDaProposta, numerosLote) ::= <%
+    select                                                                                                 <\n>
+        submeta.id id,                                                                                     <\n>
+        submeta.nr_submeta numero,                                                                         <\n>
+        submeta.meta_fk id_meta,                                                                           <\n>
+        submeta.tx_descricao descricao,                                                                    <\n>
+        submeta.nr_lote numero_lote,                                                                       <\n>
+        submeta.in_situacao situacaoAnalise,                                                               <\n>
+        submeta.in_regime_execucao regime_execucao,                                                        <\n>
+        submeta.natureza_despesa_sub_it_fk natureza_despesa_fk,                                            <\n>
+        COALESCE(submeta.vl_repasse, 0) valor_repasse_analise,                                             <\n>
+        COALESCE(submeta.vl_contrapartida, 0) valor_contrapartida_analise,                                 <\n>
+        COALESCE(submeta.vl_outros, 0) valor_outros_analise,                                               <\n>
+        (COALESCE(submeta.vl_repasse,0) +                                                                  <\n>
+            COALESCE(submeta.vl_contrapartida, 0) +                                                        <\n>
+            COALESCE(submeta.vl_outros, 0)) as valor_aceito_na_analise                                     <\n>
+        FROM                                                                                               <\n>
+           siconv.acffo_meta meta,                                                                         <\n>
+           siconv.acffo_qci qci,                                                                           <\n>
+           siconv.acffo acffo,                                                                             <\n>
+           siconv.acffo_submeta submeta                                                                    <\n>
+        WHERE                                                                                              <\n>
+           acffo.prop_fk = :identificadorDaProposta and                                                    <\n>
+           acffo.id = qci.acffo_fk and                                                                     <\n>
+           acffo.versao_nr = (select max(versao_nr)                                                        <\n>
+                    from siconv.acffo where id = acffo.id and acffo.prop_fk = :identificadorDaProposta     <\n>
+                ) and                                                                                      <\n>
+           qci.id = meta.qci_fk and                                                                        <\n>
+           meta.id = submeta.meta_fk and                                                                   <\n>
+           submeta.nr_lote in (<numerosLote>)                                                              <\n>
+        ORDER BY submeta.nr_lote                                                                           <\n>
+%>
+
+recuperarSubmetasDaProposta(identificadorDaProposta) ::= <%
+    select                                                                                              <\n>
+        submeta.id id,                                                                                  <\n>
+        submeta.nr_submeta numero,                                                                      <\n>
+        submeta.meta_fk id_meta,                                                                        <\n>
+        submeta.tx_descricao descricao,                                                                 <\n>
+        submeta.nr_lote numero_lote,                                                                    <\n>
+        submeta.in_situacao situacaoAnalise,                                                            <\n>
+        submeta.in_regime_execucao regime_execucao,                                                     <\n>
+        submeta.natureza_despesa_sub_it_fk natureza_despesa_fk,                                         <\n>
+        COALESCE(submeta.vl_repasse, 0) valor_repasse_analise,                                          <\n>
+        COALESCE(submeta.vl_contrapartida, 0) valor_contrapartida_analise,                              <\n>
+        COALESCE(submeta.vl_outros, 0) valor_outros_analise,                                            <\n>
+        (COALESCE(submeta.vl_repasse,0) +                                                               <\n>
+            COALESCE(submeta.vl_contrapartida, 0) +                                                     <\n>
+            COALESCE(submeta.vl_outros, 0)) as valor_aceito_na_analise                                  <\n>
+        FROM                                                                                            <\n>
+           siconv.acffo_meta meta,                                                                      <\n>
+           siconv.acffo_qci qci,                                                                        <\n>
+           siconv.acffo acffo,                                                                          <\n>
+           siconv.acffo_submeta submeta                                                                 <\n>
+        WHERE                                                                                           <\n>
+           acffo.prop_fk = :identificadorDaProposta and                                                 <\n>
+           acffo.id = qci.acffo_fk and                                                                  <\n>
+           acffo.versao_nr = (select max(versao_nr)                                                     <\n>
+                    from siconv.acffo where id = acffo.id and acffo.prop_fk = :identificadorDaProposta  <\n>
+                ) and                                                                                   <\n>
+           qci.id = meta.qci_fk and                                                                     <\n>
+           meta.id = submeta.meta_fk                                                                    <\n>
+        ORDER BY submeta.nr_lote                                                                        <\n>
+%>
+
+recuperarMetasProposta(identificadorDaProposta) ::= <%
+    select 																								<\n>
+            meta.id id, 																				<\n>
+            meta.tx_descricao descricao, 																<\n>
+            meta.qt_itens qt_itens, 																	<\n>
+            meta.subitem_investimento_fk subitem_investimento_fk, 										<\n>
+            meta.nr_meta numero, 																		<\n>
+            CASE WHEN subitem.in_tipo_projeto_social IS NULL THEN false ELSE true END as social 		<\n>
+        from siconv.acffo_meta meta 																	<\n>
+        inner join siconv.acffo_qci qci on meta.qci_fk = qci.id 										<\n>
+        inner join siconv.acffo on qci.acffo_fk = acffo.id 												<\n>
+        inner join siconv.sub_it_investimento subitem on subitem.id = meta.subitem_investimento_fk 		<\n>
+        where acffo.prop_fk = :identificadorDaProposta 													<\n>
+        and acffo.versao_nr = ( 																		<\n>
+                select max(versao_nr) 																	<\n>
+                    from siconv.acffo where id = acffo.id and acffo.prop_fk = :identificadorDaProposta 	<\n>
+            ) 																							<\n>
+%>
+
+recuperarPosPorIdSubmeta(idsSubmeta) ::= <%
+    SELECT 																								<\n>
+        po.id id, 																						<\n>
+        po.dt_base data_base, 																			<\n>
+        po.submeta_fk id_submeta, 																		<\n>
+        po.in_desonerado indicador_desonerado, 															<\n>
+        po.sg_localidade sigla_localidade,  															<\n>
+        po.dt_previsao_inicio_obra data_previsao_inicio_obra, 											<\n>
+        po.qt_meses_duracao_obra quantidade_meses_duracao_obra,  										<\n>
+        po.in_acompanhamento_eventos indicador_acompanhamento_por_evento 								<\n>
+    FROM siconv.acffo_po po where po.submeta_fk in (<idsSubmeta>); 										<\n>
+%>
+
+recuperarPosPropostaPorLote(identificadorDaProposta, numerosLote) ::= <%
+    select 																								<\n>
+        po.id id, 																						<\n>
+        po.dt_base data_base, 																			<\n>
+        po.submeta_fk id_submeta, 																		<\n>
+        po.in_desonerado indicador_desonerado, 															<\n>
+        po.sg_localidade sigla_localidade,  															<\n>
+        po.dt_previsao_inicio_obra data_previsao_inicio_obra, 											<\n>
+        po.qt_meses_duracao_obra quantidade_meses_duracao_obra,  										<\n>
+        po.in_acompanhamento_eventos indicador_acompanhamento_por_evento 								<\n>
+        FROM 																							<\n>
+           siconv.acffo_meta meta, 																		<\n>
+           siconv.acffo_qci qci, 																		<\n>
+           siconv.acffo acffo, 																			<\n>
+           siconv.acffo_submeta submeta, 																<\n>
+           siconv.acffo_po po 																			<\n>
+        WHERE 																							<\n>
+           acffo.prop_fk = :identificadorDaProposta and 												<\n>
+           acffo.id = qci.acffo_fk and 																	<\n>
+           acffo.versao_nr = (select max(versao_nr)														<\n>
+                    from siconv.acffo where id = acffo.id and acffo.prop_fk = :identificadorDaProposta 	<\n>
+                ) and 																					<\n>
+           qci.id = meta.qci_fk and 																	<\n>
+           meta.id = submeta.meta_fk and 																<\n>
+           submeta.nr_lote in (<numerosLote>) and 														<\n>
+           po.submeta_fk = submeta.id 																	<\n>
+%>
+
+recuperarMacroServicosPorIdsPos(idsPo) ::= <%
+    SELECT 																								<\n>
+        mservico.id servico_id, 																		<\n>
+        mservico.tx_descricao servico_tx_descricao, 													<\n>
+        mservico.po_fk servico_po_fk, 																	<\n>
+        mservico.nr_macro_servico servico_nr_macro_servico, 											<\n>
+        parcela.id parcela_id, 																			<\n>
+        parcela.nr_parcela parcela_nr_parcela, 															<\n>
+        parcela.pc_parcela parcela_pc_parcela, 															<\n>
+        parcela.macro_servico_fk parcela_macro_servico_fk 												<\n>
+    FROM siconv.acffo_macro_servico mservico 															<\n>
+    left join 																							<\n>
+        siconv.acffo_macro_servico_parcela parcela 														<\n>
+            on parcela.macro_servico_fk = mservico.id 													<\n>
+    where po_fk in (<idsPo>); 																			<\n>
+%>
+
+recuperarServicosPorIdsMacroServico(idsMacroServico) ::= <%
+    SELECT  																							<\n>
+        id,  																							<\n>
+        tx_observacao,  																				<\n>
+        macro_servico_fk,  																				<\n>
+        nr_servico,  																					<\n>
+        cd_servico,  																					<\n>
+        tx_descricao,  																					<\n>
+        sg_unidade,  																					<\n>
+        vl_custo_unitario_ref,  																		<\n>
+        pc_bdi,  																						<\n>
+        qt_total_itens,  																				<\n>
+        vl_custo_unitario,  																			<\n>
+        vl_preco_unitario,  																			<\n>
+        vl_preco_total,  																				<\n>
+        evento_fk,  																					<\n>
+        in_fonte  																						<\n>
+    FROM  																								<\n>
+        siconv.acffo_servico  																			<\n>
+    where  																								<\n>
+        macro_servico_fk in (<idsMacroServico>);  														<\n>
+%>
+
+recuperarEventoFrenteObraPorIdEvento(idsEvento) ::= <%
+    SELECT 																								<\n>
+        evento_fk, 																						<\n>
+        frente_obra_fk, 																				<\n>
+        nr_mes_conclusao 																				<\n>
+    FROM 																								<\n>
+        siconv.acffo_evento_frente_obra 																<\n>
+    where 																								<\n>
+        evento_fk in (<idsEvento>);  																	<\n>
+%>
+
+recuperarServicoFrenteObraPorIdServico(idsServico) ::= <%
+    SELECT  																							<\n>
+        servico_fk,  																					<\n>
+        frente_obra_fk,  																				<\n>
+        qt_itens 																						<\n>
+    FROM  																								<\n>
+        siconv.acffo_servico_frente_obra,														<\n>
+    where  																								<\n>
+        servico_fk in (<idsServico>);  																	<\n>
+%>
+
+recuperarServicoFrenteObraDetalhePorIdServico(idsServico) ::= <%
+    SELECT  																						<\n>
+        srv_frente.servico_fk,  																	<\n>
+        srv_frente.frente_obra_fk,  																<\n>
+        srv_frente.qt_itens, 																		<\n>
+        frente_obra.nr_frente_obra, 																<\n>
+        frente_obra.nm_frente_obra 				   												    <\n>
+    FROM  																							<\n>
+        siconv.acffo_servico_frente_obra srv_frente,												<\n>
+        siconv.acffo_frente_obra frente_obra														<\n>
+    where  		                                                                                    <\n>
+        srv_frente.frente_obra_fk = frente_obra.id and												<\n>
+        srv_frente.servico_fk in (<idsServico>);  													<\n>
+%>
+
+recuperarSubitemInvestimentoPorMetas(idsMetas) ::= <%
+    select  																							<\n>
+        subit.id id, 																					<\n>
+        subit.descricao descricao,  																	<\n>
+        subit.in_tipo_projeto_social in_projeto_social, 												<\n>
+        und.codigo codigo_und, 																			<\n>
+        und.descricao descricao_und 																	<\n>
+    from siconv.sub_it_investimento subit 																<\n>
+    inner join siconv.acffo_meta meta on subit.id = meta.subitem_investimento_fk 						<\n>
+    left join siconv.und_fornecimento und on und.id = subit.und_fornecimento_fk 						<\n>
+    where meta.id in (<idsMetas>); 																		<\n>
+%>
+
+findCtefByIdsLicitacaoFK(idsLicitacaoFK) ::= <%
+    SELECT                                                      <\n>
+        id,                                                     <\n>
+        licitacao_fk,                                           <\n>
+        contrato_original_fk,                                   <\n>
+        fornecedor_fk,                                          <\n>
+        ano,                                                    <\n>
+        sequencial,                                             <\n>
+        data_fim_vigencia,                                      <\n>
+        data_inicio_vigencia,                                   <\n>
+        data_assinatura,                                        <\n>
+        valor_global,                                           <\n>
+        data_publicacao,                                        <\n>
+        objeto,                                                 <\n>
+        tipo_aquisicao,                                         <\n>
+        tipo_contrato                                           <\n>
+    FROM siconv.contrato                                        <\n>
+    WHERE licitacao_fk in (<idsLicitacaoFK>);                   <\n>
+%>
+
+recuperarContratoPorId(id) ::= <%
+    SELECT                                                      <\n>
+        id,                                                     <\n>
+        licitacao_fk,                                           <\n>
+        contrato_original_fk,                                   <\n>
+        fornecedor_fk,                                          <\n>
+        ano,                                                    <\n>
+        sequencial,                                             <\n>
+        data_fim_vigencia,                                      <\n>
+        data_inicio_vigencia,                                   <\n>
+        data_assinatura,                                        <\n>
+        valor_global,                                           <\n>
+        data_publicacao,                                        <\n>
+        objeto,                                                 <\n>
+        tipo_aquisicao,                                         <\n>
+        tipo_contrato                                           <\n>
+    FROM siconv.contrato                                        <\n>
+    WHERE id = :id;                                             <\n>
+%>
+
+recuperarFornecedoresProposta(idProposta) ::= <%
+    select distinct                                                    		<\n>
+        fornecedor.id,                                              		<\n>
+        lic.id id_licitacao,                                        		<\n>
+        fornecedor.razao_social razao_social,                       		<\n>
+        fornecedor.tipo_identificacao tipo_identificacao,           		<\n>
+        fornecedor.identificacao identificacao                      		<\n>
+    from                                                            		<\n>
+        siconv.fornecedores fornecedor                                      <\n>
+    inner join siconv.fornecedores_vencedores_itens forvencedor             <\n>
+        on forvencedor.fornecedores_vencedores_fk = fornecedor.id   		<\n>
+    inner join siconv.it_licitacao it on forvencedor.itens_fk = it.id       <\n>
+    inner join siconv.licitacao lic on it.licitacao_fk = lic.id             <\n>
+    where lic.prop_fk = :idProposta;                                		<\n>
+%>
+
+recuperarSinapiPorCodigoItemData(cdItem, data, local) ::= <%
+	select															<\n>
+		id,															<\n>
+		cd_item,													<\n>
+		sg_localidade,												<\n>
+		vl_desonerado,												<\n>
+		vl_nao_desonerado,											<\n>
+		tp_sinapi,													<\n>
+		dt_referencia,												<\n>
+		dt_registro,												<\n>
+		sg_unidade,													<\n>
+		tx_descricao_item											<\n>
+	from															<\n>
+		siconv.acffo_sinapi											<\n>
+	where															<\n>
+		cd_item = :cdItem and										<\n>
+		sg_localidade = :local and	 								<\n>
+		TO_CHAR(dt_referencia,'MMYYYY') = TO_CHAR(TO_DATE(:data,'YYYY-MM-DD'), 'MMYYYY');	<\n>
+%>
+
+
+recuperarListaSinapiPorCodigoItemData(lista) ::= <%
+	select																<\n>
+		id,																<\n>
+		cd_item,														<\n>
+		sg_localidade,													<\n>
+		vl_desonerado,													<\n>
+		vl_nao_desonerado,												<\n>
+		tp_sinapi,														<\n>
+		dt_referencia,													<\n>
+		dt_registro,													<\n>
+		sg_unidade,														<\n>
+		tx_descricao_item as s_tx_descricao_item						<\n>
+	from																<\n>
+		siconv.acffo_sinapi												<\n>
+	where																<\n>
+		(cd_item, sg_localidade, TO_CHAR(dt_referencia,'MMYYYY')) in 	<\n>	
+		( <lista> )														<\n>
+%>
+
+
+
+recuperarEmailsPerfilProponente(propostaFk, perfis) ::= <%
+	select mp.email																			<\n>
+		from siconv.membro_partc mp															<\n>
+			inner join siconv.papel_membro pplm on pplm.ativo  and pplm.membro_fk = mp.id	<\n>
+			inner join siconv.prop on prop.proponente_fk = pplm.proponente_fk				<\n>
+		where prop.id = :propostaFk															<\n>
+			and mp.situacao_inativacao = 'ATIVO'											<\n>
+			and exists(																		<\n>
+				select 'x' from siconv.papeis_papel_membro ppm								<\n>
+					inner join siconv.papeis_possiveis pppsv on ppm.papeis_fk = pppsv.id	<\n>
+					where ppm.papel_membro_fk = pplm.id										<\n>
+						and pppsv.identificador in (<perfis>)								<\n>
+				)																			<\n>
+		group by mp.email;																	<\n>
+%>
+
+recuperarEmailsPerfilConcedente(propostaFk, perfis) ::= <%
+	select mp.email																				<\n>
+		from siconv.membro_partc mp																<\n>
+			inner join siconv.papel_membro pplm on pplm.ativo  and pplm.membro_fk = mp.id		<\n>
+			inner join siconv.org_administrativo org on pplm.concedente_fk = org.id				<\n>
+			inner join siconv.prop on prop.org_concedente_fk in (org.id, org.org_superior_fk)	<\n>
+		where prop.id = :propostaFk																<\n>
+			and mp.situacao_inativacao = 'ATIVO'												<\n>
+			and exists(																			<\n>
+					select 'x' from siconv.papeis_papel_membro ppm								<\n>
+						inner join siconv.papeis_possiveis pppsv on ppm.papeis_fk = pppsv.id	<\n>
+					where ppm.papel_membro_fk = pplm.id											<\n>
+						and pppsv.identificador in (<perfis>)									<\n>
+					)																			<\n>
+		group by mp.email;																		<\n>
+%>
+
+recuperarEmailsPerfilMandataria(propostaFk, perfis) ::= <%
+	select mp.email																						<\n>
+		from siconv.membro_partc mp																		<\n>
+			inner join siconv.papel_membro pplm on pplm.ativo  and pplm.membro_fk = mp.id				<\n>
+			inner join siconv.org_administrativo org on pplm.concedente_fk = org.id						<\n>
+			inner join siconv.prop on prop.instituicao_mandataria_fk in (org.id, org.org_superior_fk)	<\n>
+		where prop.id = :propostaFk																		<\n>
+			and mp.situacao_inativacao = 'ATIVO'														<\n>
+			and exists(																					<\n>
+					select 'x' from siconv.papeis_papel_membro ppm										<\n>
+						inner join siconv.papeis_possiveis pppsv on ppm.papeis_fk = pppsv.id			<\n>
+					where ppm.papel_membro_fk = pplm.id													<\n>
+						and pppsv.identificador in (<perfis>)											<\n>
+					)																					<\n>
+		group by mp.email;																				<\n>
+%>

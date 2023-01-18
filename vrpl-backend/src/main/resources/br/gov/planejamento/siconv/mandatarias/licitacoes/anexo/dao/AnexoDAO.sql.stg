@@ -1,0 +1,185 @@
+findAnexosByIdLicitacao(identificadorDaLicitacao) ::= <%
+    select 															<\n>
+        anexo.id,  													<\n>
+        anexo.vrpl_licitacao_fk, 									<\n>
+        anexo.nm_arquivo, 											<\n>
+        anexo.caminho, 												<\n>
+        anexo.bucket, 												<\n>
+        anexo.dt_upload, 											<\n>
+        anexo.tx_descricao, 										<\n>
+        anexo.in_tipoanexo, 										<\n>
+        anexo.id_cpf_enviadopor, 									<\n>
+        anexo.nome_enviadopor, 										<\n>
+        anexo.in_perfil,											<\n>
+        anexo.versao												<\n>
+    from siconv.vrpl_anexo anexo									<\n> 
+    inner join siconv.vrpl_licitacao on								<\n> 
+        ( anexo.vrpl_licitacao_fk = vrpl_licitacao.id )				<\n> 
+    where vrpl_licitacao.id = :identificadorDaLicitacao 			<\n>
+    	and anexo.in_tipoanexo in ('ATA_HOMOLOGACAO_LICITACAO',		<\n>
+ 			'DESPACHO_ADJUDICACAO', 'RESUMO_EDITAL', 'OUTROS')		<\n>
+    order by anexo.adt_data_hora desc;								<\n>
+%>
+
+findTodosAnexosByIdLicitacao(identificadorDaLicitacao) ::= <%
+    select 															<\n>
+        anexo.id,  													<\n>
+        anexo.vrpl_licitacao_fk, 									<\n>
+        anexo.nm_arquivo, 											<\n>
+        anexo.caminho, 												<\n>
+        anexo.bucket, 												<\n>
+        anexo.dt_upload, 											<\n>
+        anexo.tx_descricao, 										<\n>
+        anexo.in_tipoanexo, 										<\n>
+        anexo.id_cpf_enviadopor, 									<\n>
+        anexo.nome_enviadopor, 										<\n>
+        anexo.in_perfil,											<\n>
+        anexo.versao												<\n>
+    from siconv.vrpl_anexo anexo									<\n> 
+    inner join siconv.vrpl_licitacao on								<\n> 
+        ( anexo.vrpl_licitacao_fk = vrpl_licitacao.id )				<\n> 
+    where vrpl_licitacao.id = :identificadorDaLicitacao 			<\n>
+    order by anexo.adt_data_hora desc;								<\n>
+%>
+
+recuperarAnexo(idAnexo) ::= <%
+    select 	 														<\n>
+        anexo.id,  													<\n>
+        anexo.vrpl_licitacao_fk, 									<\n>
+        anexo.nm_arquivo, 											<\n>
+        anexo.caminho, 												<\n>
+        anexo.bucket, 												<\n>
+        anexo.dt_upload, 											<\n>
+        anexo.tx_descricao, 										<\n>
+        anexo.in_tipoanexo, 										<\n>
+        anexo.id_cpf_enviadopor, 									<\n>
+        anexo.nome_enviadopor, 										<\n>
+        anexo.in_perfil,											<\n>
+        anexo.versao,												<\n>
+        anexo.versao_nr,											<\n>
+        anexo.versao_nm_evento,										<\n>
+        anexo.versao_id												<\n>
+    from 															<\n>
+        siconv.vrpl_anexo anexo 									<\n>
+    inner join siconv.vrpl_licitacao on 							<\n>
+        ( anexo.vrpl_licitacao_fk = vrpl_licitacao.id)				<\n>
+    where anexo.id = :idAnexo; 										<\n>
+%>
+
+insertAnexo (anexo) ::= <% 
+INSERT INTO siconv.vrpl_anexo 										<\n>
+        (vrpl_licitacao_fk, 										<\n>
+         nm_arquivo, 												<\n>
+         caminho, 													<\n>
+         bucket,													<\n>
+         tx_descricao, 												<\n>
+         in_tipoanexo, 												<\n>
+         id_cpf_enviadopor, 										<\n>
+         nome_enviadopor, 											<\n>
+         in_perfil, 												<\n>
+         adt_login, 												<\n>
+         adt_operacao, 												<\n>
+         dt_upload, 												<\n>
+         adt_data_hora,												<\n>
+         versao ) 													<\n>
+ VALUES (:identificadorDaLicitacao, 								<\n>
+        :nomeDoArquivo,   											<\n>
+        :caminhoDoArquivo,  										<\n>
+        :bucket,													<\n>
+        :descricaoDoAnexo,  										<\n>
+        :tipoDoAnexo,  												<\n>
+        :cpfDoUsuarioQueEnviou, 									<\n>
+        :nomeDoUsuarioQueEnviou,  									<\n>
+        :perfilDoUsuarioQueEnviou,  								<\n>
+        current_setting('vrpl.cpf_usuario'),						<\n>
+        'INSERT',													<\n>
+        LOCALTIMESTAMP, 											<\n>
+        LOCALTIMESTAMP,												<\n>
+        1); 														<\n>
+%>
+
+updateAnexo(anexo) ::= <%
+    UPDATE siconv.vrpl_anexo 										<\n>
+    SET 															<\n>
+        vrpl_licitacao_fk  = :identificadorDaLicitacao, 			<\n>
+        nm_arquivo         = :nomeDoArquivo, 						<\n>
+        caminho            = :caminhoDoArquivo,						<\n>
+        bucket             = :bucket, 								<\n>
+        tx_descricao       = :descricaoDoAnexo,						<\n>
+        in_tipoanexo       = :tipoDoAnexo, 							<\n>
+        id_cpf_enviadopor  = :cpfDoUsuarioQueEnviou,				<\n>
+        in_perfil          = :perfilDoUsuarioQueEnviou,				<\n>
+        adt_login          = current_setting('vrpl.cpf_usuario'),	<\n>
+        dt_upload          = LOCALTIMESTAMP,						<\n>
+        adt_data_hora      = LOCALTIMESTAMP, 						<\n>
+        adt_operacao       = 'UPDATE', 								<\n>
+        versao             = (:versao + 1)							<\n>
+    WHERE id               = :identificadorDoAnexo					<\n>
+%>
+
+deleteAnexo(anexo) ::= <% 
+	DELETE FROM siconv.vrpl_anexo 									<\n>
+	WHERE    id 		   = :identificadorDoAnexo 					<\n>
+	AND versao             = :versao;								<\n>
+%>
+
+deleteAnexoPorIdLicitacao(anexo) ::= <%   
+	DELETE FROM siconv.vrpl_anexo 									<\n>
+	WHERE vrpl_licitacao_fk = :identificadorDaLicitacao				<\n>
+	AND versao        		= :versao;								<\n>
+%>
+
+recuperarOutrosAnexosDaLicitacao(identificadorDaLicitacao, identificadorDoAnexo) ::= <%
+    SELECT 															<\n>
+        anexo.id,  													<\n>
+        anexo.vrpl_licitacao_fk, 									<\n>
+        anexo.nm_arquivo, 											<\n>
+        anexo.caminho, 												<\n>
+        anexo.bucket, 												<\n>
+        anexo.dt_upload, 											<\n>
+        anexo.tx_descricao, 										<\n>
+        anexo.in_tipoanexo, 										<\n>
+        anexo.id_cpf_enviadopor, 									<\n>
+        anexo.nome_enviadopor, 										<\n>
+        anexo.in_perfil,											<\n>
+        anexo.versao,												<\n>
+        anexo.versao_nr,											<\n>
+        anexo.versao_nm_evento,										<\n>
+        anexo.versao_id												<\n>
+    FROM siconv.vrpl_anexo anexo									<\n> 
+    WHERE 															<\n>
+        anexo.vrpl_licitacao_fk = :identificadorDaLicitacao AND  	<\n>
+        anexo.id != :identificadorDoAnexo  							<\n>
+    ORDER BY anexo.dt_upload; 										<\n>
+%>
+
+findAnexosByTipo(identificadorDaLicitacao, tipoAnexo) ::= <%
+    select 															<\n>
+        anexo.id,  													<\n>
+        anexo.vrpl_licitacao_fk, 									<\n>
+        anexo.nm_arquivo, 											<\n>
+        anexo.caminho, 												<\n>
+        anexo.bucket, 												<\n>
+        anexo.dt_upload, 											<\n>
+        anexo.tx_descricao, 										<\n>
+        anexo.in_tipoanexo, 										<\n>
+        anexo.id_cpf_enviadopor, 									<\n>
+        anexo.nome_enviadopor, 										<\n>
+        anexo.in_perfil,											<\n>
+        anexo.versao,												<\n>
+        anexo.versao_nr,											<\n>
+        anexo.versao_nm_evento,										<\n>
+        anexo.versao_id												<\n>
+    from 															<\n>
+        siconv.vrpl_anexo anexo 									<\n>
+    inner join siconv.vrpl_licitacao lic on							<\n>
+        ( 															<\n>
+            anexo.vrpl_licitacao_fk = lic.id 						<\n>
+        ) 															<\n>
+    where 															<\n>
+        lic.id = :identificadorDaLicitacao and 						<\n>
+        anexo.in_tipoanexo = :tipoAnexo 							<\n>
+    order by 														<\n>
+        anexo.adt_data_hora desc;  									<\n>
+%>
+    

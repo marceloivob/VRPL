@@ -1,0 +1,37 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_coluna_tem_mandataria
+      context: termoCompromisso
+      author: ivan.leite
+      changes:
+        - sqlFile:
+            path: liquibase/termoCompromisso/struct/do/SICONV_SS2338963_01_add_column_vrpl_proposta_IVLE.sql
+            splitStatements: false 
+
+  - changeSet:
+      id: add_coluna_tem_mandataria_log_rec_proposta
+      context: termoCompromisso
+      author: ivan.leite
+      changes:
+        - sqlFile:
+            path: liquibase/termoCompromisso/struct/do/SICONV_SS2338963_02_alterar_trigger_log_rec_proposta_IVLE.sql
+            splitStatements: false 
+
+
+  - changeSet:
+      id: add_coluna_acffo_proposta_para_testes
+      context: testeTermoCompromisso
+      author: ivan.leite
+      changes:
+        - sqlFile:
+            path: liquibase/termoCompromisso/struct/do/SICONV_SS2338963_03_apenas_para_teste_IVLE.sql
+            splitStatements: false 
+
+
+
+
+  
+
+
+
+

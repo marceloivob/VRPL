@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/beans_2_0.xsd"
+	bean-discovery-mode="all" version="2.0">
+
+	<interceptors>
+		<class>br.gov.planejamento.siconv.mandatarias.licitacoes.application.security.AccessAllowedInterceptor</class>
+		<class>br.gov.planejamento.siconv.mandatarias.licitacoes.application.core.cache.RefreshRowPoliceInterceptor</class>
+		<class>br.gov.planejamento.siconv.mandatarias.licitacoes.application.interceptor.LoggingInterceptor</class>
+		<class>org.hibernate.validator.cdi.internal.interceptor.ValidationInterceptor</class>
+	</interceptors>
+
+</beans>

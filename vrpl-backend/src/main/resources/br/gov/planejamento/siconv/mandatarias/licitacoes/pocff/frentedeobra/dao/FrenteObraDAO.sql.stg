@@ -1,0 +1,31 @@
+recuperarListaFrentesDeObraIdServico(idServico) ::= <%
+    SELECT  																			<\n>
+        frente.id,  																	<\n>
+        frente.nm_frente_obra,  														<\n>
+        frente.po_fk,  																	<\n>
+        frente.nr_frente_obra,  														<\n>
+        frente.versao,																	<\n>
+        servicoFrente.qt_itens qtd_servico_frente_obra								    <\n>
+    FROM  																				<\n>
+        siconv.vrpl_frente_obra frente 													<\n>
+    inner join  																		<\n>
+        siconv.vrpl_servico_frente_obra servicoFrente  									<\n>
+            on servicoFrente.frente_obra_fk 	= frente.id 							<\n>
+    where  servicoFrente.servico_fk 			= :idServico  							<\n>
+    order by frente.nr_frente_obra;  													<\n>
+%>
+
+recuperarListaFrentesDeObraPoIdServico(idServico) ::= <%
+    SELECT    																								<\n>
+        frente.id,    																						<\n>
+        frente.nm_frente_obra,    																			<\n>
+        frente.po_fk,    																					<\n>
+        frente.nr_frente_obra,    																			<\n>
+        frente.versao  																						<\n>
+    FROM siconv.vrpl_frente_obra 			frente  														<\n>
+    inner join siconv.vrpl_po 				po 				on frente.po_fk 			= po.id  			<\n>
+    inner join siconv.vrpl_macro_servico 	macrosservico 	on macrosservico.po_fk 		= po.id  			<\n>
+    inner join siconv.vrpl_servico 			servico 		on servico.macro_servico_fk = macrosservico.id  <\n>
+    where servico.id 						= :idServico  													<\n>
+    order by frente.nr_frente_obra;  																		<\n>
+%>

@@ -1,0 +1,3 @@
+alter table siconv.vrpl_pendencia drop constraint vrpl_pendencia_prazo;
+
+alter table siconv.vrpl_pendencia add constraint vrpl_pendencia_prazo check (( (prazo)::text = any (array[ ('RSU'::character varying)::text, ('CON'::character varying)::text, ('AIO'::character varying)::text, ('PRO'::character varying)::text, ('ULT'::character varying)::text, ('PCF'::character varying)::text, ('APT'::character varying)::text, ('ACL'::character varying)::text, ('PVL'::character varying)::text])));

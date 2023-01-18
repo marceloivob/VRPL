@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: criacao_chave_unica
+      context: demanda2907252
+      author: bruno.prybecz
+      changes:
+        - sqlFile:
+            path: liquibase/demanda2907252_duplicacaoPropostas/SICONV_SS2907252_01_Chave_Unica_Versao_Proposta_BHP.sql
+            splitStatements: false

@@ -1,0 +1,26 @@
+
+existeParecerEmitidoViavelParaALicitacao(licitacao) ::= <%
+	SELECT vrpl_laudo.*																				<\n>
+	FROM siconv.vrpl_licitacao 																		<\n>
+	JOIN siconv.vrpl_laudo 		on vrpl_licitacao.id 			= vrpl_laudo.licitacao_fk			<\n>
+	WHERE vrpl_licitacao.id 	= :id																<\n>
+	AND vrpl_laudo.in_resultado	= 'VI' --VI == Viável												<\n>
+	AND (vrpl_laudo.in_status 	= 2 or vrpl_laudo.in_status = 3); --2 == EMITIDO 3 == ASSINADO		<\n>												<\n>
+%>
+
+
+existeParecerEmitidoParaALicitacao(licitacao) ::= <%
+	SELECT vrpl_laudo.*																				<\n>
+	FROM siconv.vrpl_licitacao 																		<\n>
+	JOIN siconv.vrpl_laudo 		on vrpl_licitacao.id 			= vrpl_laudo.licitacao_fk			<\n>
+	WHERE vrpl_licitacao.id 	= :id																<\n>
+	AND (vrpl_laudo.in_status 	= 2 or vrpl_laudo.in_status = 3); --2 == EMITIDO 3 == ASSINADO		<\n>
+%>
+
+existeAlgumParecerEmitidoParaALicitacao(idLicitacao) ::= <%
+	SELECT COUNT(1) > 0 AS existe																	<\n>
+	FROM siconv.vrpl_licitacao																		<\n>
+	JOIN siconv.vrpl_laudo 		on vrpl_licitacao.id 			= vrpl_laudo.licitacao_fk			<\n>
+	WHERE vrpl_licitacao.id 	= :idLicitacao														<\n>
+	AND (vrpl_laudo.in_status 	= 2 or vrpl_laudo.in_status = 3); --2 == EMITIDO 3 == ASSINADO		<\n>
+%>

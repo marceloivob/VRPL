@@ -1,0 +1,45 @@
+findArtByIdLicitacao(identificadorDaLicitacao) ::= <%
+    SELECT   <\n>
+        art.id,   <\n>
+        art.nu_art_rrt,  <\n>
+        art.dt_emissao,  <\n>
+        art.licitacao_fk,  <\n>
+        art.responsavel_tecnico_vrpl_fk,  <\n>
+        art.anexo_vrpl_fk,  <\n>
+        art.tipo   <\n>
+    FROM   <\n>
+        siconv.vrpl_art_rrt art  <\n>
+    WHERE  <\n>
+        art.licitacao_fk = :identificadorDaLicitacao;  <\n>
+%>
+
+updateArt(art) ::= <%
+    UPDATE siconv.vrpl_art_rrt 
+    SET 
+        nu_art_rrt = :numero, 
+        dt_emissao = :dataDeEmissao, 
+        responsavel_tecnico_vrpl_fk = :identificadorDoResponsavelTecnico, 
+        anexo_vrpl_fk = :identificadorDoAnexo, 
+        tipo = :tipo,  
+        adt_login = :loginAuditoria, 
+        adt_data_hora = LOCALTIMESTAMP, 
+        adt_operacao = 'UPDATE' 
+    WHERE id = :id; 
+%>
+
+recuperarOutrosArtDaLicitacao(identificadorDaLicitacao, identificadorDoArt) ::= <%
+    SELECT 
+        art.id, 
+        art.nu_art_rrt, 
+        art.dt_emissao, 
+        art.licitacao_fk, 
+        art.responsavel_tecnico_vrpl_fk, 
+        art.anexo_vrpl_fk, 
+        art.tipo  
+    FROM 
+        siconv.vrpl_art_rrt art 
+    WHERE 
+        art.licitacao_fk = :identificadorDaLicitacao AND  
+        art.id != :identificadorDoArt; 
+%>
+   

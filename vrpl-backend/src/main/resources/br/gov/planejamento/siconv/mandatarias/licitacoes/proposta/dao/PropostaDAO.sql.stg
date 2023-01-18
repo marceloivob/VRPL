@@ -1,0 +1,135 @@
+existePropostaVrpl(usuarioLogado) ::= <%
+    select exists(select 1 from siconv.vrpl_proposta where id_siconv=:idProposta);
+%>
+
+loadById(identificadorDaProposta) ::= <%
+SELECT                                                                      <\n>
+	id,                                                                     <\n>
+	id_siconv,                                                              <\n>
+	numero_proposta,                                                        <\n>
+	ano_proposta,                                                           <\n>
+	valor_global,                                                           <\n>
+	valor_repasse,                                                          <\n>
+	valor_contrapartida,                                                    <\n>
+	modalidade,                                                             <\n>
+	nome_objeto,                                                            <\n>
+	numero_convenio,                                                        <\n>
+	ano_convenio,                                                           <\n>
+	data_assinatura_convenio,                                               <\n>
+	codigo_programa,                                                        <\n>
+	nome_programa,                                                          <\n>
+	identificacao_proponente,                                               <\n>
+	nome_proponente,                                                        <\n>
+	uf,                                                                     <\n>
+	pc_min_contrapartida,                                                   <\n>
+	nome_mandataria,                                                        <\n>
+	categoria,                                                              <\n>
+	nivel_contrato,                                                         <\n>
+	spa_homologado,                                                         <\n>
+    apelido_empreendimento,                                                 <\n>
+	versao,                                                                 <\n>
+	versao_nm_evento 	as versaoNmEvento,									<\n>
+	versao_nr			as versaoNr,										<\n>
+	versao_in_atual 	as versaoAtual,                                     <\n>
+	termo_compromisso_tem_mandatar                                          <\n>
+                                                                            <\n>
+FROM siconv.vrpl_proposta                                                   <\n>
+                                                                            <\n>
+WHERE id = :identificadorDaProposta	                                		<\n>
+%>
+
+recuperaUltimaVersaoDaProposta(usuarioLogado) ::= <%
+SELECT                                                                      <\n>
+	id,                                                                     <\n>
+	id_siconv,                                                              <\n>
+	numero_proposta,                                                        <\n>
+	ano_proposta,                                                           <\n>
+	valor_global,                                                           <\n>
+	valor_repasse,                                                          <\n>
+	valor_contrapartida,                                                    <\n>
+	modalidade,                                                             <\n>
+	nome_objeto,                                                            <\n>
+	numero_convenio,                                                        <\n>
+	ano_convenio,                                                           <\n>
+	data_assinatura_convenio,                                               <\n>
+	codigo_programa,                                                        <\n>
+	nome_programa,                                                          <\n>
+	identificacao_proponente,                                               <\n>
+	nome_proponente,                                                        <\n>
+	uf,                                                                     <\n>
+	pc_min_contrapartida,                                                   <\n>
+	nome_mandataria,                                                        <\n>
+	categoria,                                                              <\n>
+	nivel_contrato,                                                         <\n>
+	spa_homologado,                                                         <\n>
+	apelido_empreendimento,                                             	<\n>
+	versao,                                                                 <\n>
+	versao_nm_evento 	as versaoNmEvento,									<\n>
+	versao_nr			as versaoNr,										<\n>
+	versao_in_atual 	as versaoAtual,                                     <\n>
+	termo_compromisso_tem_mandatar                                          <\n>
+                                                                            <\n>
+FROM siconv.vrpl_proposta                                                   <\n>
+                                                                            <\n>
+WHERE id_siconv = :idProposta				                                <\n>
+  AND versao_in_atual;	                                                    <\n>
+%>
+
+recuperaVersaoDaProposta(usuarioLogado, versao) ::= <%
+SELECT                                                                      <\n>
+	id,                                                                     <\n>
+	id_siconv,                                                              <\n>
+	numero_proposta,                                                        <\n>
+	ano_proposta,                                                           <\n>
+	valor_global,                                                           <\n>
+	valor_repasse,                                                          <\n>
+	valor_contrapartida,                                                    <\n>
+	modalidade,                                                             <\n>
+	nome_objeto,                                                            <\n>
+	numero_convenio,                                                        <\n>
+	ano_convenio,                                                           <\n>
+	data_assinatura_convenio,                                               <\n>
+	codigo_programa,                                                        <\n>
+	nome_programa,                                                          <\n>
+	identificacao_proponente,                                               <\n>
+	nome_proponente,                                                        <\n>
+	uf,                                                                     <\n>
+	pc_min_contrapartida,                                                   <\n>
+	nome_mandataria,                                                        <\n>
+	categoria,                                                              <\n>
+	nivel_contrato,                                                         <\n>
+	spa_homologado,                                                         <\n>
+	apelido_empreendimento,                                             	<\n>
+	versao,                                                                 <\n>
+	versao_nm_evento 	as versaoNmEvento,									<\n>
+	versao_nr			as versaoNr,										<\n>
+    versao_in_atual 	as versaoAtual,                                     <\n>
+	termo_compromisso_tem_mandatar                                          <\n>
+                                                                            <\n>
+FROM siconv.vrpl_proposta                                                   <\n>
+                                                                            <\n>
+WHERE id_siconv = :idProposta				                                <\n>
+  AND versao_nr	= :versao;	                                                <\n>
+%>
+
+recuperaVersoesDaProposta(usuarioLogado) ::= <%
+	SELECT versao_nr 														<\n>
+                                                                            <\n>
+	FROM siconv.vrpl_proposta 												<\n>
+                                                                            <\n>
+	WHERE id_siconv = :idProposta											<\n>
+                                                                            <\n>
+	ORDER BY versao_nr DESC; 												<\n>
+%>
+
+
+existePropostaVrplAceita(idProposta) ::= <%
+	select exists( 															<\n>
+		select 1  															<\n>
+		from siconv.vrpl_proposta 											<\n>
+		join siconv.vrpl_licitacao 											<\n>
+		on (siconv.vrpl_proposta.id = siconv.vrpl_licitacao.proposta_fk)  	<\n>
+		where siconv.vrpl_proposta.id_siconv		= :idProposta 			<\n>
+			and siconv.vrpl_licitacao.in_situacao 	= 'ACT' 				<\n>
+		    and siconv.vrpl_proposta.versao_in_atual); 						<\n>
+%>

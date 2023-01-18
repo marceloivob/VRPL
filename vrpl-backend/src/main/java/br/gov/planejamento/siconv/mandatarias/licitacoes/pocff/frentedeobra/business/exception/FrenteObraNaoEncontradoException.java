@@ -1,0 +1,20 @@
+package br.gov.planejamento.siconv.mandatarias.licitacoes.pocff.frentedeobra.business.exception;
+
+import br.gov.planejamento.siconv.mandatarias.licitacoes.application.exceptions.ErrorInfo;
+import br.gov.planejamento.siconv.mandatarias.licitacoes.application.rest.mapper.exception.BusinessException;
+import br.gov.planejamento.siconv.mandatarias.licitacoes.pocff.frentedeobra.entity.database.FrenteObraBD;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class FrenteObraNaoEncontradoException extends BusinessException {
+
+	private static final long serialVersionUID = 4722213817459058926L;
+
+	public FrenteObraNaoEncontradoException(FrenteObraBD frenteObra) {
+        super(ErrorInfo.FRENTE_DE_OBRA_NAO_ENCONTRADO);
+
+		log.info("Mensagem: [{}], detalhe: [{}]", ErrorInfo.FRENTE_DE_OBRA_NAO_ENCONTRADO, frenteObra);
+
+    }
+
+}

@@ -1,0 +1,80 @@
+
+inserirProposta(proposta) ::= <%
+    INSERT INTO                                                             <\n>
+        siconv.vrpl_proposta                                                <\n>
+        (id_siconv,                                                         <\n>
+        numero_proposta,                                                    <\n>
+        ano_proposta,                                                       <\n>
+        valor_global,                                                       <\n>
+        valor_repasse,                                                      <\n>
+        valor_contrapartida,                                                <\n>
+        modalidade,                                                         <\n>
+        nome_objeto,                                                        <\n>
+        numero_convenio,                                                    <\n>
+        ano_convenio,                                                       <\n>
+        data_assinatura_convenio,                                           <\n>
+        codigo_programa, nome_programa,                                     <\n>
+        identificacao_proponente,                                           <\n>
+        nome_proponente,                                                    <\n>
+        uf,                                                                 <\n>
+        pc_min_contrapartida,                                               <\n>
+        nome_mandataria,                                                    <\n>
+        categoria,                                                          <\n>
+        nivel_contrato,                                                     <\n>
+        spa_homologado,                                                     <\n>
+        apelido_empreendimento,                                             <\n>
+        termo_compromisso_tem_mandatar,                                     <\n>
+        adt_login,                                                          <\n>
+        adt_data_hora,                                                      <\n>
+        adt_operacao,                                                       <\n>
+        versao)                                                             <\n>
+    VALUES(                                                                 <\n>
+        :idSiconv,                                                          <\n>
+        :numeroProposta,                                                    <\n>
+        :anoProposta,                                                       <\n>
+        :valorGlobal,                                                       <\n>
+        :valorRepasse,                                                      <\n>
+        :valorContrapartida,                                                <\n>
+        :modalidade,                                                        <\n>
+        :nomeObjeto,                                                        <\n>
+        :numeroConvenio,                                                    <\n>
+        :anoConvenio,                                                       <\n>
+        :dataAssinaturaConvenio,                                            <\n>
+        :codigoPrograma,                                                    <\n>
+        :nomePrograma,                                                      <\n>
+        :identificacaoProponente,                                           <\n>
+        :nomeProponente,                                                    <\n>
+        :uf,                                                                <\n>
+        :pcMinContrapartida,                                                <\n>
+        :nomeMandataria,                                                    <\n>
+        :categoria,                                                         <\n>
+        :nivelContrato,                                                     <\n>
+        :spaHomologado,                                                     <\n>
+        :apelidoEmpreendimento,                                             <\n>
+        :termoCompromissoTemMandatar,                                       <\n>
+        current_setting('vrpl.cpf_usuario'),                                <\n>
+        LOCALTIMESTAMP,                                                     <\n>
+        'INSERT',                                                           <\n>
+        1);                                                                 <\n>
+%>
+
+atualizaDadosProposta(proposta) ::= <%
+
+UPDATE siconv.vrpl_proposta													<\n>
+																			<\n>
+SET data_assinatura_convenio = :dataAssinaturaConvenio, 					<\n>
+    numero_convenio			 = :numeroConvenio,								<\n>
+    ano_convenio			 = :anoConvenio,								<\n>
+	nome_mandataria			 = :nomeMandataria,								<\n>
+	modalidade				 = :modalidade,									<\n>  
+	valor_global 			 = :valorGlobal,		    					<\n>
+	valor_repasse 			 = :valorRepasse,			   					<\n>
+	valor_contrapartida      = :valorContrapartida, 						<\n>
+    versao					 = (:versao + 1),								<\n>
+    adt_login 				 = current_setting('vrpl.cpf_usuario'),			<\n>
+    adt_data_hora			 = LOCALTIMESTAMP, 								<\n>
+    adt_operacao			 = 'UPDATE' 									<\n>
+																			<\n>
+WHERE id					 = :id;											<\n>
+%>
+

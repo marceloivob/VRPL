@@ -1,0 +1,263 @@
+recuperarPoPorId(idPo) ::= <%
+   select  																											<\n>
+       vrpl_po.id									as id,															<\n>
+	   vrpl_po.dt_previsao_inicio_obra_analise		as dtPrevisaoInicioObraAnalise,									<\n>
+       vrpl_po.dt_previsao_inicio_obra				as dtPrevisaoInicioObra,										<\n>
+       vrpl_po.dt_base_analise						as dtBaseAnalise,												<\n>
+       vrpl_po.dt_base_vrpl							as dtBaseVrpl,													<\n>
+																													<\n>
+       vrpl_meta.in_social							as inTrabalhoSocial,											<\n>
+																													<\n>
+	   vrpl_po.id_po_analise						as idPoAnalise,													<\n>
+       vrpl_po.qt_meses_duracao_obra 				as qtMesesDuracaoObra,											<\n>
+       																												<\n>
+       vrpl_po.in_desonerado 						as inDesonerado, 												<\n>
+       vrpl_po.in_acompanhamento_eventos			as inAcompanhamentoEventos,										<\n>
+       vrpl_po.sg_localidade						as sgLocalidade,												<\n>
+																													<\n>
+       vrpl_po.referencia							as referencia,													<\n>
+       vrpl_po.versao								as versao,														<\n>
+																													<\n>
+       licitacao.id 								as idLicitacao,													<\n>
+																													<\n>
+       vrpl_submeta.id 								as submetaId,													<\n>
+       vrpl_submeta.id_submeta_analise 				as submetaAnaliseId, 											<\n>
+       vrpl_submeta.nr_submeta_analise 				as submetaNumero, 												<\n>
+       vrpl_submeta.tx_descricao_analise 			as submetaDescricao,		 									<\n>
+       COALESCE(vrpl_submeta.vl_repasse, 0) 		as submetaVlRepasse, 											<\n>
+       COALESCE(vrpl_submeta.vl_contrapartida, 0) 	as submetaVlContrapartida, 										<\n>
+       COALESCE(vrpl_submeta.vl_outros, 0) 			as submetaVlOutros, 											<\n>
+       COALESCE(vrpl_submeta.vl_total_licitado, 0) 	as submetaVlTotalLicitado,	 									<\n>
+       COALESCE(vrpl_submeta.vl_total_analise, 0) 	as precoTotalAnalise,											<\n>
+       COALESCE(vrpl_submeta.vl_total_licitado, 0) 	as precoTotalLicitacao,											<\n>
+																													<\n>
+       vrpl_meta.nr_meta_analise 					as metaNumero,													<\n>
+       vrpl_meta.tx_descricao_analise 				as metaDescricao, 												<\n>
+       																												<\n>
+	   vrpl_po.dt_previsao_inicio_obra_analise		as previsaoAnalise,												<\n>
+       vrpl_po.dt_previsao_inicio_obra				as previsaoInicioVRPL,											<\n>
+       																												<\n>
+       vrpl_po.qt_meses_duracao_obra 				as qtMesesDuracaoObraValorOriginal								<\n>
+       																												<\n>
+   from siconv.vrpl_po 																								<\n>
+   inner join siconv.vrpl_submeta 				on siconv.vrpl_submeta.id 				= siconv.vrpl_po.submeta_fk	<\n>
+   inner join siconv.vrpl_lote_licitacao lote 	on vrpl_submeta.vrpl_lote_licitacao_fk 	= lote.id 					<\n>
+   inner join siconv.vrpl_licitacao licitacao 	on lote.licitacao_fk 					= licitacao.id 				<\n>
+   inner join siconv.vrpl_meta 					on siconv.vrpl_submeta.meta_fk 			= siconv.vrpl_meta.id 		<\n>
+  																													<\n>
+   where siconv.vrpl_po.id 						= :idPo;															<\n>
+%>
+
+recuperarSubmetaPorPO(idPO) ::= <%
+		select  																							<\n>
+			vrpl_submeta.id,                                                                                <\n>
+			vrpl_submeta.id_submeta_analise,                                                                <\n>
+			vrpl_submeta.proposta_fk idProposta,                                                            <\n>
+			vrpl_submeta.vrpl_lote_licitacao_fk,                                                            <\n>
+			vrpl_submeta.meta_fk idMeta,                                                                    <\n>
+			COALESCE(vrpl_submeta.vl_repasse, 0) vl_repasse,                                                <\n>
+			COALESCE(vrpl_submeta.vl_outros, 0) vl_outros,                                                  <\n>
+			vrpl_submeta.nr_submeta_analise numero,                                                         <\n>
+			vrpl_submeta.tx_descricao_analise descricao,                                                    <\n>
+			vrpl_submeta.nr_lote_analise lote,                                                              <\n>
+			COALESCE(vrpl_submeta.vl_repasse_analise, 0) vl_repasse_analise,                                <\n>
+			COALESCE(vrpl_submeta.vl_contrapartida_analise, 0) vl_contrapartida_analise,                    <\n>
+			COALESCE(vrpl_submeta.vl_outros_analise, 0) vl_outros_analise,                                  <\n>
+			COALESCE(vrpl_submeta.vl_total_analise, 0) vl_total_analise,                                    <\n>
+			vrpl_submeta.in_situacao_analise situacaoAnalise,                                               <\n>
+			vrpl_submeta.in_regime_execucao_analise regimeExecucaoAnalise,                                  <\n>
+			vrpl_submeta.natureza_despesa_sub_it_fk_analise itemPad,                                        <\n>
+			vrpl_submeta.in_regime_execucao regimeExecucao,                                                 <\n>
+			COALESCE(vrpl_submeta.vl_contrapartida, 0) vl_contrapartida,                                    <\n>
+			COALESCE(vrpl_submeta.vl_total_licitado, 0) vl_total_licitado,                                  <\n>
+			vrpl_submeta.in_situacao situacao,                                                              <\n>
+			vrpl_submeta.versao_nr,                                                                         <\n>
+			vrpl_submeta.versao 							                                                <\n>
+		from siconv.vrpl_po 																				<\n>
+		inner join siconv.vrpl_submeta on siconv.vrpl_submeta.id = siconv.vrpl_po.submeta_fk 				<\n>
+		inner join siconv.vrpl_lote_licitacao lote on vrpl_submeta.vrpl_lote_licitacao_fk = lote.id 		<\n>
+		inner join siconv.vrpl_licitacao licitacao on lote.licitacao_fk = licitacao.id 						<\n>
+		inner join siconv.vrpl_meta on siconv.vrpl_submeta.meta_fk = siconv.vrpl_meta.id 					<\n>
+		where siconv.vrpl_po.id = :idPO; 																	<\n>
+%>
+
+
+
+recuperarPosPorLicitacao(licitacao) ::= <%
+   select  																																			<\n>
+    vrpl_po.id 								as id, 																									<\n>
+    vrpl_po.dt_previsao_inicio_obra_analise	as dataPrevisaoInicioObraAnalise,																		<\n>
+    vrpl_po.dt_previsao_inicio_obra			as dataPrevisaoInicioObra, 																				<\n>
+    vrpl_po.id_po_analise					as idAnalise, 																							<\n>
+    vrpl_po.qt_meses_duracao_obra 			as qtMesesDuracaoObra,		 																			<\n>
+    vrpl_po.qt_meses_duracao_obra 			as qtMesesDuracaoObraValorOriginal,																		<\n>
+																																					<\n>
+    vrpl_po.in_acompanhamento_eventos		as indicadorAcompanhamentoPorEvento, 																	<\n>
+    vrpl_po.sg_localidade					as siglaLocalidade, 																					<\n>
+    vrpl_po.dt_base_analise					as dataBaseAnalise,																						<\n>
+	vrpl_po.dt_base_vrpl					as dataBaseVrpl,																						<\n>    
+    vrpl_po.versao							as versao,																								<\n>
+    vrpl_po.referencia						as referencia,																							<\n>
+																																					<\n>
+    licitacao.id 							as idLicitacao,  																						<\n>
+    vrpl_submeta.id                         as idSubmeta,                                                                                           <\n>
+    vrpl_submeta.nr_submeta_analise 		as numeroSubmeta, 																						<\n>
+    vrpl_submeta.tx_descricao_analise 		as descricaoSubmeta, 																					<\n>
+	COALESCE(vrpl_submeta.vl_total_analise, 0) 	as precoTotalAnalise,																				<\n>
+    COALESCE(vrpl_submeta.vl_total_licitado, 0) as precoTotalLicitacao, 																			<\n>
+																																					<\n>
+    vrpl_meta.id                                as idMeta,                                                                                          <\n>
+    vrpl_meta.tx_descricao_analise 				as descricaoMeta, 																					<\n>
+    vrpl_meta.nr_meta_analise 					as numeroMeta, 																						<\n>
+	vrpl_meta.in_social							as inTrabalhoSocial																					<\n>
+																																					<\n>
+   from siconv.vrpl_po 																																<\n>
+   inner join siconv.vrpl_submeta 						on siconv.vrpl_submeta.id 				= siconv.vrpl_po.submeta_fk							<\n>
+   inner join siconv.vrpl_lote_licitacao lote 			on vrpl_submeta.vrpl_lote_licitacao_fk 	= lote.id 											<\n>
+   inner join siconv.vrpl_licitacao licitacao 			on lote.licitacao_fk 					= licitacao.id 										<\n>
+   inner join siconv.vrpl_meta 							on siconv.vrpl_submeta.meta_fk 			= siconv.vrpl_meta.id 								<\n>
+																																					<\n>
+   where licitacao.id            						= :id 			 																			<\n>
+																																					<\n>
+   order by vrpl_meta.nr_meta_analise, vrpl_submeta.nr_submeta_analise; 																			<\n>
+%>
+
+recuperarPosPorLicitacaoELote(idLicitacao, idLote) ::= <%
+   select  																																			<\n>
+    vrpl_po.id, 																																	<\n>
+    vrpl_po.dt_previsao_inicio_obra_analise,																										<\n>
+    vrpl_po.dt_previsao_inicio_obra, 																												<\n>
+    vrpl_po.id_po_analise, 																															<\n>
+    vrpl_po.qt_meses_duracao_obra, 																													<\n>
+    vrpl_po.in_acompanhamento_eventos, 																												<\n>
+    vrpl_po.in_desonerado, 																															<\n>
+    vrpl_po.sg_localidade, 																															<\n>
+    vrpl_po.dt_base_analise,																														<\n>
+	vrpl_po.dt_base_vrpl,																															<\n>    
+    vrpl_po.referencia,																																<\n>
+	vrpl_po.versao,																																	<\n>    
+    licitacao.id id_licitacao,  																													<\n>
+    vrpl_submeta.id submeta_id, 																													<\n>
+    vrpl_submeta.id_submeta_analise submeta_analise_id, 																							<\n>
+    vrpl_submeta.nr_submeta_analise submeta_numero, 																								<\n>
+    vrpl_submeta.tx_descricao_analise submeta_descricao, 																							<\n>
+    COALESCE(vrpl_submeta.vl_repasse, 0) submeta_vl_repasse, 																						<\n>
+    COALESCE(vrpl_submeta.vl_contrapartida, 0) submeta_vl_contrapartida, 																			<\n>
+    COALESCE(vrpl_submeta.vl_outros, 0) submeta_vl_outros, 																							<\n>
+    COALESCE(vrpl_submeta.vl_total_licitado, 0) submeta_vl_total_licitado, 																			<\n>
+    vrpl_meta.tx_descricao_analise meta_descricao, 																									<\n>
+    vrpl_meta.nr_meta_analise meta_numero 																											<\n>
+   from siconv.vrpl_po 																																<\n>
+   inner join siconv.vrpl_submeta 						on siconv.vrpl_submeta.id = siconv.vrpl_po.submeta_fk 										<\n>
+   inner join siconv.vrpl_lote_licitacao lote 			on vrpl_submeta.vrpl_lote_licitacao_fk = lote.id 											<\n>
+   inner join siconv.vrpl_licitacao licitacao 			on lote.licitacao_fk = licitacao.id 														<\n>
+   inner join siconv.vrpl_meta 							on siconv.vrpl_submeta.meta_fk = siconv.vrpl_meta.id 										<\n>
+   where licitacao.id = :idLicitacao 																												<\n>
+     and lote.id = :idLote 																															<\n>
+   order by vrpl_meta.nr_meta_analise, vrpl_submeta.nr_submeta_analise; 																			<\n>
+%>
+
+insertPos(pos) ::= <%
+   INSERT INTO siconv.vrpl_po 															<\n>
+        (id_po_analise,  																<\n>
+        submeta_fk,  																	<\n>
+        dt_previsao_inicio_obra,  														<\n>
+        dt_previsao_inicio_obra_analise,												<\n>
+        qt_meses_duracao_obra, 															<\n>
+        in_acompanhamento_eventos, 														<\n>
+        in_desonerado, 																	<\n>
+        sg_localidade, 																	<\n>
+        dt_base_analise, 																<\n>
+        dt_base_vrpl, 																	<\n>
+        versao,  																		<\n>
+        adt_login,  																	<\n>
+        adt_data_hora,  																<\n>
+        adt_operacao) 																	<\n>
+   VALUES( 																				<\n>
+        :idPoAnalise,  																	<\n>
+        :submetaId,  																	<\n>
+        :dtPrevisaoInicioObra, 															<\n>
+        :dtPrevisaoInicioObraAnalise,													<\n>
+        :qtMesesDuracaoObra, 															<\n>
+        :inAcompanhamentoEventos, 														<\n>
+        :inDesonerado, 																	<\n>
+        :sgLocalidade, 																	<\n>
+        :dtBaseAnalise, 																<\n>
+        :dtBaseVrpl, 																	<\n>
+        1,  																			<\n>
+        current_setting('vrpl.cpf_usuario'), LOCALTIMESTAMP, 'INSERT'); 				<\n>
+%>
+
+alterarReferenciaPo(po) ::= <%                                                          <\n>
+	UPDATE siconv.vrpl_po                                                               <\n>
+		SET referencia 					    = :referencia,                              <\n>
+		     versao 					    = (:versao + 1),                            <\n>
+		     adt_login 					    = current_setting('vrpl.cpf_usuario'),      <\n>
+		     adt_data_hora 				    = LOCALTIMESTAMP,                           <\n>
+		     adt_operacao 				    = 'UPDATE'                                  <\n>
+     WHERE id 							    = :id                                       <\n>
+%>
+
+alterarDadosPo(po) ::= <%
+	UPDATE siconv.vrpl_po 																<\n>
+		SET dt_previsao_inicio_obra 		= :dtPrevisaoInicioObra ,                   <\n>
+		    dt_base_vrpl 					= :dtBaseVrpl ,                             <\n>
+		    qt_meses_duracao_obra 			= :qtMesesDuracaoObra,                      <\n>
+		    versao 							= (:versao + 1),                            <\n>
+		    adt_login 						= current_setting('vrpl.cpf_usuario'),      <\n>
+		    adt_data_hora 					= LOCALTIMESTAMP,                           <\n>
+		    adt_operacao 					= 'UPDATE'                                  <\n>
+	WHERE id 								= :id                                       <\n>
+%>
+
+recuperarIdsPOPorNumerosLotes(licitacao, numerosLotes) ::= <% 
+	SELECT distinct po.id    												             <\n>
+	 FROM 	siconv.vrpl_po po,    											             <\n>
+			siconv.vrpl_submeta submeta,    								             <\n>
+			siconv.vrpl_lote_licitacao lote,    							             <\n>
+			siconv.vrpl_licitacao 											             <\n>
+	WHERE   															                 <\n>
+		po.submeta_fk 						= submeta.id 			and    		         <\n>
+		submeta.vrpl_lote_licitacao_fk 		= lote.id 				and    		         <\n>
+		lote.licitacao_fk 					= vrpl_licitacao.id	 	and 		         <\n>
+		vrpl_licitacao.id 					= :id 					and 		         <\n>
+		lote.numero_lote 					in (<numerosLotes>) 	                     <\n>
+                                                                                         <\n>
+%>
+
+recuperarPoVRPL(idPo) ::= <%
+	SELECT * FROM siconv.vrpl_po WHERE id = :idPo;
+%>
+
+recuperarIdPoPorSubmeta(submetaId) ::= <%
+	SELECT id FROM siconv.vrpl_po WHERE submeta_fk = :submetaId;
+%>
+
+recuperarValorTotalAnalise(submetaId) ::= <%
+	SELECT vl_total_analise FROM siconv.vrpl_submeta WHERE id = :submetaId;
+%>
+
+recuperarValorTotalVRPL(idPO) ::= <%
+	SELECT SUM(servico.vl_preco_unitario_licitado * servico.qt_total_itens_analise)      <\n>
+		FROM siconv.vrpl_po po,                                                          <\n>
+ 			 siconv.vrpl_macro_servico macro,                                            <\n>
+			 siconv.vrpl_servico servico                                                 <\n>
+	WHERE po.id 		= :idPO                                                          <\n>
+	  and po.id 		= macro.po_fk                                                    <\n>
+	  and macro.id 		= servico.macro_servico_fk;                                      <\n>
+%>
+
+recuperarValorTotalAnalisePorPO(idPO) ::= <%
+	SELECT SUM(servico.vl_preco_unitario_analise * servico.qt_total_itens_analise)       <\n>
+		FROM siconv.vrpl_po po,                                                          <\n>
+ 			 siconv.vrpl_macro_servico macro,                                            <\n>
+			 siconv.vrpl_servico servico                                                 <\n>
+	WHERE po.id 		= :idPO                                                          <\n>
+	  and po.id 		= macro.po_fk                                                    <\n>
+	  and macro.id 		= servico.macro_servico_fk;                                      <\n>
+%>
+
+
+
+
+

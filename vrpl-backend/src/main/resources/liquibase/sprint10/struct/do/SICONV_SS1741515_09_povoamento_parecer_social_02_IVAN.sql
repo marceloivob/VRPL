@@ -1,0 +1,4 @@
+SET LOCAL vrpl.cpf_usuario TO 'SISTEMA';
+
+INSERT INTO siconv.vrpl_pergunta (numero,        titulo, tipo_resposta, valor_resposta, valor_esperado,                                                                                                                                                                  grupo_fk, versao_nr, versao_id, versao_nm_evento, versao,     adt_login,                        adt_data_hora, adt_operacao)
+						  VALUES (     3, 'Comentários',       'TEXTO',             '',             '', (select grupo.id from siconv.vrpl_grupo_pergunta grupo, siconv.vrpl_template_laudo templ where grupo.numero = 3 and templ.tipo = 'VRPLS' and grupo.template_fk = templ.id),        0,      NULL,             NULL,      0,     'SISTEMA', to_date ('17/05/2019', 'DD/MM/YYYY'),     'INSERT');

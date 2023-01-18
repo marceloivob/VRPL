@@ -1,0 +1,15 @@
+consultarPermissoesDasLicitacoesDaProposta(identificadorDaProposta) ::= <%
+
+	SELECT  licitacao.id_licitacao_fk  															idLicitacao,						<\n>
+			CASE WHEN lote.licitacao_fk IS NOT NULL     THEN submeta.in_situacao         END AS situacaoVRPL,						<\n>
+			CASE WHEN lote.licitacao_fk IS NULL         THEN submeta.in_situacao_analise END AS situacaoAnalise						<\n>
+																																	<\n>
+	FROM		siconv.vrpl_proposta 			proposta																			<\n>
+	INNER JOIN siconv.vrpl_submeta 				submeta 		ON submeta.proposta_fk 	= proposta.id                               <\n>
+	INNER JOIN siconv.vrpl_lote_licitacao 		lote			ON lote.id         		= submeta.vrpl_lote_licitacao_fk			<\n>
+    INNER JOIN siconv.vrpl_licitacao 			licitacao		ON licitacao.id         = lote.licitacao_fk							<\n>
+																																	<\n>
+    WHERE proposta.id_siconv															= :identificadorDaProposta					<\n>
+      AND proposta.versao_in_atual																									<\n>
+
+%>
